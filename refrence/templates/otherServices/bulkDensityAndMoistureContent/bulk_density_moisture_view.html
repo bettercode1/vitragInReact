@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Density and Moisture Content Test - {{ test.sample_test_code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-weight-hanging me-2"></i>Bulk Density and Moisture Content Test Details</h1>
+                            <p class="mb-0">Sample Code: {{ test.sample_test_code }}</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('bulk_density_moisture_form') }}" class="btn btn-light me-2">
+                                <i class="fas fa-plus me-2"></i>New Test
+                            </a>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Customer:</strong></td>
+                                    <td>{{ test.customer.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>URL Number:</strong></td>
+                                    <td>{{ test.url_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Job Code Number:</strong></td>
+                                    <td>{{ test.job_code_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Reference Number:</strong></td>
+                                    <td>{{ test.reference_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sample Description:</strong></td>
+                                    <td>{{ test.sample_description }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date of Receipt:</strong></td>
+                                    <td>{{ test.date_of_receipt.strftime('%d-%m-%Y') if test.date_of_receipt else 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Test Method:</strong></td>
+                                    <td>{{ test.test_method }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Sample Test Code:</strong></td>
+                                    <td>{{ test.sample_test_code }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date of Testing:</strong></td>
+                                    <td>{{ test.date_of_testing.strftime('%d-%m-%Y') if test.date_of_testing else 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Environmental Conditions:</strong></td>
+                                    <td>{{ test.environmental_conditions }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td><span class="badge bg-success">{{ test.status.title() }}</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-flask me-2"></i>Test Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Sr. No.</th>
+                                    <th>Weight of Sample before oven drying (kg)</th>
+                                    <th>Weight of Sample after oven drying (kg)</th>
+                                    <th>Size of Sample</th>
+                                    <th>Volume of Sample (m³)</th>
+                                    <th>Bulk Density (kg/m³)</th>
+                                    <th>Moisture Content (%)</th>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th style="text-align: center;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>L (mm)</span>
+                                            <span>B (mm)</span>
+                                            <span>D (mm)</span>
+                                        </div>
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if test.readings %}
+                                    {% for reading in test.readings %}
+                                    <tr>
+                                        <td>{{ reading.sr_no }}</td>
+                                        <td>{{ "%.3f"|format(reading.weight_before) if reading.weight_before else 'N/A' }}</td>
+                                        <td>{{ "%.3f"|format(reading.weight_after) if reading.weight_after else 'N/A' }}</td>
+                                        <td>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>{{ "%.1f"|format(reading.length) if reading.length else 'N/A' }}</span>
+                                                <span>{{ "%.1f"|format(reading.breadth) if reading.breadth else 'N/A' }}</span>
+                                                <span>{{ "%.1f"|format(reading.depth) if reading.depth else 'N/A' }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ "%.6f"|format(reading.volume) if reading.volume else 'N/A' }}</td>
+                                        <td>{{ "%.1f"|format(reading.bulk_density) if reading.bulk_density else 'N/A' }}</td>
+                                        <td>{{ "%.2f"|format(reading.moisture_content) if reading.moisture_content else 'N/A' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No test readings available</td>
+                                    </tr>
+                                {% endif %}
+                                <tr class="table-secondary">
+                                    <td colspan="5" class="text-center fw-bold">Average</td>
+                                    <td class="fw-bold">{{ "%.1f"|format(test.avg_bulk_density) if test.avg_bulk_density else 'N/A' }}</td>
+                                    <td class="fw-bold">{{ "%.2f"|format(test.avg_moisture_content) if test.avg_moisture_content else 'N/A' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Verification</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Tested By</h6>
+                            <p><strong>Name:</strong> {{ test.tested_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.tested_by_date.strftime('%d-%m-%Y') if test.tested_by_date else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Checked By</h6>
+                            <p><strong>Name:</strong> {{ test.checked_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.checked_by_date.strftime('%d-%m-%Y') if test.checked_by_date else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Verified By</h6>
+                            <p><strong>Name:</strong> {{ test.verified_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.verified_by_date.strftime('%d-%m-%Y') if test.verified_by_date else 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviewed By -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Reviewed By</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ test.reviewed_by or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remarks -->
+    {% if test.remarks %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Remarks</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ test.remarks }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('bulk_density_moisture_report', test_id=test.id) }}" class="btn btn-success btn-lg me-3" target="_blank">
+                <i class="fas fa-file-pdf me-2"></i>View Report
+            </a>
+            <a href="{{ url_for('bulk_density_moisture_form') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-plus me-2"></i>New Test
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

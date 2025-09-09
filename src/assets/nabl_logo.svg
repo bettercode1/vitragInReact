@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#000" stroke-width="2"/>
+  
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#000" stroke-width="1.5"/>
+  
+  <!-- Top text curve -->
+  <path id="top-curve" d="M 30 100 A 70 70 0 0 1 170 100" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="8" text-anchor="middle">
+    <textPath href="#top-curve" startOffset="50%">
+      राष्ट्रीय परीक्षण और अंशांकन प्रयोगशाला मान्यता बोर्ड
+    </textPath>
+  </text>
+  
+  <!-- Bottom text curve -->
+  <path id="bottom-curve" d="M 170 100 A 70 70 0 0 1 30 100" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="8" text-anchor="middle">
+    <textPath href="#bottom-curve" startOffset="50%">
+      NATIONAL ACCREDITATION BOARD FOR TESTING AND CALIBRATION LABORATORIES
+    </textPath>
+  </text>
+  
+  <!-- Central gear/star symbol -->
+  <g transform="translate(100,100)">
+    <!-- Outer gear teeth -->
+    <g fill="#000">
+      <polygon points="0,-25 5,-35 -5,-35"/>
+      <polygon points="17.7,-17.7 30,-12.5 22.5,-22.5"/>
+      <polygon points="25,0 35,-5 35,5"/>
+      <polygon points="17.7,17.7 22.5,22.5 30,12.5"/>
+      <polygon points="0,25 -5,35 5,35"/>
+      <polygon points="-17.7,17.7 -30,12.5 -22.5,22.5"/>
+      <polygon points="-25,0 -35,5 -35,-5"/>
+      <polygon points="-17.7,-17.7 -22.5,-22.5 -30,-12.5"/>
+    </g>
+    
+    <!-- Inner circle -->
+    <circle r="20" fill="#fff" stroke="#000" stroke-width="2"/>
+    
+    <!-- Central star/cross -->
+    <g fill="#000">
+      <polygon points="0,-15 3,-5 -3,-5"/>
+      <polygon points="15,0 5,-3 5,3"/>
+      <polygon points="0,15 -3,5 3,5"/>
+      <polygon points="-15,0 -5,3 -5,-3"/>
+    </g>
+  </g>
+  
+  <!-- NABL text -->
+  <text x="100" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">NABL</text>
+  
+  <!-- Bottom triangular supports -->
+  <polygon points="80,165 100,180 120,165" fill="none" stroke="#000" stroke-width="2"/>
+  <line x1="85" y1="165" x2="85" y2="175" stroke="#000" stroke-width="1"/>
+  <line x1="115" y1="165" x2="115" y2="175" stroke="#000" stroke-width="1"/>
+  
+  <!-- TC-11552 text -->
+  <text x="100" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold">TC-11552</text>
+</svg>

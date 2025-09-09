@@ -1,0 +1,776 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - {{ test_request.customer.customer_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card bg-dark border-primary shadow-lg">
+                <div class="card-header bg-primary text-white border-0">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-flask me-3"></i>
+                        <div>
+                            <h4 class="mb-1">Test Observations</h4>
+                            <p class="mb-0 text-light">{{ test_request.customer.customer_name }} - ULR: {{ test_request.ulr_number }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Test Details Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="sample_description" class="form-label">Sample Description</label>
+                                {{ form.sample_description(class="form-control") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cube_condition" class="form-label">Cube Condition</label>
+                                {{ form.cube_condition(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="curing_condition" class="form-label">Curing Condition <span class="text-danger">*</span></label>
+                                {{ form.curing_condition(class="form-control", required=true, placeholder="Enter curing condition (Required)") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="machine_used" class="form-label">Machine Used for Testing</label>
+                                {{ form.machine_used(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="test_method" class="form-label">Test Method</label>
+                                {{ form.test_method(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <!-- Test Results Table Section -->
+                        <div class="mt-5 pt-4">
+                            <div class="d-flex align-items-center mb-4 p-3 bg-dark rounded-3 border">
+                                <div class="bg-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-calculator fa-lg text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1 text-white">Test Results</h4>
+                                    <p class="text-muted mb-0">Enter cube testing measurements and results</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Test Results Table -->
+                            <div class="table-responsive">
+                                <table class="table table-dark table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 6%">Sr. No.</th>
+                                            <th style="width: 10%">Cube ID</th>
+                                            <th style="width: 8%">Length (mm)</th>
+                                            <th style="width: 8%">Breadth (mm)</th>
+                                            <th style="width: 8%">Height (mm)</th>
+                                            <th style="width: 8%">Area</th>
+                                            <th style="width: 10%">Cube Weight</th>
+                                            <th style="width: 8%">Density</th>
+                                            <th style="width: 10%">Maximum Load</th>
+                                            <th style="width: 12%">Compressive Strength</th>
+                                            <th style="width: 8%">Type of Failure</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="test-results-body">
+                                        <!-- Rows will be added dynamically -->
+                                    </tbody>
+                                </table>
+                                
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-success" id="add-row-btn">
+                                        <i class="fas fa-plus me-2"></i>Add Row
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Average Strength Section -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label for="average_strength" class="form-label">Average Compressive Strength (MPa)</label>
+                                    <input type="number" class="form-control" id="average_strength" name="average_strength" step="0.01" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Verification Section -->
+                        <div class="mt-4">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-dark">
+                                    <tr>
+                                        <td width="33%">Tested By:</td>
+                                        <td width="33%">Checked By:</td>
+                                        <td width="33%">Verified By:</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.tested_by(class="form-control", placeholder="Name") }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.checked_by(class="form-control", placeholder="Name") }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.verified_by(class="form-control", placeholder="Name") }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Date: {{ test.testing_date.strftime('%d/%m/%Y') if test.testing_date else 'N/A' }}</td>
+                                        <td>Date: {{ test.testing_date.strftime('%d/%m/%Y') if test.testing_date else 'N/A' }}</td>
+                                        <td>Date: {{ test.testing_date.strftime('%d/%m/%Y') if test.testing_date else 'N/A' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sign:</td>
+                                        <td>Sign:</td>
+                                        <td>Sign:</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Remarks Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="test_remarks" class="form-label">Remarks</label>
+                                {{ form.test_remarks(class="form-control", rows=3, placeholder="Additional observations or notes about the test results") }}
+                            </div>
+                        </div>
+
+                        <!-- Photo Capture Section -->
+                        <div class="mt-5 pt-4">
+                            <div class="d-flex align-items-center mb-4 p-3 bg-dark rounded-3 border">
+                                <div class="bg-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-camera fa-lg text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1 text-white">Cube Test Photos</h4>
+                                    <p class="text-muted mb-0">Capture photos of cube specimens during testing</p>
+                                </div>
+                            </div>
+                            
+                            {% set num_cubes = test.num_of_cubes|int if test.num_of_cubes else 3 %}
+                            
+                            {% for cube_num in range(1, num_cubes + 1) %}
+                            <div class="card mb-4 bg-dark border-primary shadow-sm">
+                                <div class="card-header bg-primary text-white border-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-cube me-2"></i>
+                                        <h6 class="mb-0 fw-bold">Cube/Core Specimen #{{ cube_num }}</h6>
+                                    </div>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <!-- Front Failure Photo -->
+                                        <div class="col-md-4">
+                                            <div class="text-center mb-3">
+                                                <h6 class="text-white fw-semibold mb-0">Front Side Failure</h6>
+                                            </div>
+                                            <div class="photo-container border border-secondary rounded-3 p-2 bg-dark" id="front_failure_{{ cube_num }}_container">
+                                                {% set front_photo = photos[cube_num]['front_failure'] if photos and cube_num in photos else none %}
+                                                {% if front_photo %}
+                                                    <img src="data:image/jpeg;base64,{{ front_photo.photo_data }}" alt="Front Failure" class="img-fluid">
+                                                    <span class="delete-photo" data-photo-id="{{ front_photo.id }}" data-type="front_failure" data-cube="{{ cube_num }}">&times;</span>
+                                                {% else %}
+                                                    <div class="no-photo-placeholder">
+                                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                                        <p class="text-muted">No photo</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="photo-controls mt-3">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-warning fw-semibold capture-btn" data-type="front_failure" data-cube="{{ cube_num }}">
+                                                        <i class="fas fa-camera me-2"></i>Capture
+                                                    </button>
+                                                    <div class="upload-container">
+                                                        <input type="file" id="front_failure_{{ cube_num }}_file" class="photo-file d-none" 
+                                                               data-type="front_failure" data-cube="{{ cube_num }}" accept="image/*">
+                                                        <button class="btn btn-outline-light upload-btn" data-target="front_failure_{{ cube_num }}_file">
+                                                            <i class="fas fa-upload me-2"></i>Upload
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Digital Reading Photo -->
+                                        <div class="col-md-4">
+                                            <div class="text-center mb-3">
+                                                <h6 class="text-white fw-semibold mb-0">Digital Reading</h6>
+                                            </div>
+                                            <div class="photo-container border border-secondary rounded-3 p-2 bg-dark" id="digital_reading_{{ cube_num }}_container">
+                                                {% set digital_photo = photos[cube_num]['digital_reading'] if photos and cube_num in photos else none %}
+                                                {% if digital_photo %}
+                                                    <img src="data:image/jpeg;base64,{{ digital_photo.photo_data }}" alt="Digital Reading" class="img-fluid">
+                                                    <span class="delete-photo" data-photo-id="{{ digital_photo.id }}" data-type="digital_reading" data-cube="{{ cube_num }}">&times;</span>
+                                                {% else %}
+                                                    <div class="no-photo-placeholder">
+                                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                                        <p class="text-muted">No photo</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="photo-controls mt-3">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-warning fw-semibold capture-btn" data-type="digital_reading" data-cube="{{ cube_num }}">
+                                                        <i class="fas fa-camera me-2"></i>Capture
+                                                    </button>
+                                                    <div class="upload-container">
+                                                        <input type="file" id="digital_reading_{{ cube_num }}_file" class="photo-file d-none" 
+                                                               data-type="digital_reading" data-cube="{{ cube_num }}" accept="image/*">
+                                                        <button class="btn btn-outline-light upload-btn" data-target="digital_reading_{{ cube_num }}_file">
+                                                            <i class="fas fa-upload me-2"></i>Upload
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Back Failure Photo -->
+                                        <div class="col-md-4">
+                                            <div class="text-center mb-3">
+                                                <h6 class="text-white fw-semibold mb-0">Back Side Failure</h6>
+                                            </div>
+                                            <div class="photo-container border border-secondary rounded-3 p-2 bg-dark" id="back_failure_{{ cube_num }}_container">
+                                                {% set back_photo = photos[cube_num]['back_failure'] if photos and cube_num in photos else none %}
+                                                {% if back_photo %}
+                                                    <img src="data:image/jpeg;base64,{{ back_photo.photo_data }}" alt="Back Failure" class="img-fluid">
+                                                    <span class="delete-photo" data-photo-id="{{ back_photo.id }}" data-type="back_failure" data-cube="{{ cube_num }}">&times;</span>
+                                                {% else %}
+                                                    <div class="no-photo-placeholder">
+                                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                                        <p class="text-muted">No photo</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="photo-controls mt-3">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-warning fw-semibold capture-btn" data-type="back_failure" data-cube="{{ cube_num }}">
+                                                        <i class="fas fa-camera me-2"></i>Capture
+                                                    </button>
+                                                    <div class="upload-container">
+                                                        <input type="file" id="back_failure_{{ cube_num }}_file" class="photo-file d-none" 
+                                                               data-type="back_failure" data-cube="{{ cube_num }}" accept="image/*">
+                                                        <button class="btn btn-outline-light upload-btn" data-target="back_failure_{{ cube_num }}_file">
+                                                            <i class="fas fa-upload me-2"></i>Upload
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Save Button Section -->
+                        <div class="mt-4 border-top pt-3">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-outline-light me-md-2">
+                                    <i class="fas fa-times me-2"></i> Cancel
+                                </a>
+                                <button type="button" class="btn btn-primary me-md-2" id="save-btn">
+                                    <i class="fas fa-save me-2"></i> Save Test Observations
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize row counter
+    let rowCounter = 0;
+
+    // Function to add a new row
+    function addRow() {
+        rowCounter++;
+        const tbody = document.getElementById('test-results-body');
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+            <td class="text-center">${rowCounter}</td>
+            <td><input type="text" class="form-control" id="cube_id_${rowCounter}" placeholder="Cube ID"></td>
+            <td><input type="number" class="form-control" id="dimension_length_${rowCounter}" placeholder="Length" step="0.1" oninput="calculateForRow(${rowCounter})"></td>
+            <td><input type="number" class="form-control" id="dimension_width_${rowCounter}" placeholder="Breadth" step="0.1" oninput="calculateForRow(${rowCounter})"></td>
+            <td><input type="number" class="form-control" id="dimension_height_${rowCounter}" placeholder="Height" step="0.1" oninput="calculateForRow(${rowCounter})"></td>
+            <td><input type="number" class="form-control" id="area_${rowCounter}" placeholder="Area" readonly></td>
+            <td><input type="number" class="form-control" id="weight_${rowCounter}" placeholder="Weight" step="0.1" oninput="calculateForRow(${rowCounter})"></td>
+            <td><input type="number" class="form-control" id="density_${rowCounter}" placeholder="Density" readonly></td>
+            <td><input type="number" class="form-control" id="crushing_load_${rowCounter}" placeholder="Load" step="0.1" oninput="calculateForRow(${rowCounter})"></td>
+            <td><input type="number" class="form-control" id="compressive_strength_${rowCounter}" placeholder="Strength" readonly></td>
+            <td><input type="number" class="form-control" id="failure_type_${rowCounter}" placeholder="5.0" step="0.1"></td>
+        `;
+        
+        tbody.appendChild(row);
+    }
+
+    // Function to calculate values for a specific row
+    function calculateForRow(rowIndex) {
+        const length = parseFloat(document.getElementById(`dimension_length_${rowIndex}`).value) || 0;
+        const width = parseFloat(document.getElementById(`dimension_width_${rowIndex}`).value) || 0;
+        const height = parseFloat(document.getElementById(`dimension_height_${rowIndex}`).value) || 0;
+        const weight = parseFloat(document.getElementById(`weight_${rowIndex}`).value) || 0;
+        const crushingLoad = parseFloat(document.getElementById(`crushing_load_${rowIndex}`).value) || 0;
+        
+        // Calculate area (length × width)
+        if (length && width) {
+            const area = length * width;
+            document.getElementById(`area_${rowIndex}`).value = area.toFixed(2);
+            
+            // Calculate density (weight / volume) where volume = length × width × height in mm³
+            if (height && weight) {
+                const volume = length * width * height; // mm³
+                const volumeM3 = volume / 1000000000; // Convert to m³
+                const density = weight / volumeM3; // kg/m³
+                document.getElementById(`density_${rowIndex}`).value = density.toFixed(2);
+            }
+            
+            // Calculate compressive strength (load / area)
+            if (crushingLoad) {
+                const compressiveStrength = (crushingLoad * 1000) / area; // Convert kN to N, result in N/mm² (MPa)
+                document.getElementById(`compressive_strength_${rowIndex}`).value = compressiveStrength.toFixed(2);
+            }
+        }
+        
+        // Calculate average strength across all rows
+        calculateAverageStrength();
+    }
+
+    // Function to calculate average compressive strength
+    function calculateAverageStrength() {
+        let totalStrength = 0;
+        let count = 0;
+        
+        for (let i = 1; i <= rowCounter; i++) {
+            const strengthElement = document.getElementById(`compressive_strength_${i}`);
+            if (strengthElement && strengthElement.value) {
+                const strength = parseFloat(strengthElement.value);
+                if (!isNaN(strength)) {
+                    totalStrength += strength;
+                    count++;
+                }
+            }
+        }
+        
+        const averageStrength = count > 0 ? totalStrength / count : 0;
+        document.getElementById('average_strength').value = averageStrength.toFixed(2);
+    }
+
+    // Function to collect form data for submission
+    function collectFormData() {
+        const rowsData = [];
+        
+        // Collect data from each row
+        document.querySelectorAll('#test-results-body tr').forEach((row, index) => {
+            const rowNum = index + 1;
+            const cubeId = row.querySelector(`input[id^="cube_id_"]`).value;
+            const length = row.querySelector(`input[id^="dimension_length_"]`).value;
+            const width = row.querySelector(`input[id^="dimension_width_"]`).value;
+            const height = row.querySelector(`input[id^="dimension_height_"]`).value;
+            const area = row.querySelector(`input[id^="area_"]`).value;
+            const weight = row.querySelector(`input[id^="weight_"]`).value;
+            const density = row.querySelector(`input[id^="density_"]`).value;
+            const crushingLoad = row.querySelector(`input[id^="crushing_load_"]`).value;
+            const compressiveStrength = row.querySelector(`input[id^="compressive_strength_"]`).value;
+            const failureType = row.querySelector(`input[id^="failure_type_"]`).value;
+            
+            if (!crushingLoad || !compressiveStrength) {
+                return; // Skip incomplete rows
+            }
+            
+            const rowData = {
+                cube_id: cubeId,
+                dimension_length: parseFloat(length) || null,
+                dimension_width: parseFloat(width) || null,
+                dimension_height: parseFloat(height) || null,
+                area: parseFloat(area) || null,
+                weight: parseFloat(weight) || null,
+                density: parseFloat(density) || null,
+                crushing_load: parseFloat(crushingLoad),
+                compressive_strength: parseFloat(compressiveStrength),
+                failure_type: parseFloat(failureType) || null
+            };
+            
+            rowsData.push(rowData);
+        });
+        
+        if (rowsData.length === 0) {
+            alert('Please complete at least one row with all required measurements.');
+            return null;
+        }
+        
+        // Validate required fields
+        const curingCondition = document.querySelector('[name="curing_condition"]').value.trim();
+        if (!curingCondition) {
+            alert('Please enter the curing condition. This field is required.');
+            document.querySelector('[name="curing_condition"]').focus();
+            return null;
+        }
+        
+        // Validate average strength field
+        const averageStrength = document.getElementById('average_strength').value.trim();
+        if (!averageStrength) {
+            alert('Please enter the average strength. This field is required.');
+            document.getElementById('average_strength').focus();
+            return null;
+        }
+        
+        const formData = {
+            sample_description: document.querySelector('[name="sample_description"]').value,
+            cube_condition: document.querySelector('[name="cube_condition"]').value,
+            curing_condition: curingCondition,
+            machine_used: document.querySelector('[name="machine_used"]').value,
+            test_method: document.querySelector('[name="test_method"]').value,
+            average_strength: parseFloat(document.getElementById('average_strength').value),
+            tested_by: document.querySelector('[name="tested_by"]').value,
+            checked_by: document.querySelector('[name="checked_by"]').value,
+            verified_by: document.querySelector('[name="verified_by"]').value,
+            test_remarks: document.querySelector('[name="test_remarks"]').value,
+            rows: rowsData
+        };
+        
+        return formData;
+    }
+
+    // Function to submit the form
+    function submitForm() {
+        const formData = collectFormData();
+        if (!formData) {
+            return;
+        }
+        
+        // Create hidden input to hold the JSON data
+        let formDataInput = document.querySelector('input[name="form_data_json"]');
+        if (!formDataInput) {
+            formDataInput = document.createElement('input');
+            formDataInput.type = 'hidden';
+            formDataInput.name = 'form_data_json';
+            document.querySelector('form').appendChild(formDataInput);
+        }
+        
+        formDataInput.value = JSON.stringify(formData);
+        
+        // Submit the form normally to redirect to strength graph
+        document.querySelector('form').submit();
+    }
+
+    // Photo capture functionality
+    let currentStream = null;
+    let currentPhotoType = null;
+    let currentCubeNumber = null;
+
+    // Handle capture button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('capture-btn')) {
+            const photoType = e.target.dataset.type;
+            const cubeNumber = e.target.dataset.cube;
+            startCamera(photoType, cubeNumber);
+        }
+        
+        if (e.target.classList.contains('upload-btn')) {
+            const targetFile = e.target.dataset.target;
+            document.getElementById(targetFile).click();
+        }
+        
+        if (e.target.classList.contains('delete-photo')) {
+            const photoId = e.target.dataset.photoId;
+            const photoType = e.target.dataset.type;
+            const cubeNumber = e.target.dataset.cube;
+            deletePhoto(photoId, photoType, cubeNumber);
+        }
+    });
+
+    // Handle file upload
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('photo-file')) {
+            const file = e.target.files[0];
+            if (file) {
+                const photoType = e.target.dataset.type;
+                const cubeNumber = e.target.dataset.cube;
+                uploadPhoto(file, photoType, cubeNumber);
+            }
+        }
+    });
+
+    function startCamera(photoType, cubeNumber) {
+        currentPhotoType = photoType;
+        currentCubeNumber = cubeNumber;
+        
+        // Create camera modal
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-white">Capture Photo - ${photoType.replace('_', ' ').toUpperCase()}</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="stopCamera()"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <video id="camera-video" width="100%" height="400" autoplay class="border rounded"></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" onclick="capturePhoto()">
+                                <i class="fas fa-camera me-2"></i>Capture Photo
+                            </button>
+                            <button class="btn btn-secondary" onclick="stopCamera()">Cancel</button>
+                        </div>
+                        <div id="camera-error" class="text-danger mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+        
+        // Start camera with back camera prioritization
+        async function startBackCamera() {
+            try {
+                let constraints = {
+                    video: {
+                        facingMode: { exact: 'environment' }, // Force back camera
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
+                    }
+                };
+                
+                try {
+                    // Try back camera first
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    currentStream = stream;
+                    document.getElementById('camera-video').srcObject = stream;
+                    console.log('Back camera activated successfully');
+                } catch (exactError) {
+                    console.log('Back camera not available, trying device enumeration');
+                    
+                    // Fallback: enumerate devices and find back camera
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    let backCameraId = null;
+                    for (const device of videoDevices) {
+                        const label = (device.label || '').toLowerCase();
+                        if (label.includes('back') || label.includes('environment') || label.includes('rear')) {
+                            backCameraId = device.deviceId;
+                            break;
+                        }
+                    }
+                    
+                    if (backCameraId) {
+                        constraints.video = {
+                            deviceId: { exact: backCameraId },
+                            width: { ideal: 1280, min: 640 },
+                            height: { ideal: 720, min: 480 }
+                        };
+                        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        currentStream = stream;
+                        document.getElementById('camera-video').srcObject = stream;
+                        console.log('Back camera found via device enumeration');
+                    } else {
+                        // Final fallback to ideal constraint
+                        constraints.video.facingMode = { ideal: 'environment' };
+                        delete constraints.video.deviceId;
+                        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        currentStream = stream;
+                        document.getElementById('camera-video').srcObject = stream;
+                        console.log('Using ideal back camera constraint');
+                    }
+                }
+            } catch (err) {
+                console.error('Camera error:', err);
+                document.getElementById('camera-error').style.display = 'block';
+                document.getElementById('camera-error').textContent = 'Camera access denied or not available. Please use the upload option instead.';
+            }
+        }
+        
+        startBackCamera();
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('camera-canvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            uploadPhoto(blob, currentPhotoType, currentCubeNumber);
+            stopCamera();
+        }, 'image/jpeg', 0.8);
+    }
+
+    function stopCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+        
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (modal.querySelector('#camera-video')) {
+                modal.remove();
+            }
+        });
+    }
+
+    function uploadPhoto(file, photoType, cubeNumber) {
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('photo_type', photoType);
+        formData.append('cube_number', cubeNumber);
+        formData.append('test_id', {{ test.id }});
+        
+        fetch('{{ url_for("upload_test_photo") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the photo container
+                const container = document.getElementById(`${photoType}_${cubeNumber}_container`);
+                container.innerHTML = `
+                    <img src="data:image/jpeg;base64,${data.photo_data}" alt="${photoType}" class="img-fluid">
+                    <span class="delete-photo" data-photo-id="${data.photo_id}" data-type="${photoType}" data-cube="${cubeNumber}">&times;</span>
+                `;
+                
+                // Show success message
+                showToast('Photo uploaded successfully!', 'success');
+            } else {
+                showToast('Failed to upload photo: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            showToast('Failed to upload photo', 'error');
+        });
+    }
+
+    function deletePhoto(photoId, photoType, cubeNumber) {
+        if (!confirm('Are you sure you want to delete this photo?')) {
+            return;
+        }
+        
+        fetch('{{ url_for("delete_test_photo") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                photo_id: photoId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the photo container
+                const container = document.getElementById(`${photoType}_${cubeNumber}_container`);
+                container.innerHTML = `
+                    <div class="no-photo-placeholder">
+                        <i class="fas fa-image fa-2x text-muted"></i>
+                        <p class="text-muted">No photo</p>
+                    </div>
+                `;
+                showToast('Photo deleted successfully!', 'success');
+            } else {
+                showToast('Failed to delete photo', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            showToast('Failed to delete photo', 'error');
+        });
+    }
+
+    function showToast(message, type) {
+        // Simple toast notification
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('add-row-btn').addEventListener('click', addRow);
+        document.getElementById('save-btn').addEventListener('click', submitForm);
+        
+        // Add the first row automatically
+        addRow();
+    });
+</script>
+
+<!-- CSS for photo containers -->
+<style>
+.photo-container {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.photo-container img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.no-photo-placeholder {
+    text-align: center;
+    opacity: 0.6;
+}
+
+.delete-photo {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.delete-photo:hover {
+    background: rgba(255, 0, 0, 1);
+}
+</style>
+
+{% endblock %}

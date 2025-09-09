@@ -1,0 +1,708 @@
+{% extends 'base.html' %}
+
+{% block title %}Sample Test Record Register - Vitrag Associates LLP{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles for sortable table headers */
+    th.sortable {
+        cursor: pointer;
+        position: relative;
+    }
+
+    th.sortable:hover {
+        background-color: #495057;
+    }
+
+    .sort-icon {
+        display: inline-block;
+        width: 10px;
+    }
+
+    /* Highlight current search results */
+    .highlight {
+        background-color: yellow;
+        padding: 2px;
+    }
+
+    /* Make the table more readable */
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    /* Make the filter section sticky */
+    .filter-section {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: #212529;
+        padding: 10px 0;
+        border-bottom: 1px solid #495057;
+    }
+
+    /* Make table headers sticky */
+    .samples-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #2B3245;
+        color: white;
+        border-bottom: 2px solid #dee2e6;
+        text-align: center;
+        vertical-align: middle;
+        padding: 12px 8px;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    /* Ensure table container has proper scrolling */
+    .table-responsive {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    /* Improve table body alignment */
+    .samples-table tbody td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    /* Left align text content in certain columns */
+    .samples-table tbody td:nth-child(4), /* Customer Name */
+    .samples-table tbody td:nth-child(5), /* Site Name */
+    .samples-table tbody td:nth-child(8), /* Test Requirement */
+    .samples-table tbody td:nth-child(13) /* Remarks */ {
+        text-align: left;
+    }
+
+    /* Center align action buttons */
+    .samples-table tbody td:nth-child(14) { /* Actions column */
+        text-align: center;
+    }
+
+    /* Sort icon styling */
+    .sort-icon {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    /* Fix form elements to use dark theme */
+    .bg-dark .form-control,
+    .bg-dark .form-select {
+        background-color: #495057 !important;
+        border-color: #6c757d !important;
+        color: #fff !important;
+    }
+
+    .bg-dark .form-control:focus,
+    .bg-dark .form-select:focus {
+        background-color: #495057 !important;
+        border-color: #80bdff !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    }
+
+    .bg-dark .form-control::placeholder {
+        color: #adb5bd !important;
+    }
+
+    /* Fix dropdown options */
+    .bg-dark .form-select option {
+        background-color: #495057 !important;
+        color: #fff !important;
+    }
+
+    /* Fix form labels in dark theme */
+    .bg-dark .form-label {
+        color: #fff !important;
+    }
+
+    /* Fix input group buttons */
+    .bg-dark .input-group .btn {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+
+    /* Professional filter section styling */
+    .bg-secondary {
+        background-color: #495057 !important;
+    }
+
+    .bg-secondary .form-control,
+    .bg-secondary .form-select {
+        background-color: #212529 !important;
+        border-color: #495057 !important;
+        color: #fff !important;
+    }
+
+    .bg-secondary .form-control:focus,
+    .bg-secondary .form-select:focus {
+        background-color: #212529 !important;
+        border-color: #0d6efd !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+    .bg-secondary .form-control::placeholder {
+        color: #adb5bd !important;
+    }
+
+    .bg-secondary .input-group-text {
+        background-color: #212529 !important;
+        border-color: #495057 !important;
+        color: #fff !important;
+    }
+
+    .bg-secondary .form-select option {
+        background-color: #212529 !important;
+        color: #fff !important;
+    }
+
+    .bg-secondary .btn-outline-light {
+        border-color: #fff !important;
+        color: #fff !important;
+    }
+
+    .bg-secondary .btn-outline-light:hover {
+        background-color: #fff !important;
+        color: #212529 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-mobile-2">
+<div class="card shadow mb-3 mb-md-4">
+    <div class="card-header bg-primary text-white">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-8 mb-2 mb-md-0">
+                <div class="d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="40" class="me-2 d-none d-sm-block">
+                    <div>
+                        <h3 class="mb-0 h5 h-md-3">
+                            <span style="color: #FFD700;">Vitrag Associates LLP</span>
+                        </h3>
+                        <h4 class="mt-1 h6 h-md-4">Sample Test Record Register</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 text-md-end text-mobile-center">
+                <a href="{{ url_for('test_request_form') }}" class="btn btn-light w-100 w-md-auto">
+                    <i class="fas fa-plus me-1"></i>New Test Request
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Professional Search and Filter Section -->
+    <div class="card-body bg-secondary p-3">
+        <form method="get" action="{{ url_for('samples') }}" id="searchForm">
+            <div class="row g-3">
+                <!-- Search Section -->
+                <div class="col-12 col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark text-white border-secondary">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" 
+                               id="searchQuery" name="q" 
+                               placeholder="Search job #, customer, site..." 
+                               value="{{ request.args.get('q', '') }}"
+                               style="border-left: none;">
+                        <button class="btn btn-primary px-3" type="submit">
+                            <span class="d-none d-sm-inline">Search</span>
+                            <span class="d-sm-none">Go</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filters Section -->
+                <div class="col-12 col-lg-8">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark text-white border-secondary">
+                                    <i class="fas fa-filter"></i>
+                                </span>
+                                <select class="form-select bg-dark text-white border-secondary" 
+                                        name="status" id="statusFilter" onchange="this.form.submit()">
+                                    <option value="" {% if not request.args.get('status') %}selected{% endif %}>All Status</option>
+                                    <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="observations_completed" {% if request.args.get('status') == 'observations_completed' %}selected{% endif %}>Observations Completed</option>
+                                    <option value="graph_generated" {% if request.args.get('status') == 'graph_generated' %}selected{% endif %}>Graph Generated</option>
+                                    <option value="test_completed" {% if request.args.get('status') == 'test_completed' %}selected{% endif %}>Test Completed</option>
+                                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 col-md-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark text-white border-secondary">
+                                    <i class="fas fa-cube"></i>
+                                </span>
+                                <select class="form-select bg-dark text-white border-secondary" 
+                                        name="type" id="typeFilter" onchange="this.form.submit()">
+                                    <option value="" {% if not request.args.get('type') %}selected{% endif %}>All Types</option>
+                                    <option value="cube" {% if request.args.get('type') == 'cube' %}selected{% endif %}>Cube Testing</option>
+                                    <option value="sand" {% if request.args.get('type') == 'sand' %}selected{% endif %}>Sand</option>
+                                    <option value="cement" {% if request.args.get('type') == 'cement' %}selected{% endif %}>Cement</option>
+                                    <option value="other" {% if request.args.get('type') == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 col-md-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark text-white border-secondary">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </span>
+                                <input type="date" class="form-control bg-dark text-white border-secondary" 
+                                       name="from_date" id="fromDate" 
+                                       value="{{ request.args.get('from_date', '') }}" 
+                                       onchange="this.form.submit()">
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 col-md-3">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark text-white border-secondary">
+                                    <i class="fas fa-calendar-check"></i>
+                                </span>
+                                <input type="date" class="form-control bg-dark text-white border-secondary" 
+                                       name="to_date" id="toDate" 
+                                       value="{{ request.args.get('to_date', '') }}" 
+                                       onchange="this.form.submit()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clear Filters Button -->
+                    {% if request.args.get('q') or request.args.get('status') or request.args.get('type') or request.args.get('from_date') or request.args.get('to_date') %}
+                    <div class="row mt-2">
+                        <div class="col-12 text-end">
+                            <a href="{{ url_for('samples') }}" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-times me-1"></i>Reset Filters
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body">
+        <!-- Search and Filter Bar -->
+        <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="tableSearchInput" placeholder="Search any column...">
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="customerFilter" placeholder="Filter by customer...">
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    <select class="form-select" id="dateRangeFilter">
+                        <option value="">Any date</option>
+                        <option value="week">Last 7 days</option>
+                        <option value="month">Last 30 days</option>
+                        <option value="year">This year</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <button class="btn btn-secondary w-100" id="resetFilters">
+                    <i class="fas fa-sync-alt me-1"></i> Reset Filters
+                </button>
+            </div>
+        </div>
+
+        {% if test_requests %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover samples-table">
+                <thead class="table-light">
+                    <tr>
+                        <th class="sortable" data-sort="receipt-date">Date of Receipt <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="ulr-no">ULR Number <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="job-no">Sample Test Job Number <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="customer-name">Name of Customer <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="site-name">Site Name <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="sample-type">Sample <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="quantity">Qty <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="test-req">Test Requirement <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="casting-date">Date of Casting <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="testing-date">Date of Testing <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="report-date">Date of Report <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="disposal-date">Date of Disposal <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="remarks">Remarks <span class="sort-icon ms-1"></span></th>
+                        <th class="sortable" data-sort="actions">Actions <span class="sort-icon ms-1"></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test_request in test_requests %}
+                    <tr>
+                        <td>{{ test_request.receipt_date.strftime('%d-%m-%Y') if test_request.receipt_date is not none else 'N/A' }}</td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 and test_request.concrete_tests[0].ulr_number %}
+                                {{ test_request.concrete_tests[0].ulr_number }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-primary">{{ test_request.job_number }}</span></td>
+                        <td>{{ test_request.customer_name_display }}</td>
+                        <td>{{ test_request.site_name|truncate(30) }}</td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                <span class="badge bg-info">Concrete Cube</span>
+                            {% elif test_request.river_sand or test_request.crushed_sand or test_request.m_sand or test_request.p_sand %}
+                                <span class="badge bg-secondary">Sand</span>
+                            {% elif test_request.cement %}
+                                <span class="badge bg-secondary">Cement</span>
+                            {% elif test_request.materials|length > 0 %}
+                                <span class="badge bg-secondary">Other</span>
+                            {% else %}
+                                <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                {{ test_request.concrete_tests|sum(attribute='num_of_cubes')|int }} cubes
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                Compression Test
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                {% if test_request.concrete_tests[0].casting_date is not none %}
+                                    {{ test_request.concrete_tests[0].casting_date.strftime('%d-%m-%Y') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                {% if test_request.concrete_tests[0].testing_date is not none %}
+                                    {{ test_request.concrete_tests[0].testing_date.strftime('%d-%m-%Y') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.completion_date is not none %}
+                                {{ test_request.completion_date.strftime('%d-%m-%Y') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.disposal_date is not none %}
+                                {{ test_request.disposal_date.strftime('%d-%m-%Y') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if test_request.review_remarks %}
+                                {{ test_request.review_remarks|truncate(30) }}
+                            {% elif test_request.requirements_remarks %}
+                                {{ test_request.requirements_remarks|truncate(30) }}
+                            {% elif test_request.capability_remarks %}
+                                {{ test_request.capability_remarks|truncate(30) }}
+                            {% elif test_request.sample_condition_remarks %}
+                                {{ test_request.sample_condition_remarks|truncate(30) }}
+                            {% elif test_request.customer_discussion %}
+                                {{ test_request.customer_discussion|truncate(30) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if test_request.concrete_tests|length > 0 %}
+                                <div class="d-flex flex-wrap gap-1" style="min-width: 180px;">
+                                    <!-- View Button -->
+                                    <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                    </a>
+
+                                    <!-- Edit Button - Only show if not completed -->
+                                    {% if test_request.status != 'completed' and test_request.status != 'test_completed' %}
+                                        <a href="{{ url_for('edit_sample', id=test_request.id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i><span class="d-none d-xl-inline ms-1">Edit</span>
+                                        </a>
+                                    {% endif %}
+
+                                    <!-- Status-based Action Buttons -->
+                                    {% if test_request.status == 'completed' or test_request.status == 'test_completed' %}
+                                        <!-- Preview Test Report Button -->
+                                        <a href="{{ url_for('complete_test', test_id=test_request.id) }}" class="btn btn-sm btn-warning" title="Preview Report">
+                                            <i class="fas fa-file-pdf"></i><span class="d-none d-xl-inline ms-1">Preview Report</span>
+                                        </a>
+                                    {% elif test_request.status == 'pending' %}
+                                        <!-- Start Test button removed as requested -->
+                                    {% elif test_request.status == 'observations_completed' %}
+                                        <a href="{{ url_for('view_strength_graph', test_request_id=test_request.id, test_id=test_request.concrete_tests[0].id) }}" class="btn btn-sm btn-primary" title="Generate Graph">
+                                            <i class="fas fa-chart-bar"></i><span class="d-none d-xl-inline ms-1">Generate Graph</span>
+                                        </a>
+                                    {% elif test_request.status == 'graph_generated' %}
+                                        <a href="{{ url_for('complete_test', test_id=test_request.id) }}" class="btn btn-sm btn-primary" title="Finalize Test">
+                                            <i class="fas fa-clipboard-check"></i><span class="d-none d-xl-inline ms-1">Finalize Test</span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="d-flex flex-wrap gap-1" style="min-width: 120px;">
+                                    <!-- View Button -->
+                                    <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                    </a>
+
+                                    <!-- Edit Button -->
+                                    <a href="{{ url_for('edit_sample', id=test_request.id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i><span class="d-none d-xl-inline ms-1">Edit</span>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No sample test requests found. 
+            <a href="{{ url_for('test_request_form') }}" class="alert-link">Create a new test request</a>.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    // Table sorting and filtering functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get table elements
+        const table = document.querySelector('table');
+        const tableBody = document.querySelector('tbody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Store original table data
+        const originalRows = [...rows];
+
+        // Sort direction state
+        let sortDirection = {};
+
+        // Add click event listeners to sortable headers
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortKey = this.getAttribute('data-sort');
+                sortTable(sortKey);
+            });
+        });
+
+        // Function to sort table
+        function sortTable(key) {
+            // Toggle sort direction
+            sortDirection[key] = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+
+            // Reset all header styles
+            sortableHeaders.forEach(header => {
+                header.querySelector('.sort-icon').innerHTML = '';
+            });
+
+            // Update sort icon for the clicked header
+            const currentHeader = document.querySelector(`th[data-sort="${key}"]`);
+            currentHeader.querySelector('.sort-icon').innerHTML = 
+                sortDirection[key] === 'asc' ? '▲' : '▼';
+
+            // Get index of the column
+            const headerCells = Array.from(document.querySelectorAll('th'));
+            const columnIndex = headerCells.indexOf(currentHeader);
+
+            // Sort the rows
+            const sortedRows = [...rows].sort((rowA, rowB) => {
+                const cellA = rowA.querySelectorAll('td')[columnIndex].textContent.trim();
+                const cellB = rowB.querySelectorAll('td')[columnIndex].textContent.trim();
+
+                // Check if values are dates
+                const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+                if (dateRegex.test(cellA) && dateRegex.test(cellB)) {
+                    // Convert DD-MM-YYYY to YYYY-MM-DD for proper comparison
+                    const dateA = cellA === 'N/A' ? new Date(0) : 
+                                 new Date(cellA.split('-').reverse().join('-'));
+                    const dateB = cellB === 'N/A' ? new Date(0) : 
+                                 new Date(cellB.split('-').reverse().join('-'));
+
+                    return sortDirection[key] === 'asc' ? 
+                        dateA - dateB : dateB - dateA;
+                }
+
+                // Check if values are numbers
+                const numA = parseFloat(cellA);
+                const numB = parseFloat(cellB);
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return sortDirection[key] === 'asc' ? 
+                        numA - numB : numB - numA;
+                }
+
+                // Default to string comparison
+                return sortDirection[key] === 'asc' ? 
+                    cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            });
+
+            // Clear table
+            while (tableBody.firstChild) {
+                tableBody.removeChild(tableBody.firstChild);
+            }
+
+            // Add sorted rows
+            sortedRows.forEach(row => {
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Filter functionality
+        const globalSearchInput = document.getElementById('tableSearchInput');
+        const customerFilterInput = document.getElementById('customerFilter');
+        const dateRangeSelect = document.getElementById('dateRangeFilter');
+        const resetFiltersButton = document.getElementById('resetFilters');
+
+        // Event listeners for filter inputs
+        if (globalSearchInput) {
+            globalSearchInput.addEventListener('input', filterTable);
+        }
+
+        if (customerFilterInput) {
+            customerFilterInput.addEventListener('input', filterTable);
+        }
+
+        if (dateRangeSelect) {
+            dateRangeSelect.addEventListener('change', filterTable);
+        }
+
+        if (resetFiltersButton) {
+            resetFiltersButton.addEventListener('click', resetFilters);
+        }
+
+        // Function to filter table
+        function filterTable() {
+            const searchTerm = globalSearchInput ? globalSearchInput.value.toLowerCase() : '';
+            const customerTerm = customerFilterInput ? customerFilterInput.value.toLowerCase() : '';
+            const dateRange = dateRangeSelect ? dateRangeSelect.value : '';
+
+            const filteredRows = originalRows.filter(row => {
+                // Get all text content from the row for global search
+                const rowText = row.textContent.toLowerCase();
+
+                // Check global search term
+                if (searchTerm && !rowText.includes(searchTerm)) {
+                    return false;
+                }
+
+                // Check customer filter
+                if (customerTerm) {
+                    const customerCell = row.querySelectorAll('td')[3]; // Customer name column
+                    if (!customerCell.textContent.toLowerCase().includes(customerTerm)) {
+                        return false;
+                    }
+                }
+
+                // Check date range filter
+                if (dateRange) {
+                    const receiptDateCell = row.querySelectorAll('td')[0]; // Receipt date column
+                    const dateText = receiptDateCell.textContent.trim();
+
+                    if (dateText === 'N/A') {
+                        return false;
+                    }
+
+                    // Parse DD-MM-YYYY date
+                    const [day, month, year] = dateText.split('-').map(num => parseInt(num, 10));
+                    const rowDate = new Date(year, month - 1, day); // Months are 0-indexed in JS
+                    const today = new Date();
+
+                    switch (dateRange) {
+                        case 'week':
+                            const weekAgo = new Date();
+                            weekAgo.setDate(today.getDate() - 7);
+                            return rowDate >= weekAgo;
+                        case 'month':
+                            const monthAgo = new Date();
+                            monthAgo.setDate(today.getDate() - 30);
+                            return rowDate >= monthAgo;
+                        case 'year':
+                            return rowDate.getFullYear() === today.getFullYear();
+                    }
+                }
+
+                return true;
+            });
+
+            // Update the table with filtered rows
+            while (tableBody.firstChild) {
+                tableBody.removeChild(tableBody.firstChild);
+            }
+
+            if (filteredRows.length > 0) {
+                filteredRows.forEach(row => {
+                    tableBody.appendChild(row.cloneNode(true));
+                });
+            } else {
+                // Show "no results" message
+                const noResultsRow = document.createElement('tr');
+                const noResultsCell = document.createElement('td');
+                noResultsCell.colSpan = table.querySelectorAll('th').length;
+                noResultsCell.textContent = 'No matching records found';
+                noResultsCell.className = 'text-center py-3 text-muted';
+                noResultsRow.appendChild(noResultsCell);
+                tableBody.appendChild(noResultsRow);
+            }
+        }
+
+        // Function to reset filters
+        function resetFilters() {
+            if (globalSearchInput) globalSearchInput.value = '';
+            if (customerFilterInput) customerFilterInput.value = '';
+            if (dateRangeSelect) dateRangeSelect.value = '';
+
+            // Restore original table
+            while (tableBody.firstChild) {
+                tableBody.removeChild(tableBody.firstChild);
+            }
+
+            originalRows.forEach(row => {
+                tableBody.appendChild(row.cloneNode(true));
+            });
+        }
+    });
+</script>
+{% endblock %}

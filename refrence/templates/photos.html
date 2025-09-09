@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Photos - {{ test_request.job_number }} - Vitrag Associates{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="50" class="me-3">
+            <div>
+                <h3 class="mb-0">Photos - {{ test_request.job_number }}</h3>
+                <p class="mb-0 small">Customer: {{ customer.name }}</p>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-light btn-sm me-2">
+                <i class="fas fa-eye"></i> View Test
+            </a>
+            <a href="{{ url_for('camera_capture', test_id=test_request.id) }}" class="btn btn-light btn-sm">
+                <i class="fas fa-camera"></i> Capture Photo
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h4 class="mb-3">Upload Photo</h4>
+                <form action="{{ url_for('upload_photo', test_id=test_request.id) }}" method="POST" enctype="multipart/form-data" class="card bg-dark p-3">
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">Select Photo</label>
+                        <input type="file" name="photo" id="photo" class="form-control" accept="image/*" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="photo_type" class="form-label">Photo Type</label>
+                        <select name="photo_type" id="photo_type" class="form-select">
+                            <option value="sample_photo">Sample Photo</option>
+                            <option value="before_test">Before Test</option>
+                            <option value="during_test">During Test</option>
+                            <option value="after_test">After Test</option>
+                            <option value="equipment">Equipment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="concrete_test_id" class="form-label">Related Concrete Test (Optional)</label>
+                        <select name="concrete_test_id" id="concrete_test_id" class="form-select">
+                            <option value="">-- None --</option>
+                            {% for test in concrete_tests %}
+                            <option value="{{ test.id }}">{{ test.id_mark }} - {{ test.grade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Photo
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="mb-3">Information</h4>
+                <div class="card bg-dark p-3">
+                    <div class="alert alert-info mb-0">
+                        <p><strong>Sample ID:</strong> {{ test_request.job_number }}</p>
+                        <p><strong>Site:</strong> {{ test_request.site_name }}</p>
+                        <p><strong>Status:</strong> <span class="badge {% if test_request.status == 'completed' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ test_request.status | capitalize }}</span></p>
+                        <p><strong>Photos Required:</strong> At least one photo is required before a test can be marked as complete.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mb-3">Photo Gallery <span class="badge bg-secondary">{{ photos|length }}</span></h4>
+        
+        {% if photos %}
+        <div class="row">
+            {% for photo in photos %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ url_for('static', filename='uploads/photos/' + photo.filename) }}" class="card-img-top" alt="Test photo" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ photo.photo_type | replace('_', ' ') | title }}</h5>
+                        <p class="card-text small">{{ photo.description or 'No description provided' }}</p>
+                        
+                        {% if photo.concrete_test_id %}
+                        {% for test in concrete_tests %}
+                            {% if test.id == photo.concrete_test_id %}
+                            <span class="badge bg-info mb-2">Test: {{ test.id_mark }}</span>
+                            {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        
+                        <p class="card-text small text-muted">Captured: {{ photo.captured_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('delete_photo', test_id=test_request.id, photo_id=photo.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this photo?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No photos have been uploaded for this test request yet. Use the upload form or camera capture to add photos.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

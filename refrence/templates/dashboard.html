@@ -1,0 +1,483 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Vitrag Associates{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-mobile-2 mt-3 mt-md-4">
+    <div class="row mb-3 mb-md-4">
+        <div class="col-12 text-mobile-center">
+            <h2 class="mb-3 h3 h-md-2">Testing Dashboard</h2>
+
+            <!-- Stats Overview Cards -->
+            <div class="row mb-3 mb-md-4 g-2 g-md-3">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="card bg-dark text-white mb-2 mb-md-3">
+                        <div class="card-body text-center p-mobile-2">
+                            <h3 class="display-6 display-md-4">{{ stats.total }}</h3>
+                            <p class="card-text small">Total Test Requests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="card bg-dark text-warning mb-2 mb-md-3">
+                        <div class="card-body text-center p-mobile-2">
+                            <h3 class="display-6 display-md-4">{{ stats.pending }}</h3>
+                            <p class="card-text small">Pending Tests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="card bg-dark text-success mb-2 mb-md-3">
+                        <div class="card-body text-center p-mobile-2">
+                            <h3 class="display-6 display-md-4">{{ stats.completed }}</h3>
+                            <p class="card-text small">Completed Tests</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gamification Elements -->
+            <div class="row mb-4">
+                <!-- Progress and Achievements Section -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Your Achievements</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <!-- Achievement Badges -->
+                                <div class="col-md-3 text-center">
+                                    <div class="achievement-badge {% if stats.completed >= 1 %}achieved{% else %}locked{% endif %}">
+                                        <i class="fas fa-vial fa-2x mb-2 {% if stats.completed >= 1 %}text-success{% else %}text-secondary{% endif %}"></i>
+                                        <p class="badge bg-{% if stats.completed >= 1 %}success{% else %}secondary{% endif %}">First Test</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="achievement-badge {% if stats.completed >= 5 %}achieved{% else %}locked{% endif %}">
+                                        <i class="fas fa-microscope fa-2x mb-2 {% if stats.completed >= 5 %}text-info{% else %}text-secondary{% endif %}"></i>
+                                        <p class="badge bg-{% if stats.completed >= 5 %}info{% else %}secondary{% endif %}">5 Tests</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="achievement-badge {% if stats.completed >= 10 %}achieved{% else %}locked{% endif %}">
+                                        <i class="fas fa-flask fa-2x mb-2 {% if stats.completed >= 10 %}text-warning{% else %}text-secondary{% endif %}"></i>
+                                        <p class="badge bg-{% if stats.completed >= 10 %}warning{% else %}secondary{% endif %}">10 Tests</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="achievement-badge {% if stats.completed >= 25 %}achieved{% else %}locked{% endif %}">
+                                        <i class="fas fa-atom fa-2x mb-2 {% if stats.completed >= 25 %}text-danger{% else %}text-secondary{% endif %}"></i>
+                                        <p class="badge bg-{% if stats.completed >= 25 %}danger{% else %}secondary{% endif %}">25 Tests</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Towards Next Achievement -->
+                            <div class="mt-4">
+                                {% if stats.completed < 1 %}
+                                    {% set next_milestone = 1 %}
+                                    {% set progress = (stats.completed / 1) * 100 %}
+                                {% elif stats.completed < 5 %}
+                                    {% set next_milestone = 5 %}
+                                    {% set progress = (stats.completed / 5) * 100 %}
+                                {% elif stats.completed < 10 %}
+                                    {% set next_milestone = 10 %}
+                                    {% set progress = (stats.completed / 10) * 100 %}
+                                {% elif stats.completed < 25 %}
+                                    {% set next_milestone = 25 %}
+                                    {% set progress = (stats.completed / 25) * 100 %}
+                                {% else %}
+                                    {% set next_milestone = "Max" %}
+                                    {% set progress = 100 %}
+                                {% endif %}
+
+                                <h6>Progress to Next Achievement: {{ stats.completed }} / {% if next_milestone != "Max" %}{{ next_milestone }}{% else %}{{ next_milestone }}{% endif %}</h6>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         data-progress="{{ progress }}"
+                                         aria-valuenow="{{ progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats and Streaks -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Stats & Streaks</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-3 rounded-circle bg-warning me-3 text-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-fire text-white fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Current Streak</h6>
+                                    <p class="fs-4 mb-0">{{ stats.completed }} days</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-3 rounded-circle bg-info me-3 text-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-tachometer-alt text-white fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Efficiency Rate</h6>
+                                    <p class="fs-4 mb-0">{{ (stats.completed / stats.total * 100) | round if stats.total > 0 else 0 }}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <ul class="nav nav-tabs mb-3" id="testsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">Pending Tests</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">Completed Tests</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false">All Tests</button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="testsTabsContent">
+                <!-- Pending Tests Tab -->
+                <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                    {% if pending_tests %}
+                    <form id="pendingBulkForm" method="post" action="{{ url_for('bulk_actions') }}">
+                        <input type="hidden" name="source_tab" value="pending">
+                        <div class="mb-3 d-flex align-items-center">
+                            <div class="input-group" style="max-width: 400px;">
+                                <select class="form-select bg-dark text-light border-secondary" name="bulk_action" id="pendingBulkAction">
+                                    <option value="">Bulk Actions...</option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-light" id="applyPendingBulkAction">Apply</button>
+                            </div>
+                            <div class="ms-2">
+                                <button type="button" class="btn btn-sm btn-outline-light pending-select-all">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-light pending-deselect-all">Deselect All</button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="form-check">
+                                                <input class="form-check-input pending-select-all-checkbox" type="checkbox">
+                                            </div>
+                                        </th>
+                                        <th>Job Number</th>
+                                        <th>Customer</th>
+                                        <th>Site</th>
+                                        <th>Receipt Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                                {% for test in pending_tests %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input test-checkbox" type="checkbox" name="test_ids" value="{{ test.id }}">
+                                        </div>
+                                    </td>
+                                    <td>{{ test.job_number }}</td>
+                                    <td>{{ test.customer.name }}</td>
+                                    <td>{{ test.site_name }}</td>
+                                    <td>{{ test.receipt_date.strftime('%d-%m-%Y') }}</td>
+                                    <td>
+                                        {% if test.status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Test Completed
+                                            </span>
+                                        {% elif test.concrete_tests and test.concrete_tests[0].has_results %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-chart-line me-1"></i>Results Available
+                                            </span>
+                                        {% elif test.concrete_tests and test.concrete_tests[0].test_results_json %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-clipboard-check me-1"></i>Observations Taken
+                                            </span>
+                                        {% elif test.concrete_tests %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-vial me-1"></i>Sample Received
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-clock me-1"></i>{{ test.status | capitalize }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1" style="min-width: 200px;">
+                                            <a href="{{ url_for('view_sample', id=test.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                            </a>
+                                            <a href="{{ url_for('edit_sample', id=test.id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i><span class="d-none d-xl-inline ms-1">Edit</span>
+                                            </a>
+                                            {% if not (test.concrete_tests and test.concrete_tests[0].has_results) %}
+                                                <a href="{{ url_for('complete_test', test_id=test.id) }}" class="btn btn-sm btn-outline-primary" title="Complete Test">
+                                                    <i class="fas fa-clipboard-check"></i><span class="d-none d-xl-inline ms-1">Complete Test</span>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No pending tests found.</div>
+                    {% endif %}
+                </div>
+
+                <!-- Completed Tests Tab -->
+                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                    {% if completed_tests %}
+                    <form id="completedBulkForm" method="post" action="{{ url_for('bulk_actions') }}">
+                        <input type="hidden" name="source_tab" value="completed">
+                        <div class="mb-3 d-flex align-items-center">
+                            <div class="input-group" style="max-width: 400px;">
+                                <select class="form-select bg-dark text-light border-secondary" name="bulk_action" id="completedBulkAction">
+                                    <option value="">Bulk Actions...</option>
+                                    <option value="mark_pending">Mark Selected as Pending</option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-light" id="applyCompletedBulkAction">Apply</button>
+                            </div>
+                            <div class="ms-2">
+                                <button type="button" class="btn btn-sm btn-outline-light completed-select-all">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-light completed-deselect-all">Deselect All</button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="form-check">
+                                                <input class="form-check-input completed-select-all-checkbox" type="checkbox">
+                                            </div>
+                                        </th>
+                                        <th>Job Number</th>
+                                        <th>Customer</th>
+                                        <th>Site</th>
+                                        <th>Receipt Date</th>
+                                        <th>Completion Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                                {% for test in completed_tests %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input test-checkbox" type="checkbox" name="test_ids" value="{{ test.id }}">
+                                        </div>
+                                    </td>
+                                    <td>{{ test.job_number }}</td>
+                                    <td>{{ test.customer.name }}</td>
+                                    <td>{{ test.site_name }}</td>
+                                    <td>{{ test.receipt_date.strftime('%d-%m-%Y') }}</td>
+                                    <td>{{ test.completion_date.strftime('%d-%m-%Y') if test.completion_date else 'N/A' }}</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Test Completed
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1" style="min-width: 220px;">
+                                            <a href="{{ url_for('view_sample', id=test.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                            </a>
+                                            <a href="{{ url_for('update_status', id=test.id, status='pending') }}" class="btn btn-sm btn-outline-warning" title="Re-open Test">
+                                                <i class="fas fa-undo"></i><span class="d-none d-xl-inline ms-1">Re-open</span>
+                                            </a>
+                                            <a href="{{ url_for('complete_test', test_id=test.id) }}" class="btn btn-sm btn-success" title="See Test Report">
+                                                <i class="fas fa-file-pdf"></i><span class="d-none d-xl-inline ms-1">Report</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No completed tests found.</div>
+                    {% endif %}
+                </div>
+
+                <!-- All Tests Tab -->
+                <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
+                    {% if all_tests %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Job Number</th>
+                                    <th>Customer</th>
+                                    <th>Site</th>
+                                    <th>Receipt Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in all_tests %}
+                                <tr>
+                                    <td>{{ test.job_number }}</td>
+                                    <td>{{ test.customer.name }}</td>
+                                    <td>{{ test.site_name }}</td>
+                                    <td>{{ test.receipt_date.strftime('%d-%m-%Y') }}</td>
+                                    <td>
+                                        {% if test.status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Test Completed
+                                            </span>
+                                        {% elif test.concrete_tests and test.concrete_tests[0].has_results %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-chart-line me-1"></i>Results Available
+                                            </span>
+                                        {% elif test.concrete_tests and test.concrete_tests[0].test_results_json %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-clipboard-check me-1"></i>Observations Taken
+                                            </span>
+                                        {% elif test.concrete_tests %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-vial me-1"></i>Sample Received
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if test.status != 'completed' %}
+                                        <div class="d-flex flex-wrap gap-1" style="min-width: 200px;">
+                                            <a href="{{ url_for('view_sample', id=test.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                            </a>
+                                            <a href="{{ url_for('edit_sample', id=test.id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i><span class="d-none d-xl-inline ms-1">Edit</span>
+                                            </a>
+                                            {% if not (test.concrete_tests and test.concrete_tests[0].has_results) %}
+                                                <a href="{{ url_for('complete_test', test_id=test.id) }}" class="btn btn-sm btn-outline-primary" title="Complete Test">
+                                                    <i class="fas fa-clipboard-check"></i><span class="d-none d-xl-inline ms-1">Complete Test</span>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        {% else %}
+                                        <div class="d-flex flex-wrap gap-1" style="min-width: 220px;">
+                                            <a href="{{ url_for('view_sample', id=test.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i><span class="d-none d-xl-inline ms-1">View</span>
+                                            </a>
+                                            <a href="{{ url_for('update_status', id=test.id, status='pending') }}" class="btn btn-sm btn-outline-warning" title="Re-open Test">
+                                                <i class="fas fa-undo"></i><span class="d-none d-xl-inline ms-1">Re-open</span>
+                                            </a>
+                                            <a href="{{ url_for('complete_test', test_id=test.id) }}" class="btn btn-sm btn-success" title="See Test Report">
+                                                <i class="fas fa-file-pdf"></i><span class="d-none d-xl-inline ms-1">Report</span>
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No tests found.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove the Other Testing Services Section from here -->
+
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ url_for('test_request_form') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Test Request
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Preview Modals -->
+{% for test in completed_tests %}
+    {% if test.report_filename %}
+    <div class="modal fade" id="previewModal{{ test.id }}" tabindex="-1" aria-labelledby="previewModalLabel{{ test.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title" id="previewModalLabel{{ test.id }}">Report Preview - {{ test.job_number }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <embed src="{{ url_for('view_report', test_id=test.id) }}" type="application/pdf" width="100%" height="500px" />
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ url_for('view_report', test_id=test.id) }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <a href="{{ url_for('share_report_options', test_id=test.id) }}" class="btn btn-info">
+                        <i class="fas fa-share-alt"></i> Share
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- All Tests Modals (for completed tests in the All Tests tab) -->
+{% for test in all_tests %}
+    {% if test.status == 'completed' and test.report_filename %}
+    <div class="modal fade" id="previewModal{{ test.id }}" tabindex="-1" aria-labelledby="previewModalLabel{{ test.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title" id="previewModalLabel{{ test.id }}">Report Preview - {{ test.job_number }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <embed src="{{ url_for('view_report', test_id=test.id) }}" type="application/pdf" width="100%" height="500px" />
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ url_for('view_report', test_id=test.id) }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <a href="{{ url_for('share_report_options', test_id=test.id) }}" class="btn btn-info">
+                        <i class="fas fa-share-alt"></i> Share
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- Include the modal and bulk actions scripts -->
+{% include 'includes/modal_scripts.html' %}
+{% include 'includes/bulk_actions.html' %}
+{% endblock %}

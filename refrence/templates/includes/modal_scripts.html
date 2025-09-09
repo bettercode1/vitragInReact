@@ -1,0 +1,56 @@
+<!-- JavaScript for PDF preview modals and print functionality -->
+<script>
+    // Function to print a PDF by opening it in a new window
+    function printPDF(testId) {
+        // Get the PDF URL
+        const pdfUrl = "{{ url_for('view_report', test_id=0) }}".replace('0', testId);
+        
+        // Open the PDF in a new window
+        const printWindow = window.open(pdfUrl, '_blank');
+        
+        // Wait for the window to load and trigger print
+        printWindow.addEventListener('load', function() {
+            printWindow.print();
+        });
+    }
+    
+    // Initialize modals with Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add print buttons to all modal footers
+        const modalFooters = document.querySelectorAll('.modal-footer');
+        modalFooters.forEach(footer => {
+            // Check if the footer already has a print button
+            if (!footer.querySelector('.btn-warning')) {
+                // Get the test ID from the URL in the download button
+                const downloadBtn = footer.querySelector('a[href*="view_report"]');
+                if (downloadBtn) {
+                    const testIdMatch = downloadBtn.getAttribute('href').match(/test_id=(\d+)/);
+                    if (testIdMatch && testIdMatch[1]) {
+                        // Create and insert the print button before the close button
+                        const testId = testIdMatch[1];
+                        const printBtn = document.createElement('button');
+                        printBtn.className = 'btn btn-warning';
+                        printBtn.innerHTML = '<i class="fas fa-print"></i> Print';
+                        printBtn.onclick = function() {
+                            printPDF(testId);
+                        };
+                        const closeBtn = footer.querySelector('.btn-secondary');
+                        if (closeBtn) {
+                            footer.insertBefore(printBtn, closeBtn);
+                        } else {
+                            footer.appendChild(printBtn);
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Make modals larger on desktop
+        const modalDialogs = document.querySelectorAll('.modal-dialog');
+        if (window.innerWidth >= 992) {
+            modalDialogs.forEach(dialog => {
+                dialog.classList.add('modal-xl');
+            });
+        }
+    });
+</script>

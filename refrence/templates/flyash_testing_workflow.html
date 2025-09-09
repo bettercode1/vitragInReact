@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Fly Ash/GGBS Testing Workflow</h2>
+    <div class="mb-3">
+        <strong>Customer:</strong> {{ customer_name }}<br>
+        <strong>Inward Date:</strong> {{ inward_date }}
+    </div>
+    <ol class="list-group list-group-numbered mb-4">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Material Inward
+            <span class="badge bg-success">Done</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('flyash_specific_gravity', customer_name=customer_name, inward_date=inward_date) }}">Specific Gravity</a>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('flyash_fineness', customer_name=customer_name, inward_date=inward_date) }}">Fineness by Wet Sieving</a>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('flyash_observation_sheet', customer_name=customer_name, inward_date=inward_date) }}">Observation Sheet</a>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('flyash_generate_report', customer_name=customer_name, inward_date=inward_date) }}">Generate Report</a>
+        </li>
+    </ol>
+    <a href="{{ url_for('other_services') }}" class="btn btn-secondary">Back to Other Services</a>
+</div>
+{% endblock %} 

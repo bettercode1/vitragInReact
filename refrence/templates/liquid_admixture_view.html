@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Liquid Admixture Test - {{ test.sample_test_code }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-vial me-2"></i>Liquid Admixture Test Details</h1>
+                            <p class="mb-0">Sample Code: {{ test.sample_test_code }}</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('liquid_admixture_form') }}" class="btn btn-light me-2">
+                                <i class="fas fa-plus me-2"></i>New Test
+                            </a>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Customer:</strong></td>
+                                    <td>{{ test.customer.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>URL Number:</strong></td>
+                                    <td>{{ test.url_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Job Code Number:</strong></td>
+                                    <td>{{ test.job_code_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Reference Number:</strong></td>
+                                    <td>{{ test.reference_number or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sample Description:</strong></td>
+                                    <td>{{ test.sample_description }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date of Receipt:</strong></td>
+                                    <td>{{ test.date_of_receipt.strftime('%d-%m-%Y') if test.date_of_receipt else 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Test Method:</strong></td>
+                                    <td>{{ test.test_method }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Sample Test Code:</strong></td>
+                                    <td>{{ test.sample_test_code }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date of Testing:</strong></td>
+                                    <td>{{ test.date_of_testing.strftime('%d-%m-%Y') if test.date_of_testing else 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Environmental Conditions:</strong></td>
+                                    <td>{{ test.environmental_conditions }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td><span class="badge bg-success">{{ test.status.title() }}</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-flask me-2"></i>Test Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Sr. No.</th>
+                                    <th>Colour & Texture of Admixture</th>
+                                    <th>Volume of Admixture taken (ml)</th>
+                                    <th>Temperature of Liquid (°C)</th>
+                                    <th>Reading on Hydrometer</th>
+                                    <th>Relative Density of Admixture</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reading in test.readings %}
+                                <tr>
+                                    <td>{{ reading.sr_no }}</td>
+                                    <td>{{ reading.colour_texture or 'N/A' }}</td>
+                                    <td>{{ "%.2f"|format(reading.volume_ml) if reading.volume_ml else 'N/A' }}</td>
+                                    <td>{{ "%.1f"|format(reading.temperature_c) if reading.temperature_c else 'N/A' }}</td>
+                                    <td>{{ "%.4f"|format(reading.hydrometer_reading) if reading.hydrometer_reading else 'N/A' }}</td>
+                                    <td>{{ "%.4f"|format(reading.relative_density) if reading.relative_density else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-secondary">
+                                    <td colspan="5" class="text-center fw-bold">Specific Gravity</td>
+                                    <td class="fw-bold">{{ "%.4f"|format(test.specific_gravity) if test.specific_gravity else 'N/A' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Verification</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Tested By</h6>
+                            <p><strong>Name:</strong> {{ test.tested_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.tested_by_date.strftime('%d-%m-%Y') if test.tested_by_date else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Checked By</h6>
+                            <p><strong>Name:</strong> {{ test.checked_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.checked_by_date.strftime('%d-%m-%Y') if test.checked_by_date else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Verified By</h6>
+                            <p><strong>Name:</strong> {{ test.verified_by_name or 'N/A' }}</p>
+                            <p><strong>Date:</strong> {{ test.verified_by_date.strftime('%d-%m-%Y') if test.verified_by_date else 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviewed By and Authorized By -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Reviewed By</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ test.reviewed_by or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Authorized By</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ test.authorized_by or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remarks -->
+    {% if test.remarks %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Remarks</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ test.remarks }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('liquid_admixture_report', test_id=test.id) }}" class="btn btn-primary btn-lg me-3" target="_blank">
+                <i class="fas fa-file-pdf me-2"></i>View Report
+            </a>
+            <a href="{{ url_for('liquid_admixture_form') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-plus me-2"></i>New Test
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

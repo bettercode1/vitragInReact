@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Observation Sheet - Bricks Testing{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Observation Sheet (Bricks)</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="customer_name" value="{{ customer_name }}">
+                        <input type="hidden" name="inward_date" value="{{ inward_date }}">
+                        <input type="hidden" name="brick_type" value="{{ brick_type }}">
+                        <div class="mb-3">
+                            <label for="observation_notes" class="form-label">Observation Notes</label>
+                            <textarea class="form-control" id="observation_notes" name="observation_notes" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">Save & Return to Workflow</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

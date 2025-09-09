@@ -1,0 +1,630 @@
+{% extends 'base.html' %}
+
+{% block title %}Sample Test Request - {{ test_request.job_number }} - Vitrag Associates LLP{% endblock %}
+
+{% block styles %}
+<style>
+    /* Fix table column widths to prevent date overlap */
+    .concrete-tests-table th:nth-child(5), /* Casting Date */
+    .concrete-tests-table th:nth-child(6) { /* Testing Date */
+        min-width: 120px;
+        white-space: nowrap;
+    }
+    
+    .concrete-tests-table td:nth-child(5),
+    .concrete-tests-table td:nth-child(6) {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+    
+    /* Better spacing for the entire table */
+    .concrete-tests-table {
+        table-layout: auto;
+    }
+    
+    .concrete-tests-table th,
+    .concrete-tests-table td {
+        padding: 8px 12px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3 mb-3">
+    {% include 'includes/navigation.html' %}
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="50" class="me-3">
+            <div>
+                <h3 class="mb-0"><span style="color: #FFD700;">Vitrag Associates LLP</span> - Sample Test Request</h3>
+                <div class="mt-2">
+                    <span class="badge bg-primary fs-6 p-2">Job Number: {{ test_request.job_number }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2" id="headerButtonContainer">
+            <a href="{{ url_for('edit_sample', id=test_request.id) }}" class="btn btn-light btn-sm px-3 py-2">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+
+            {% if test_request.status == 'observations_completed' %}
+            <a href="{{ url_for('complete_test', test_id=test_request.id) }}" class="btn btn-primary btn-sm px-3 py-2">
+                <i class="fas fa-clipboard-check"></i> Complete Test
+            </a>
+            {% endif %}
+
+            {% if test_request.concrete_tests|length > 0 %}
+            <a href="{{ url_for('view_test_results', test_request_id=test_request.id, test_id=test_request.concrete_tests[0].id) }}" class="btn btn-info btn-sm px-3 py-2">
+                <i class="fas fa-camera"></i> Capture Images & Observations
+            </a>
+            
+            {% if test_request.concrete_tests[0].has_results %}
+            <a href="{{ url_for('view_strength_graph', test_request_id=test_request.id, test_id=test_request.concrete_tests[0].id) }}" class="btn btn-warning btn-sm px-3 py-2">
+                <i class="fas fa-chart-bar"></i> Generate Graph
+            </a>
+            {% endif %}
+            {% endif %}
+
+            {% if test_request.status == 'completed' %}
+            <a href="{{ url_for('view_report', test_id=test_request.concrete_tests[0].id) }}" class="btn btn-success btn-sm px-3 py-2">
+                <i class="fas fa-file-pdf"></i> Preview PDF
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h4 class="mb-3">Customer Information</h4>
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="bg-secondary" style="width: 40%">Name of Customer</th>
+                        <td class="bg-dark">{{ test_request.customer.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">Contact Person</th>
+                        <td class="bg-dark">{{ test_request.customer.contact_person }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">Phone/Mobile</th>
+                        <td class="bg-dark">{{ test_request.customer.phone }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">E-mail</th>
+                        <td class="bg-dark">{{ test_request.customer.email }}</td>
+                    </tr>
+
+                </table>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="mb-3">Sample Information</h4>
+                <table class="table table-bordered">
+                    <!-- Job Number removed as it's now specific to each concrete test -->
+                    <tr>
+                        <th class="bg-secondary">Receipt Date</th>
+                        <td class="bg-dark">{{ test_request.receipt_date.strftime('%d-%m-%Y') if test_request.receipt_date is not none else 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">Site Name</th>
+                        <td class="bg-dark">{{ test_request.site_name }}</td>
+                    </tr>
+                    <!-- Sample Code Number and ULR Number removed as they are now specific to each concrete test -->
+                    <tr>
+                        <th class="bg-secondary">Probable Completion Date</th>
+                        <td class="bg-dark">{{ test_request.probable_completion_date.strftime('%d-%m-%Y') if test_request.probable_completion_date is not none else 'N/A' }}</td>
+                    </tr>
+                    {% if test_request.status == 'completed' %}
+                    <tr>
+                        <th class="bg-secondary">Status</th>
+                        <td class="bg-dark">
+                            <span class="badge bg-success">Completed</span>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        
+        <!-- Building Material List section removed as requested -->
+        
+        <!-- Other Materials section removed as requested -->
+        
+        {% if concrete_tests and concrete_tests|length > 0 %}
+        <h4 class="mb-3">Testing Requirement (Concrete Cube/Core)</h4>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered concrete-tests-table">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Sr No</th>
+                        <th>ID Mark</th>
+                        <th>Location/Nature/Work</th>
+                        <th>Grade</th>
+                        <th>Casting Date</th>
+                        <th>Testing Date</th>
+                        <th>Age in days</th>
+                        <th>No of cubes/Cores</th>
+                        <th>Test Method/Specification</th>
+                        <th>Reference Number</th>
+                        <th>ULR Number</th>
+                        <th>Job Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in concrete_tests %}
+                    <tr>
+                        <td>{{ test.sr_no }}</td>
+                        <td>{{ test.id_mark }}</td>
+                        <td>{{ test.location_nature }}</td>
+                        <td>{{ test.grade }}</td>
+                        <td>{{ test.casting_date if test.casting_date else 'N/A' }}</td>
+                        <td>{{ test.testing_date if test.testing_date else 'N/A' }}</td>
+                        <td>{{ test.age_in_days }}</td>
+                        <td>{{ test.num_of_cubes|int if test.num_of_cubes else "" }}</td>
+                        <td>{{ test.test_method }}</td>
+                        <td>{{ test.sample_code_number }}</td>
+                        <td>{{ test.ulr_number }}</td>
+                        <td>{{ test_request.job_number }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if test['has_results'] %}
+                                <button class="btn btn-sm btn-secondary" disabled title="Observations already completed and cannot be modified">
+                                    <i class="fas fa-check-circle"></i> 
+                                    Observations Completed
+                                </button>
+                                <a href="{{ url_for('view_strength_graph', test_request_id=test_request['id'], test_id=test['id']) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-chart-bar"></i> 
+                                    Generate Graph
+                                </a>
+                                {% else %}
+                                <a href="{{ url_for('view_test_results', test_request_id=test_request['id'], test_id=test['id']) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus"></i> 
+                                    Enter Observations
+                                </a>
+                                {% endif %}
+                                {% if test['has_results'] %}
+                                <a href="{{ url_for('complete_test', test_id=test_request['id']) }}" class="btn btn-sm btn-success me-1">
+                                    <i class="fas fa-file-pdf"></i> Preview and Print PDF
+                                </a>
+                                
+                                <button type="button" class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#emailModal{{ test['id'] }}">
+                                    <i class="fas fa-envelope"></i> Email
+                                </button>
+                                
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#whatsappModal{{ test['id'] }}">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </button>
+                                
+                                <!-- Email Modal -->
+                                <div class="modal fade" id="emailModal{{ test['id'] }}" tabindex="-1" aria-labelledby="emailModalLabel{{ test['id'] }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="emailModalLabel{{ test['id'] }}">Send Report via Email</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="emailAddress{{ test['id'] }}" class="form-label">Email Address</label>
+                                                    <input type="email" class="form-control" id="emailAddress{{ test['id'] }}" placeholder="Enter recipient email address" value="{% if customer.email %}{{ customer.email }}{% endif %}">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary sendEmailBtn" data-test-id="{{ test['id'] }}" data-test-request-id="{{ test_request['id'] }}" data-job-number="{{ test['job_number'] }}">Send</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- WhatsApp Modal -->
+                                <div class="modal fade" id="whatsappModal{{ test['id'] }}" tabindex="-1" aria-labelledby="whatsappModalLabel{{ test['id'] }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="whatsappModalLabel{{ test['id'] }}">Send Report via WhatsApp</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="whatsappNumber{{ test['id'] }}" class="form-label">WhatsApp Number</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">+91</span>
+                                                        <input type="tel" class="form-control" id="whatsappNumber{{ test['id'] }}" placeholder="Enter 10-digit mobile number" value="{% if customer.phone %}{{ customer.phone }}{% endif %}" maxlength="10" pattern="[0-9]{10}">
+                                                    </div>
+                                                    <div class="form-text">Enter 10-digit mobile number without country code</div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary sendWhatsappBtn" data-test-id="{{ test['id'] }}" data-job-number="{{ test['job_number'] }}" data-test-request-id="{{ test_request['id'] }}">Send</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        
+        <h4 class="mb-3">Testing Requirements Confirmation</h4>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2" disabled {{ 'checked' if test_request.method_capability_acceptable else '' }}>
+                        Method of testing capability and resources acceptable
+                    </li>
+                    <li class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2" disabled {{ 'checked' if test_request.testing_services_requested else '' }}>
+                        Testing services requested may please be carried out
+                    </li>
+                    <li class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2" disabled {{ 'checked' if test_request.terms_conditions_acceptable else '' }}>
+                        Terms and conditions of Testing acceptable as per review remarks
+                    </li>
+                    <li class="list-group-item">
+                        <input type="checkbox" class="form-check-input me-2" disabled {{ 'checked' if test_request.statement_of_conformity else '' }}>
+                        Statement of conformity or specifications on the test report
+                    </li>
+                    <!-- Sample Condition removed as requested -->
+                </ul>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <h5 class="fw-bold">LABORATORY REPRESENTATIVE</h5>
+                </div>
+                <p><strong>Name:</strong> {{ test_request.lab_representative_name }}</p>
+                <p><strong>Signature:</strong></p>
+                {% if test_request.lab_representative_signature_data %}
+                    <div class="border p-3 mb-2 text-center bg-light" style="min-height: 100px;">
+                        <img src="{{ test_request.lab_representative_signature_data }}" alt="Lab Representative Signature" style="max-width: 100%; max-height: 100px;">
+                    </div>
+                {% elif test_request.lab_representative_signature %}
+                    <div class="border p-3 mb-2 text-center fst-italic bg-light" style="min-height: 100px;">
+                        <p class="mt-3 text-dark">Digital signature provided</p>
+                    </div>
+                {% else %}
+                    <div class="border p-3 mb-2 bg-light" style="min-height: 100px;"></div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <h5 class="fw-bold">CUSTOMER'S REPRESENTATIVE</h5>
+                </div>
+                <p><strong>Name:</strong> {{ test_request.customer_representative_name }}</p>
+                <p><strong>Signature:</strong></p>
+                {% if test_request.customer_representative_signature_data %}
+                    <div class="border p-3 mb-2 text-center bg-light" style="min-height: 100px;">
+                        <img src="{{ test_request.customer_representative_signature_data }}" alt="Customer Representative Signature" style="max-width: 100%; max-height: 100px;">
+                    </div>
+                {% elif test_request.customer_representative_signature %}
+                    <div class="border p-3 mb-2 text-center fst-italic bg-light" style="min-height: 100px;">
+                        <p class="mt-3 text-dark">Digital signature provided</p>
+                    </div>
+                {% else %}
+                    <div class="border p-3 mb-2 bg-light" style="min-height: 100px;"></div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <h4 class="mb-3">Office Use Information</h4>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h5 class="mb-3">Review Remarks</h5>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <i class="{{ 'fas fa-check-circle text-success' if test_request.requirements_defined else 'fas fa-times-circle text-muted' }}"></i>
+                                    <strong>Requirements defined and understood</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="ps-4"><em>Remarks:</em> {{ test_request.requirements_remarks or "None" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <i class="{{ 'fas fa-check-circle text-success' if test_request.capability_available else 'fas fa-times-circle text-muted' }}"></i>
+                                    <strong>Capability and Resources available</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="ps-4"><em>Remarks:</em> {{ test_request.capability_remarks or "None" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Condition of Sample:</strong> {{ test_request.sample_condition }}
+                                </div>
+                                <div class="mb-2">
+                                    <p class="ps-4"><em>Remarks:</em> {{ test_request.sample_condition_remarks or "None" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Discussion with Customer:</strong>
+                            <p>{{ test_request.customer_discussion or "None" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <!-- Sample Code Number removed as it is now specific to each concrete test -->
+                                <div class="mb-3">
+                                    <strong>Probable Completion Date:</strong> {{ test_request.probable_completion_date.strftime('%d-%m-%Y') if test_request.probable_completion_date is not none else "Not specified" }}
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Test Assigned To:</strong> {{ test_request.assigned_to }}
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Reviewed By:</strong> {{ test_request.reviewed_by }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <h5 class="fw-bold">QUALITY MANAGER (Signature)</h5>
+                </div>
+                <p><strong>Name:</strong> {{ test_request.quality_manager_name }}</p>
+                <p><strong>Signature:</strong></p>
+                {% if test_request.quality_manager_signature_data %}
+                    <div class="border p-3 mb-2 text-center bg-light" style="min-height: 100px;">
+                        <img src="{{ test_request.quality_manager_signature_data }}" alt="Quality Manager Signature" style="max-width: 100%; max-height: 100px;">
+                    </div>
+                {% elif test_request.quality_manager_signature %}
+                    <div class="border p-3 mb-2 text-center fst-italic bg-light" style="min-height: 100px;">
+                        <p class="mt-3 text-dark">Digital signature provided</p>
+                    </div>
+                {% else %}
+                    <div class="border p-3 mb-2 bg-light" style="min-height: 100px;"></div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('samples') }}" class="btn btn-secondary me-md-2">Back to Samples</a>
+            <a href="{{ url_for('edit_sample', id=test_request.id) }}" class="btn btn-primary me-md-2">Edit Request</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Loading state for buttons
+    function setButtonLoading(button, isLoading) {
+        if (isLoading) {
+            button.setAttribute('disabled', 'disabled');
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+        } else {
+            button.removeAttribute('disabled');
+            button.innerHTML = 'Send';
+        }
+    }
+    
+    // Display error alerts
+    function showAlert(message, type = 'danger') {
+        const alertContainer = document.createElement('div');
+        alertContainer.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+        alertContainer.role = 'alert';
+        alertContainer.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.container').prepend(alertContainer);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertContainer.classList.remove('show');
+            setTimeout(() => alertContainer.remove(), 150);
+        }, 5000);
+    }
+    
+    // Event handler for sending email reports
+    document.querySelectorAll('.sendEmailBtn').forEach(function(button) {
+        button.addEventListener('click', async function() {
+            const testId = this.getAttribute('data-test-id');
+            const testRequestId = this.getAttribute('data-test-request-id') || {{ test_request.id }};
+            const jobNumber = this.getAttribute('data-job-number');
+            const emailField = document.getElementById('emailAddress' + testId);
+            
+            if (!emailField) {
+                console.error('Email field not found for test ID:', testId);
+                return;
+            }
+            
+            const emailAddress = emailField.value.trim();
+            if (!emailAddress) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailAddress)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            try {
+                // Set button to loading state
+                setButtonLoading(this, true);
+                
+                // Call our improved email API endpoint
+                const response = await fetch('/api/share/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        test_request_id: testRequestId,
+                        email: emailAddress
+                    }),
+                });
+                
+                const result = await response.json();
+                
+                // Reset button state
+                setButtonLoading(this, false);
+                
+                // Close the modal first
+                const modal = bootstrap.Modal.getInstance(document.getElementById('emailModal' + testId));
+                modal.hide();
+                
+                // Handle response
+                if (result.success) {
+                    // If it's a mailto link, open it in a new tab
+                    if (result.method === 'mailto' || result.method === 'mailto_fallback') {
+                        if (result.mailto_link) {
+                            window.open(result.mailto_link, '_blank');
+                        }
+                        showAlert('Email client opened. Please complete sending the email.', 'info');
+                    } else {
+                        // API-based email was sent successfully
+                        showAlert('Email sent successfully!', 'success');
+                    }
+                } else {
+                    // Show error message
+                    showAlert(`Failed to send email: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                // Reset button state
+                setButtonLoading(this, false);
+                console.error('Error sending email:', error);
+                
+                // Fallback to simple mailto as last resort
+                const mailtoUrl = `mailto:${emailAddress}?subject=Test Report - ${jobNumber}&body=Please find attached the test report for ${jobNumber}.%0D%0A%0D%0ARegards,%0D%0AVitrag Associates LLP`;
+                window.open(mailtoUrl, '_blank');
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('emailModal' + testId));
+                modal.hide();
+                
+                showAlert('Had trouble with our email service. Email client opened as fallback.', 'warning');
+            }
+        });
+    });
+    
+    // Event handler for sending WhatsApp reports
+    document.querySelectorAll('.sendWhatsappBtn').forEach(function(button) {
+        button.addEventListener('click', async function() {
+            const testId = this.getAttribute('data-test-id');
+            const jobNumber = this.getAttribute('data-job-number');
+            const testRequestId = this.getAttribute('data-test-request-id');
+            const whatsappField = document.getElementById('whatsappNumber' + testId);
+            
+            if (!whatsappField) {
+                console.error('WhatsApp field not found for test ID:', testId);
+                return;
+            }
+            
+            const whatsappNumber = whatsappField.value.trim();
+            if (!whatsappNumber) {
+                alert('Please enter a WhatsApp number');
+                return;
+            }
+            
+            // Validate 10-digit number
+            const numberRegex = /^\d{10}$/;
+            if (!numberRegex.test(whatsappNumber)) {
+                alert('Please enter a valid 10-digit mobile number');
+                return;
+            }
+            
+            try {
+                // Set button to loading state
+                setButtonLoading(this, true);
+                
+                // Call our improved WhatsApp API endpoint
+                const response = await fetch('/api/share/whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        test_request_id: testRequestId,
+                        phone: whatsappNumber
+                    }),
+                });
+                
+                const result = await response.json();
+                
+                // Reset button state
+                setButtonLoading(this, false);
+                
+                // Close the modal first
+                const modal = bootstrap.Modal.getInstance(document.getElementById('whatsappModal' + testId));
+                modal.hide();
+                
+                // Handle response
+                if (result.success) {
+                    // If it's a direct link, open it in a new tab
+                    if ((result.method === 'link' || result.method === 'link_fallback') && result.whatsapp_link) {
+                        window.open(result.whatsapp_link, '_blank');
+                        showAlert('WhatsApp opened. Please complete sending the message.', 'info');
+                    } else {
+                        // API-based message was sent successfully
+                        showAlert('WhatsApp message sent successfully!', 'success');
+                    }
+                } else {
+                    // Show error message
+                    showAlert(`Failed to send WhatsApp message: ${result.error || 'Unknown error'}`);
+                    
+                    // If we have a fallback link, use it
+                    if (result.whatsapp_link) {
+                        window.open(result.whatsapp_link, '_blank');
+                        showAlert('Opened direct WhatsApp link as fallback.', 'warning');
+                    }
+                }
+            } catch (error) {
+                // Reset button state
+                setButtonLoading(this, false);
+                console.error('Error sending WhatsApp message:', error);
+                
+                // Fallback to direct WhatsApp link as last resort
+                const reportUrl = `${window.location.protocol}//${window.location.host}/samples/${testRequestId}/${testId}/final-report`;
+                const whatsappUrl = `https://wa.me/91${whatsappNumber}?text=Please find the test report for ${jobNumber} here: ${reportUrl}`;
+                window.open(whatsappUrl, '_blank');
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('whatsappModal' + testId));
+                modal.hide();
+                
+                showAlert('Had trouble with our WhatsApp service. WhatsApp web opened as fallback.', 'warning');
+            }
+        });
+    });
+</script>
+
+<!-- Calibration modal removed from this page -->
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Share Report - Vitrag Associates LLP{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="50" class="me-3">
+            <div>
+                <h3 class="mb-0">Share Test Report</h3>
+                <div class="mt-2">
+                    <span class="badge bg-primary fs-6 p-2">Job Number: {{ test_request.job_number }}</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-8">
+                <h5 class="mb-3">Report Details</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="bg-secondary" style="width: 40%">Customer</th>
+                        <td class="bg-dark">{{ customer.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">Site Name</th>
+                        <td class="bg-dark">{{ test_request.site_name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-secondary">Test Type</th>
+                        <td class="bg-dark">{{ test_request.test_type }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Share Options</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- WhatsApp Share Option -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Share via WhatsApp</h6>
+                            <p class="mb-3">Share the test report directly to WhatsApp:</p>
+                            <a href="{{ whatsapp_link }}" class="btn btn-success" target="_blank">
+                                <i class="fab fa-whatsapp me-2"></i> Share to WhatsApp
+                            </a>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Direct Download Link -->
+                        <div>
+                            <h6 class="mb-3">Download Report</h6>
+                            <p class="mb-3">Download the report directly:</p>
+                            <a href="{{ report_url }}" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-file-pdf me-2"></i> Download PDF Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

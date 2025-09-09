@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Report - {{ test_request.job_number }} - Vitrag Associates LLP{% endblock %}
+
+{% block content %}
+<style>
+/* Force center alignment for all table content */
+.table-center-force td,
+.table-center-force th {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Ensure rowspan cells are properly centered vertically */
+.table-center-force td[rowspan] {
+    vertical-align: middle !important;
+}
+</style>
+<div class="container-fluid px-mobile-2 mt-3 mt-md-4">
+    {% include 'includes/navigation.html' %}
+    <div class="card shadow-sm">
+        <!-- Header with Logos -->
+        <div class="card-header bg-dark">
+            <div class="row align-items-center">
+                <div class="col-3 col-md-2 text-start">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="50" class="d-none d-md-block">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="40" class="d-md-none">
+                </div>
+                <div class="col-6 col-md-8 text-center">
+                    <h2 class="text-white m-0 h4 h-md-2">TEST REPORT</h2>
+                </div>
+                <div class="col-3 col-md-2 text-end">
+                    <img src="{{ url_for('static', filename='images/nabl_logo.png') }}?v={{ range(1000, 9999) | random }}" alt="NABL Logo" height="50" class="d-none d-md-block">
+                    <img src="{{ url_for('static', filename='images/nabl_logo.png') }}?v={{ range(1000, 9999) | random }}" alt="NABL Logo" height="40" class="d-md-none">
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Customer Information Section -->
+            <div class="table-responsive mb-3">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="bg-dark text-white text-center" style="width: 25%" rowspan="2">Customer/Site Name & Address</th>
+                            <td class="bg-dark text-white text-center" rowspan="2">
+                                {{ customer.name }}<br>
+                                {% if customer.site_name %}
+                                    {{ customer.site_name }}<br>
+                                {% endif %}
+                                {% if customer.address %}
+                                    {{ customer.address }}<br>
+                                {% endif %}
+                                {% if customer.city %}
+                                    {{ customer.city }}
+                                {% endif %}
+                            </td>
+                            <th class="bg-dark text-white text-center" style="width: 18%; white-space: normal;">Date of Report</th>
+                            <td class="bg-dark text-white text-center" style="width: 25%">{{ report_date }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">ULR Number</th>
+                            <td class="bg-dark text-white text-center">{{ test_request.ulr_number }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Job Code Number</th>
+                            <td class="bg-dark text-white text-center">{{ test_request.job_number }}</td>
+                            <th class="bg-dark text-white text-center">Reference Number</th>
+                            <td class="bg-dark text-white text-center">{{ main_test.sample_code_number }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Location/Structure Type</th>
+                            <td class="bg-dark text-white text-center" colspan="3">{{ main_test.location_nature }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Date of Receipt</th>
+                            <td class="bg-dark text-white text-center">{{ receipt_date }}</td>
+                            <th class="bg-dark text-white text-center">Age of Specimen</th>
+                            <td class="bg-dark text-white text-center">{{ age_in_days }} Days</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Date of Casting</th>
+                            <td class="bg-dark text-white text-center">{{ casting_date }}</td>
+                            <th class="bg-dark text-white text-center">Date of Testing</th>
+                            <td class="bg-dark text-white text-center">{{ testing_date }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Type of Specimen</th>
+                            <td class="bg-dark text-white text-center">{{ main_test.sample_description }}</td>
+                            <th class="bg-dark text-white text-center">Grade of Specimen</th>
+                            <td class="bg-dark text-white text-center">{{ main_test.grade }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Condition of Specimen</th>
+                            <td class="bg-dark text-white text-center">{{ main_test.cube_condition }}</td>
+                            <th class="bg-dark text-white text-center">Curing Condition</th>
+                            <td class="bg-dark text-white text-center">--</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Machine used for Testing</th>
+                            <td class="bg-dark text-white text-center" colspan="3">{{ main_test.machine_used }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Location of Test</th>
+                            <td class="bg-dark text-white text-center" colspan="3">Permanent</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Capacity/Range</th>
+                            <td class="bg-dark text-white text-center">2000KN</td>
+                            <th class="bg-dark text-white text-center">Calibration Due Date</th>
+                            <td class="bg-dark text-white text-center">{{ calibration_date }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-dark text-white text-center">Test Method</th>
+                            <td class="bg-dark text-white text-center">{{ main_test.test_method }}</td>
+                            <th class="bg-dark text-white text-center">Environmental condition</th>
+                            <td class="bg-dark text-white text-center">Not Applicable</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            
+            <!-- Test Sample Description -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <h5 class="mb-3 bg-dark p-2 text-center" style="color: white !important;">DESCRIPTION OF TEST SAMPLE</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-center-force mx-auto" style="width: auto; margin: 0 auto;">
+                            <thead class="bg-dark text-white">
+                                <tr>
+                                    <th class="text-white text-center" style="width: 70px;">Sr. No.</th>
+                                    <th class="text-white text-center" style="width: 100px;">ID Mark</th>
+                                    <th class="text-white text-center" colspan="3" style="width: 200px;">Dimensions of Specimen (mm) (L x B x H)</th>
+                                    <th class="text-white text-center" style="width: 100px;">Area (mm²)</th>
+                                    <th class="text-white text-center" style="width: 100px;">Weight (kg)</th>
+                                    <th class="text-white text-center" style="width: 120px;">Maximum Load (kN)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-dark text-white">
+                                {% for result in test_results %}
+                                <tr>
+                                    <td class="text-white">{{ loop.index }}</td>
+                                    <td class="text-white">{{ main_test.id_mark }}</td>
+                                    <td class="text-white">{% if result.dimension_length is defined and result.dimension_length %}{{ result.dimension_length|round(1) }}{% endif %}</td>
+                                    <td class="text-white">{% if result.dimension_width is defined and result.dimension_width %}{{ result.dimension_width|round(1) }}{% endif %}</td>
+                                    <td class="text-white">{% if result.dimension_height is defined and result.dimension_height %}{{ result.dimension_height|round(1) }}{% endif %}</td>
+                                    <td class="text-white">{% if result.area is defined and result.area %}{{ result.area|round(1) }}{% endif %}</td>
+                                    <td class="text-white">{% if result.weight is defined and result.weight %}{{ result.weight|round(3) }}{% endif %}</td>
+                                    <td class="text-white">{% if result.crushing_load is defined and result.crushing_load %}{{ result.crushing_load|round(1) }}{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Results -->
+            <div class="row mb-4">
+                <div class="col-md-10 mx-auto">
+                    <h5 class="mb-3 bg-dark p-2 text-center" style="color: white !important;">Test Result for Compressive Strength of Concrete Cube</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-center-force mx-auto" style="width: auto; margin: 0 auto; ">
+                            <thead style="background-color: #343a40;">
+                                <tr>
+                                    <th class="text-white text-center" style="width: 100px;">Sr. No.</th>
+                                    <th class="text-white text-center" style="width: 120px;">ID Mark</th>
+                                    <th class="text-white text-center" style="width: 150px;">Density (kg/m³)</th>
+                                    <th class="text-white text-center" style="width: 200px;">Compressive Strength (N/mm²)</th>
+                                    <th class="text-white text-center" style="width: 220px;">Average Compressive Strength (N/mm²)</th>
+                                </tr>
+                            </thead>
+                            <tbody style="background-color: #495057;">
+                                {% for result in test_results %}
+                                {% if loop.first %}
+                                <tr>
+                                    <td class="text-white text-center" style="">{{ loop.index }}</td>
+                                    <td class="text-white text-center" style="">{{ main_test.id_mark }}</td>
+                                    <td class="text-white text-center" style="">{{ result.density|round(1) if result.density and result.density > 0 else 'N/A' }}</td>
+                                    <td class="text-white text-center" style="">{{ result.compressive_strength|round(1) if result.compressive_strength and result.compressive_strength > 0 else '' }}</td>
+                                    <td class="text-white text-center align-middle" style="vertical-align: middle !important;" rowspan="{{ test_results|length }}">{{ main_test.average_strength|round(1) if main_test.average_strength and main_test.average_strength > 0 else '' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td class="text-white text-center" style="">{{ loop.index }}</td>
+                                    <td class="text-white text-center" style="">{{ main_test.id_mark }}</td>
+                                    <td class="text-white text-center" style="">{{ result.density|round(1) if result.density and result.density > 0 else 'N/A' }}</td>
+                                    <td class="text-white text-center" style="">{{ result.compressive_strength|round(1) if result.compressive_strength and result.compressive_strength > 0 else '' }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+
+            <!-- Terms & Conditions -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-3 bg-dark p-2" style="color: white !important;">Terms & Conditions –</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">Samples were not drawn by VAs lab.</li>
+                        <li class="list-group-item">The Test Reports & Results pertain to Sample/ Samples of material received by VAs.</li>
+                        <li class="list-group-item">The Test Report cannot be reproduced without the written approval of CEO/QM of VAs.</li>
+                        <li class="list-group-item">Any change/ correction/ alteration to the Test Report shall be invalid.</li>
+                        <li class="list-group-item">The role VAs is restricted to testing of the material sample as received in the laboratory. VAs or any of its employees shall not be liable for any dispute/ litigation arising between the customer & Third Party on account of test results. VAs shall not interact with any Third Party in this regard.</li>
+                        <li class="list-group-item">The CEO of VAs may make necessary changes to the terms & conditions without any prior notice.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Reviewer Selection Section -->
+            <div class="row mb-1 mt-1">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white py-1">
+                            <h6 class="mb-0">Select Report Reviewer</h6>
+                        </div>
+                        <div class="card-body py-1">
+                            <form id="reviewer_form" method="POST" action="{{ url_for('complete_test', test_id=test_request.id) }}">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="reviewer_select" class="form-label">Select Reviewer:</label>
+                                        <select class="form-select" id="reviewer_select" name="reviewer_id" required>
+                                            <option value="">-- Select a reviewer --</option>
+                                            <option value="1" data-name="Lalita S. Dussa" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)" {% if not reviewer_info or reviewer_info.name == 'Lalita S. Dussa' %}selected{% endif %}>Lalita S. Dussa - Quality Manager</option>
+                                            <option value="2" data-name="Harsha Prakarsha Sangave" data-designation="Quality Manager" data-graduation="M.E(Civil-Structures)" {% if reviewer_info and reviewer_info.name == 'Harsha Prakarsha Sangave' %}selected{% endif %}>Harsha Prakarsha Sangave - Quality Manager</option>
+                                            <option value="3" data-name="Amol A Adam" data-designation="Quality Manager" data-graduation="B.E(Civil)" {% if reviewer_info and reviewer_info.name == 'Amol A Adam' %}selected{% endif %}>Amol A Adam - Quality Manager</option>
+                                            <option value="4" data-name="Aaquib J. Shaikh" data-designation="Quality Manager" data-graduation="B.E(Civil)" {% if reviewer_info and reviewer_info.name == 'Aaquib J. Shaikh' %}selected{% endif %}>Aaquib J. Shaikh - Quality Manager</option>
+                                            <option value="5" data-name="Prakarsha A. Sangave" data-designation="Chief Executive Officer" data-graduation="M.E(Civil-Structures)" {% if reviewer_info and reviewer_info.name == 'Prakarsha A. Sangave' %}selected{% endif %}>Prakarsha A. Sangave - Chief Executive Officer</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-success" id="update_reviewer_btn" style="display: none;">
+                                            <i class="fas fa-save"></i> Update Reviewer
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Hidden fields to store reviewer details -->
+                                <input type="hidden" id="selected_reviewer_name" name="reviewer_name" value="{% if reviewer_info %}{{ reviewer_info.name }}{% else %}Lalita S. Dussa{% endif %}">
+                                <input type="hidden" id="selected_reviewer_designation" name="reviewer_designation" value="{% if reviewer_info %}{{ reviewer_info.designation }}{% else %}Quality Manager{% endif %}">
+                                <input type="hidden" id="selected_reviewer_graduation" name="reviewer_graduation" value="{% if reviewer_info %}{{ reviewer_info.graduation }}{% else %}B.Tech.(Civil){% endif %}">
+                            </form>
+                            
+                            <!-- Current Reviewer Display -->
+                            <!-- <div class="mt-1 p-1 bg-light rounded">
+                                <h6 class="mb-0">Current PDF Reviewer:</h6>
+                                <p class="mb-0"><strong>Name:</strong> <span id="current_reviewer_name">{% if reviewer_info %}{{ reviewer_info.name }}{% else %}Lalita S. Dussa{% endif %}</span></p>
+                              c  <p class="mb-0"><strong>Designation:</strong> <span id="current_reviewer_designation">{% if reviewer_info %}{{ reviewer_info.designation }}{% else %}Quality Manager{% endif %}</span></p>
+                                <p class="mb-0"><strong>Qualification:</strong> <span id="current_reviewer_graduation">{% if reviewer_info %}{{ reviewer_info.graduation }}{% else %}B.Tech.(Civil){% endif %}</span></p>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authorization Section -->
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <!-- Reviewed by Section -->
+                    <div class="text-center">
+                        <p class="mb-0 fw-bold">Reviewed by –</p>
+                        <div id="reviewer_details">
+                            <p class="mb-0 fw-bold" id="reviewer_name">{% if reviewer_info %}{{ reviewer_info.name }}{% else %}Lalita S. Dussa{% endif %}</p>
+                            <p class="mb-0" id="reviewer_designation">{% if reviewer_info %}({{ reviewer_info.designation }}){% else %}(Quality Manager){% endif %}</p>
+                            <p class="mb-0 fst-italic" id="reviewer_graduation">{% if reviewer_info %}{{ reviewer_info.graduation }}{% else %}B.Tech.(Civil){% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Authorized by Section -->
+                    <div class="text-center">
+                        <p class="mb-0 fw-bold">Authorized by –</p>
+                        <p class="mb-0 fw-bold">Mr. Prakarsh A Sangave</p>
+                        <p class="mb-0">(Chief Executive Officer)</p>
+                        <p class="mb-0 fst-italic">M.E(Civil-Structures)</p>
+                        <p class="mb-0 fst-italic">MTech (Civil-Geotechnical), M.I.E, F.I.E.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Report Footer -->
+            <div class="row">
+                <div class="col-md-12 text-center border-top pt-3">
+                    <p>X-----------X-----------X-----------X----------END OF REPORT----------X-----------X-----------X-----------X</p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <a href="{{ url_for('view_sample', id=test_request.id) }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Test Details
+                    </a>
+                    
+                    <a href="{{ url_for('complete_test', test_id=test_request.id, format='pdf') }}" class="btn btn-primary me-2" target="_blank">
+                        <i class="fas fa-file-pdf"></i> View as PDF
+                    </a>
+                    
+                    <button class="btn btn-info me-2" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    
+                    <a href="mailto:{% if customer.email %}{{ customer.email }}{% endif %}?subject=Test Report - {{ main_test.job_number }}&body=Please find attached the test report for {{ main_test.job_number }}.%0D%0A%0D%0ARegards,%0D%0AVitrag Associates LLP" class="btn btn-warning me-2" target="_blank">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                    
+                    <a href="https://wa.me/{% if customer.phone %}91{{ customer.phone }}{% endif %}?text=Please find the test report for {{ main_test.job_number }} here: {{ url_for('complete_test', test_id=test_request.id, format='pdf', _external=True) }}" class="btn btn-success" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+// Handle reviewer selection
+document.getElementById('reviewer_select').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const reviewerName = document.getElementById('reviewer_name');
+    const reviewerDesignation = document.getElementById('reviewer_designation');
+    const reviewerGraduation = document.getElementById('reviewer_graduation');
+    
+    // Update hidden form fields
+    const hiddenName = document.getElementById('selected_reviewer_name');
+    const hiddenDesignation = document.getElementById('selected_reviewer_designation');
+    const hiddenGraduation = document.getElementById('selected_reviewer_graduation');
+    
+    if (this.value) {
+        const name = selectedOption.getAttribute('data-name');
+        const designation = selectedOption.getAttribute('data-designation');
+        const graduation = selectedOption.getAttribute('data-graduation');
+        
+        reviewerName.textContent = name;
+        reviewerDesignation.textContent = designation;
+        reviewerGraduation.textContent = graduation;
+        
+        // Update hidden fields
+        hiddenName.value = name;
+        hiddenDesignation.value = designation;
+        hiddenGraduation.value = graduation;
+        
+        // Show update button only if different from default (Lalita)
+        const updateBtn = document.getElementById('update_reviewer_btn');
+        if (name !== 'Lalita S. Dussa') {
+            updateBtn.style.display = 'block';
+        } else {
+            updateBtn.style.display = 'none';
+        }
+    } else {
+        reviewerName.textContent = '-- Select Reviewer --';
+        reviewerDesignation.textContent = '';
+        reviewerGraduation.textContent = '';
+        
+        // Clear hidden fields
+        hiddenName.value = '';
+        hiddenDesignation.value = '';
+        hiddenGraduation.value = '';
+        
+        // Hide update button
+        document.getElementById('update_reviewer_btn').style.display = 'none';
+    }
+});
+
+// Trigger initial selection to show current reviewer
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewerSelect = document.getElementById('reviewer_select');
+    if (reviewerSelect) {
+        // Get the currently selected option
+        const selectedOption = reviewerSelect.options[reviewerSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            // Update the display with the selected reviewer
+            const reviewerName = document.getElementById('reviewer_name');
+            const reviewerDesignation = document.getElementById('reviewer_designation');
+            const reviewerGraduation = document.getElementById('reviewer_graduation');
+            
+            const name = selectedOption.getAttribute('data-name');
+            const designation = selectedOption.getAttribute('data-designation');
+            const graduation = selectedOption.getAttribute('data-graduation');
+            
+            reviewerName.textContent = name;
+            reviewerDesignation.textContent = `(${designation})`;
+            reviewerGraduation.textContent = graduation;
+            
+            // Show/hide update button based on selection
+            const updateBtn = document.getElementById('update_reviewer_btn');
+            if (name !== 'Lalita S. Dussa') {
+                updateBtn.style.display = 'block';
+            } else {
+                updateBtn.style.display = 'none';
+            }
+        }
+    }
+});
+</script>
+        </div>
+    </div>
+</div>
+{% endblock %}

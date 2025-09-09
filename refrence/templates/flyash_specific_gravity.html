@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Specific Gravity Test - Fly Ash/GGBS</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label for="sample_id" class="form-label">Sample ID</label>
+            <input type="text" class="form-control" id="sample_id" name="sample_id" required>
+        </div>
+        <div class="mb-3">
+            <label for="specific_gravity" class="form-label">Specific Gravity</label>
+            <input type="number" step="0.01" class="form-control" id="specific_gravity" name="specific_gravity" required>
+        </div>
+        <div class="mb-3">
+            <label for="remarks" class="form-label">Remarks</label>
+            <input type="text" class="form-control" id="remarks" name="remarks">
+        </div>
+        <input type="hidden" name="customer_name" value="{{ request.args.get('customer_name', '') }}">
+        <input type="hidden" name="inward_date" value="{{ request.args.get('inward_date', '') }}">
+        <button type="submit" class="btn btn-primary">Save & Return to Workflow</button>
+    </form>
+</div>
+{% endblock %} 

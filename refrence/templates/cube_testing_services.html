@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Cube Testing Services - Vitrag Associates{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-cube me-2"></i>Cube Testing Services</h1>
+                            <p class="mb-0">Comprehensive concrete cube testing for construction projects</p>
+                        </div>
+                        <a href="{{ url_for('index') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-primary">
+                        <i class="fas fa-info-circle me-2"></i>About Our Cube Testing Services
+                    </h4>
+                    <p class="card-text">
+                        Vitrag Associates LLP provides comprehensive concrete cube testing services to ensure the quality 
+                        and strength of concrete used in construction projects. Our state-of-the-art laboratory follows 
+                        IS standards and provides accurate, reliable test results.
+                    </p>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-certificate fa-2x text-success mb-2"></i>
+                                <h6>NABL Accredited</h6>
+                                <small class="text-muted">ISO 17025:2017 certified laboratory</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                <h6>Quick Turnaround</h6>
+                                <small class="text-muted">Results within 24-48 hours</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
+                                <h6>Quality Assured</h6>
+                                <small class="text-muted">IS 516:1959 compliant testing</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cube Testing Types -->
+    <div class="row">
+        <!-- Standard Cube Testing -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card h-100 service-card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cube me-2"></i>Standard Cube Testing</h5>
+                </div>
+                <div class="card-body">
+                    <div class="service-icon mb-3 text-center">
+                        <i class="fas fa-cube fa-4x text-primary"></i>
+                    </div>
+                    <h6 class="card-title text-primary">Compressive Strength Testing</h6>
+                    <p class="card-text">Standard 150mm x 150mm x 150mm concrete cube testing for compressive strength determination.</p>
+                    
+                    <div class="service-features">
+                        <h6 class="text-muted">Testing Parameters:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>7-day strength testing</li>
+                            <li><i class="fas fa-check text-success me-2"></i>28-day strength testing</li>
+                            <li><i class="fas fa-check text-success me-2"></i>IS 516:1959 compliance</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Detailed test reports</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <a href="{{ url_for('test_request_form') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Request Standard Test
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- High-Strength Cube Testing -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card h-100 service-card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-cubes me-2"></i>High-Strength Cube Testing</h5>
+                </div>
+                <div class="card-body">
+                    <div class="service-icon mb-3 text-center">
+                        <i class="fas fa-cubes fa-4x text-success"></i>
+                    </div>
+                    <h6 class="card-title text-success">High-Performance Concrete Testing</h6>
+                    <p class="card-text">Specialized testing for high-strength concrete mixes (M40 and above) with enhanced curing protocols.</p>
+                    
+                    <div class="service-features">
+                        <h6 class="text-muted">Testing Parameters:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Enhanced curing conditions</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Precise strength measurement</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Extended testing periods</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Specialized equipment</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <a href="{{ url_for('test_request_form') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Request High-Strength Test
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rapid Cube Testing -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card h-100 service-card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Rapid Cube Testing</h5>
+                </div>
+                <div class="card-body">
+                    <div class="service-icon mb-3 text-center">
+                        <i class="fas fa-bolt fa-4x text-warning"></i>
+                    </div>
+                    <h6 class="card-title text-warning">Accelerated Strength Testing</h6>
+                    <p class="card-text">Fast-track testing for urgent projects with accelerated curing and testing protocols.</p>
+                    
+                    <div class="service-features">
+                        <h6 class="text-muted">Testing Parameters:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>3-day strength estimation</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Accelerated curing</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Same-day results available</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Express reporting</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <a href="{{ url_for('test_request_form') }}" class="btn btn-warning">
+                        <i class="fas fa-plus me-2"></i>Request Rapid Test
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specialized Cube Testing -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card h-100 service-card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-microscope me-2"></i>Specialized Testing</h5>
+                </div>
+                <div class="card-body">
+                    <div class="service-icon mb-3 text-center">
+                        <i class="fas fa-microscope fa-4x text-info"></i>
+                    </div>
+                    <h6 class="card-title text-info">Custom Testing Solutions</h6>
+                    <p class="card-text">Specialized testing for unique concrete mixes, admixtures, and project-specific requirements.</p>
+                    
+                    <div class="service-features">
+                        <h6 class="text-muted">Testing Parameters:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Custom mix designs</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Admixture testing</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Special curing conditions</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Consultation services</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <a href="{{ url_for('test_request_form') }}" class="btn btn-info">
+                        <i class="fas fa-plus me-2"></i>Request Specialized Test
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testing Process -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Our Testing Process</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="process-step">
+                                <div class="process-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-clipboard-list fa-2x"></i>
+                                </div>
+                                <h6>1. Sample Collection</h6>
+                                <small class="text-muted">Proper sampling and labeling</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="process-step">
+                                <div class="process-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-cube fa-2x"></i>
+                                </div>
+                                <h6>2. Cube Preparation</h6>
+                                <small class="text-muted">Standard cube casting</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="process-step">
+                                <div class="process-icon bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-thermometer-half fa-2x"></i>
+                                </div>
+                                <h6>3. Curing</h6>
+                                <small class="text-muted">Controlled environment curing</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="process-step">
+                                <div class="process-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                                <h6>4. Testing & Report</h6>
+                                <small class="text-muted">Strength testing and reporting</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">
+                        <i class="fas fa-phone me-2"></i>Ready to Get Started?
+                    </h5>
+                    <p class="card-text">
+                        Contact us for more information about our cube testing services or to schedule a consultation.
+                    </p>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            <strong>Address:</strong><br>
+                            <small>34A/26 West, New Paccha peth, Ashok Chowk, Solapur</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-phone text-primary me-2"></i>
+                            <strong>Phone:</strong><br>
+                            <small>9552529235</small>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            <strong>Email:</strong><br>
+                            <small>vitragassociates3@gmail.com</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('test_request_form') }}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-plus me-2"></i>Start New Test Request
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.service-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 2px solid transparent;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.service-icon {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.service-features {
+    margin-top: 1rem;
+    line-height: 1.6;
+}
+
+.process-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.process-step {
+    padding: 1rem;
+}
+
+.card-footer .btn {
+    min-width: 140px;
+}
+
+@media (max-width: 768px) {
+    .process-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .process-icon i {
+        font-size: 1.5rem !important;
+    }
+}
+</style>
+{% endblock %} 

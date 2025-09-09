@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Bricks Testing Report - Demo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Bricks Testing Report (Demo)</h4>
+                </div>
+                <div class="card-body">
+                    <p>This is a placeholder for the final Bricks Testing report.</p>
+                    <ul>
+                        <li><strong>Customer:</strong> {{ customer_name }}</li>
+                        <li><strong>Material Inward Date:</strong> {{ inward_date }}</li>
+                        <li><strong>Brick Type:</strong> {{ brick_type }}</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Report generation and PDF export will be implemented here.
+                    </div>
+                    <a href="{{ url_for('bricks_testing_workflow', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-secondary mt-3">Back to Workflow</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

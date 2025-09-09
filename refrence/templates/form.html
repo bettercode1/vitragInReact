@@ -1,0 +1,1028 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if edit_mode else 'New' }} Test Request - Vitrag Associates{% endblock %}
+
+{% block styles %}
+<style>
+    .required-field label::after {
+        content: " *";
+        color: var(--bs-danger);
+    }
+    
+    /* Larger date input fields */
+    input[type="date"] {
+        min-height: 42px;
+        font-size: 1rem;
+        padding: 0.5rem;
+    }
+    
+    /* Style for validation error messages */
+    .invalid-feedback {
+        display: block;
+        font-weight: 500;
+        color: #ff6b6b;
+    }
+    
+    /* Highlight fields with errors */
+    .is-invalid {
+        border-color: #ff6b6b !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25) !important;
+    }
+    
+    /* Confirmation message styling */
+    .alert-success {
+        background-color: rgba(25, 135, 84, 0.2);
+        border-color: #198754;
+        color: #d1e7dd;
+    }
+    
+    /* Removed tooltip styles */
+    
+    /* Style for disabled customer fields in edit mode */
+    .customer-details-readonly .form-control:disabled,
+    .customer-details-readonly .form-select:disabled {
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% macro label_with_tooltip(field_label, field_id) %}
+    <label for="{{ field_id }}" class="form-label">
+        {{ field_label }}
+    </label>
+{% endmacro %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}?v={{ range(1000, 9999) | random }}" alt="Vitrag Associates Logo" height="50" class="me-3">
+            <h3 class="mb-0">{{ 'Edit' if edit_mode else 'New' }} Test Request Form</h3>
+        </div>
+        {% if edit_mode %}
+        <a href="{{ url_for('view_sample', id=test_request_id) }}" class="btn btn-light btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to View
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="POST" id="testRequestForm" action="{{ url_for('update_sample', id=test_request_id) if edit_mode else url_for('test_request_form') }}">
+            {{ form.csrf_token }}
+            
+            <!-- Hidden fields for materials and concrete tests data -->
+            <input type="hidden" name="materials_data" id="materials_data">
+            <input type="hidden" name="concrete_data" id="concrete_data">
+            
+            <h4 class="mb-3">Customer Details</h4>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    {% if customers and not edit_mode %}
+                    <div class="mb-3">
+                        {{ label_with_tooltip('Select Existing Customer', 'customer_select') }}
+                        <select id="customer_select" name="customer_select" class="form-select">
+                            <option value="">-- Select Existing Customer --</option>
+                            <option disabled style="font-style: italic; color: #6c757d;">(New customers must be added from the Customers page)</option>
+                            <option disabled>──────────────</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.id }}" 
+                                data-name="{{ customer.name }}"
+                                data-contact="{{ customer.contact_person or '' }}"
+                                data-phone="{{ customer.phone or '' }}"
+                                data-email="{{ customer.email or '' }}"
+                                data-site="{{ customer.site_name or '' }}"
+                                {% if selected_customer_id and (selected_customer_id|string) == (customer.id|string) %}selected{% endif %}>
+                                {{ customer.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Select an existing customer from the dropdown. To add a new customer, please <a href="{{ url_for('add_customer_form') }}" class="fw-bold">go to the Customers page</a> first.
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3 required-field">
+                        {{ label_with_tooltip('Name of Customer', 'customer_name') }}
+                        {{ form.customer_name(class="form-control" + (" is-invalid" if form.customer_name.errors else ""), required=true, id="customer_name") }}
+                        {% if form.customer_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.customer_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 required-field">
+                        {{ label_with_tooltip('Contact Person', 'contact_person') }}
+                        {{ form.contact_person(class="form-control" + (" is-invalid" if form.contact_person.errors else ""), id="contact_person", required=true) }}
+                        {% if form.contact_person.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.contact_person.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 required-field">
+                        {{ label_with_tooltip('Phone/Mobile', 'phone') }}
+                        {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="10 digits only", id="phone", required=true) }}
+                        {% if form.phone.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ label_with_tooltip('E-mail', 'email') }}
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="email@example.com", id="email") }}
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+                
+                <div class="col-md-6">
+                    <!-- Job number field removed - will be generated automatically on submission -->
+                    <!-- Job number field removed - will be generated and displayed after submission -->
+                    <!-- Receipt Date field moved below Test Type field -->
+                    <div class="mb-3 required-field">
+                        {{ form.site_name.label(class="form-label") }}
+                        {{ form.site_name(class="form-control" + (" is-invalid" if form.site_name.errors else ""), rows=3, id="site_name") }}
+                        {% if form.site_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.site_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.test_type.label(class="form-label") }}
+                        {{ form.test_type(class="form-select" + (" is-invalid" if form.test_type.errors else "")) }}
+                        {% if form.test_type.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.test_type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3 required-field">
+                        {{ form.receipt_date.label(class="form-label") }}
+                        <input type="text" 
+                               name="receipt_date" 
+                               id="receipt_date_picker" 
+                               class="form-control date-picker{{ ' is-invalid' if form.receipt_date.errors else '' }}" 
+                               placeholder="DD-MM-YYYY"
+                               value="{{ form.receipt_date.data.strftime('%d-%m-%Y') if form.receipt_date.data else '' }}"
+                               required>
+                        {% if form.receipt_date.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.receipt_date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manual Input Fields for URL Number, Sample Code Number, and Job Number -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="mb-3 required-field">
+                        {{ form.ulr_number.label(class="form-label") }}
+                        {{ form.ulr_number(class="form-control" + (" is-invalid" if form.ulr_number.errors else ""), placeholder="Enter URL Number", id="ulr_number") }}
+                        {% if form.ulr_number.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.ulr_number.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3 required-field">
+                                        {{ form.sample_code_number.label(class="form-label") }}
+                {{ form.sample_code_number(class="form-control" + (" is-invalid" if form.sample_code_number.errors else ""), placeholder="Enter Reference Number", id="sample_code_number") }}
+                        {% if form.sample_code_number.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.sample_code_number.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3 required-field">
+                        {{ form.job_number.label(class="form-label") }}
+                        {{ form.job_number(class="form-control" + (" is-invalid" if form.job_number.errors else ""), placeholder="Enter Job Number", id="job_number") }}
+                        {% if form.job_number.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.job_number.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="mb-3 text-muted">Building Material List</h4>
+            <div class="row mb-4" style="opacity: 0.6; pointer-events: none;">
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        {{ form.river_sand(class="form-check-input") }}
+                        {{ form.river_sand.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.ten_mm(class="form-check-input") }}
+                        {{ form.ten_mm.label(class="form-check-label") }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        {{ form.crushed_sand(class="form-check-input") }}
+                        {{ form.crushed_sand.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.twenty_mm(class="form-check-input") }}
+                        {{ form.twenty_mm.label(class="form-check-label") }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        {{ form.m_sand(class="form-check-input") }}
+                        {{ form.m_sand.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.fly_ash(class="form-check-input") }}
+                        {{ form.fly_ash.label(class="form-check-label") }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2" style="display: none;">
+                        {{ form.p_sand(class="form-check-input") }}
+                        {{ form.p_sand.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2" style="display: none;">
+                        {{ form.ggbs(class="form-check-input") }}
+                        {{ form.ggbs.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.cement(class="form-check-input") }}
+                        {{ form.cement.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.admixture(class="form-check-input") }}
+                        {{ form.admixture.label(class="form-check-label") }}
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.curing(class="form-check-input") }}
+                        {{ form.curing.label(class="form-check-label") }}
+                    </div>
+
+                </div>
+            </div>
+            
+            <h4 class="mb-3 text-muted">Other Materials</h4>
+            <div class="table-responsive mb-4" style="opacity: 0.6; pointer-events: none;">
+                <table class="table table-bordered" id="materialsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sr No</th>
+                            <th>Material/Test Type</th>
+                            <th>Qty</th>
+                            <th>Test Requirement/NDT</th>
+                            <th>Test Method/Specification</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic rows will be added here via JavaScript -->
+                        <!-- We don't manually render rows here anymore - JavaScript now handles all table population -->
+                        <!-- This prevents duplicate rows when validation errors occur -->
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" id="addMaterialRow">
+                    <i class="fas fa-plus"></i> Add Material
+                </button>
+            </div>
+            
+            <h4 class="mb-3">Testing Requirement (Concrete Cube/Core)</h4>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered" id="concreteTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sr No</th>
+                            <th>ID Mark</th>
+                            <th>Location/Nature/Work</th>
+                            <th>Grade</th>
+                            <th>Casting Date</th>
+                            <th>Testing Date</th>
+                            <th>Age in days</th>
+                            <th>No of cubes/Cores</th>
+                            <th>Test Method/Specification</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic rows will be added here via JavaScript -->
+                        <!-- We don't manually render rows here anymore - JavaScript now handles all table population -->
+                        <!-- This prevents duplicate rows when validation errors occur -->
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" id="addConcreteRow">
+                    <i class="fas fa-plus"></i> Add Concrete Test
+                </button>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="mb-2">
+                        <label class="form-label">
+                            {{ form.method_capability_acceptable(class="form-check-input me-2") }}
+                            I agree with all testing terms and conditions
+                        </label>
+                    </div>
+                    <div class="form-text mb-3">
+                        <small>By checking this box, you agree to all of the following:</small>
+                        <ul class="small text-muted mt-1">
+                            <li>Method of testing capability and resources are acceptable</li>
+                            <li>Testing services requested may be carried out</li>
+                            <li>Terms and conditions of testing are acceptable as per review remarks</li>
+                            <li>Statement of conformity or specifications will be included on the test report</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="mb-2">
+                        <h5 class="fw-bold">LABORATORY REPRESENTATIVE</h5>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        {{ form.lab_representative_name(class="form-control" + (" is-invalid" if form.lab_representative_name.errors else "")) }}
+                        {% if form.lab_representative_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.lab_representative_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <!-- Signature pad disabled -->
+                    <div class="mb-2" style="display: none;">
+                        <label class="form-label">Signature</label>
+                        <div class="border p-3 bg-light text-muted text-center" style="min-height: 60px;">
+                            <small>Signature capture disabled</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="mb-2">
+                        <h5 class="fw-bold">CUSTOMER'S REPRESENTATIVE</h5>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        {{ form.customer_representative_name(class="form-control" + (" is-invalid" if form.customer_representative_name.errors else "")) }}
+                        {% if form.customer_representative_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.customer_representative_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <!-- Signature pad disabled -->
+                    <div class="mb-2" style="display: none;">
+                        <label class="form-label">Signature</label>
+                        <div class="border p-3 bg-light text-muted text-center" style="min-height: 60px;">
+                            <small>Signature capture disabled</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="mb-3 text-white">For Office Use Only</h4>
+            <input type="hidden" name="sample_condition" value="open">
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="mb-3 text-white">Review Remarks</h5>
+                    <div class="mb-3">
+                        <p class="fw-bold mb-2">Sample Condition: Open</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requirements_defined(class="form-check-input") }}
+                            {{ form.requirements_defined.label(class="form-check-label fw-bold") }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.capability_available(class="form-check-input") }}
+                            {{ form.capability_available.label(class="form-check-label fw-bold") }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.customer_discussion.label(class="form-label fw-bold") }}
+
+                        {{ form.customer_discussion(class="form-control", rows=3) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3 text-white">Test Details</h5>
+                    <!-- Sample Code Number removed as requested -->
+                    <div class="mb-3">
+                        {{ form.probable_completion_date.label(class="form-label fw-bold") }}
+                        <input type="text"
+                               name="probable_completion_date"
+                               id="probable_completion_date_picker"
+                               class="form-control date-picker{{ ' is-invalid' if form.probable_completion_date.errors else '' }}"
+                               placeholder="DD-MM-YYYY"
+                               value="{{ form.probable_completion_date.data.strftime('%d-%m-%Y') if form.probable_completion_date.data else '' }}">
+                        {% if form.probable_completion_date.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.probable_completion_date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.assigned_to.label(class="form-label fw-bold") }}
+                        {{ form.assigned_to(class="form-control" + (" is-invalid" if form.assigned_to.errors else "")) }}
+                        {% if form.assigned_to.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.assigned_to.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.reviewed_by.label(class="form-label fw-bold") }}
+                        {{ form.reviewed_by(class="form-control" + (" is-invalid" if form.reviewed_by.errors else "")) }}
+                        {% if form.reviewed_by.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.reviewed_by.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <h5 class="fw-bold text-white">QUALITY MANAGER (Signature)</h5>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        {{ form.quality_manager_name(class="form-control" + (" is-invalid" if form.quality_manager_name.errors else "")) }}
+                        {% if form.quality_manager_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.quality_manager_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <!-- Signature pad disabled -->
+                    <div class="mb-2" style="display: none;">
+                        <label class="form-label">Signature</label>
+                        <div class="border p-3 bg-light text-muted text-center" style="min-height: 60px;">
+                            <small>Signature capture disabled</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ 'Update' if edit_mode else 'Submit' }} Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/form.js') }}"></script>
+<script src="{{ url_for('static', filename='js/signature.js') }}"></script>
+
+<!-- Include jQuery and jQuery UI for datepicker -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+<script>
+// Initialize datepickers with DD-MM-YYYY format
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all datepickers
+    $(function() {
+        // Configure datepicker defaults for DD-MM-YYYY format
+        $.datepicker.setDefaults({
+            dateFormat: 'dd-mm-yy',
+            changeMonth: true,
+            changeYear: true,
+            yearRange: 'c-5:c+5'
+        });
+
+        // Initialize datepickers for static fields
+        $('.date-picker').datepicker();
+        
+        // Also add a handler for dynamically added date pickers
+        $(document).on('focus', '.date-picker:not(.hasDatepicker)', function() {
+            $(this).datepicker();
+        });
+    });
+    
+    // Add server-side date format conversion handling for form submission
+    const formElement = document.querySelector('form');
+    formElement.addEventListener('submit', function(e) {
+        // Convert DD-MM-YYYY dates to YYYY-MM-DD for server side processing
+        document.querySelectorAll('.date-picker').forEach(function(input) {
+            const value = input.value;
+            if (value) {
+                const parts = value.split('-');
+                if (parts.length === 3) {
+                    // Convert from DD-MM-YYYY to YYYY-MM-DD
+                    const serverFormatDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    
+                    // Create a hidden input with the server format
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = input.name + '_server_format';
+                    hiddenInput.value = serverFormatDate;
+                    formElement.appendChild(hiddenInput);
+                }
+            }
+        });
+    });
+});
+
+// Customer dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const customerSelect = document.getElementById('customer_select');
+    if (customerSelect) {
+        customerSelect.addEventListener('change', function() {
+            // Get the selected option
+            const selectedOption = this.options[this.selectedIndex];
+            
+            // Check if "Add New Customer" is selected
+            if (this.value === 'new') {
+                // Clear fields to allow user to enter new customer details
+                document.getElementById('customer_name').value = '';
+                document.getElementById('contact_person').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('site_name').value = '';
+                
+                // Set focus to the customer name field
+                document.getElementById('customer_name').focus();
+                
+                // Add visual indicator that we're in "add new" mode
+                document.getElementById('customer_name').classList.add('border-primary');
+                
+            } else if (this.value) {
+                // Populate fields with existing customer data
+                document.getElementById('customer_name').value = selectedOption.dataset.name || '';
+                document.getElementById('contact_person').value = selectedOption.dataset.contact || '';
+                document.getElementById('phone').value = selectedOption.dataset.phone || '';
+                document.getElementById('email').value = selectedOption.dataset.email || '';
+                document.getElementById('site_name').value = selectedOption.dataset.site || '';
+                
+                // Remove "new customer" visual indicator if present
+                document.getElementById('customer_name').classList.remove('border-primary');
+                
+            } else {
+                // Clear fields if "Select Customer" is chosen
+                document.getElementById('customer_name').value = '';
+                document.getElementById('contact_person').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('site_name').value = '';
+                
+                // Remove "new customer" visual indicator if present
+                document.getElementById('customer_name').classList.remove('border-primary');
+            }
+        });
+    }
+});
+</script>
+
+<!-- Initialize and populate tables if data exists -->
+<script>
+    // Function to convert date from YYYY-MM-DD to DD-MM-YYYY for display
+    function formatDateForDisplay(dateStr) {
+        if (!dateStr) return '';
+        
+        // If already in DD-MM-YYYY format, return as is
+        if (dateStr.includes('-') && dateStr.split('-')[0].length === 2) {
+            return dateStr;
+        }
+        
+        // Handle different date formats
+        let date;
+        if (typeof dateStr === 'string') {
+            // Try parsing as ISO date string
+            date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                // If parsing failed, try splitting the string
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    // Assume YYYY-MM-DD format
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;  // DD-MM-YYYY
+                }
+                return dateStr; // Return as is if not in expected format
+            }
+        } else {
+            // Handle JavaScript Date object
+            date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                return '';
+            }
+        }
+        
+        // Format date as DD-MM-YYYY
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear existing rows first to prevent duplication
+        document.querySelector('#concreteTable tbody').innerHTML = '';
+        
+        {% if preserved_concrete %}
+        // Use preserved data from validation error
+        const concreteTestsData = {{ preserved_concrete | tojson }};
+        console.log("Using preserved concrete data", concreteTestsData);
+        
+        // Debug each concrete row field to check for ID Mark and Location/Nature
+        concreteTestsData.forEach((test, index) => {
+            console.log(`Preserved concrete row ${index}:`, {
+                id_mark: test.id_mark || 'MISSING',
+                location_nature: test.location_nature || 'MISSING'
+            });
+        });
+        {% elif edit_mode and concrete_tests %}
+        // Use data from database
+        const concreteTestsData = {{ concrete_tests | tojson }};
+        console.log("Using database concrete data", concreteTestsData);
+        
+        // Debug each concrete row field to check for ID Mark and Location/Nature
+        concreteTestsData.forEach((test, index) => {
+            console.log(`Database concrete row ${index}:`, {
+                id_mark: test.id_mark || 'MISSING',
+                location_nature: test.location_nature || 'MISSING'
+            });
+        });
+        {% else %}
+        // Default empty row
+        const concreteTestsData = [{
+            sr_no: 1,
+            id_mark: "",
+            location_nature: "",
+            grade: "",
+            casting_date: "",
+            testing_date: "",
+            age_in_days: 1,
+            num_of_cubes: 1,
+            test_method: "IS 516 (Part1/Sec1):2021",
+            ulr_number: ""
+        }];
+        console.log("Using default concrete data", concreteTestsData);
+        {% endif %}
+        
+        // Initialize the table with existing data
+        for (const test of concreteTestsData) {
+            // Create an empty row by calling the function in form.js
+            window.addConcreteRow();
+            
+            // Get the last row added
+            const tbody = document.querySelector('#concreteTable tbody');
+            const row = tbody.lastElementChild;
+            
+            // Populate the fields
+            row.querySelector('.sr_no').value = test.sr_no || '';
+            
+            // Special handling for ID Mark field to ensure it's preserved
+            const idMarkField = row.querySelector('.id_mark');
+            idMarkField.value = test.id_mark || '';
+            console.log("Setting ID Mark field to:", test.id_mark || 'empty');
+            
+            // Special handling for Location/Nature field to ensure it's preserved
+            const locationField = row.querySelector('.location_nature');
+            locationField.value = test.location_nature || '';
+            console.log("Setting Location/Nature field to:", test.location_nature || 'empty');
+            
+            // Add change event listeners to ID Mark and Location fields
+            idMarkField.addEventListener('input', function() {
+                console.log("ID Mark changed to:", this.value);
+                // Update hidden field immediately when ID Mark is changed
+                if (document.getElementById('concrete_data')) {
+                    document.getElementById('concrete_data').value = JSON.stringify(window.collectConcreteData());
+                }
+            });
+            
+            locationField.addEventListener('input', function() {
+                console.log("Location/Nature changed to:", this.value);
+                // Update hidden field immediately when Location/Nature is changed
+                if (document.getElementById('concrete_data')) {
+                    document.getElementById('concrete_data').value = JSON.stringify(window.collectConcreteData());
+                }
+            });
+            
+            // Handle grade dropdown selection
+            const gradeSelect = row.querySelector('.grade');
+            
+            if (test.grade && test.grade.startsWith('M-')) {
+                gradeSelect.value = test.grade;
+            } else if (test.grade) {
+                // For grades that don't match our standard values, just leave dropdown blank
+                gradeSelect.value = '';
+            }
+            
+            // Format dates for display (DD-MM-YYYY)
+            // First check if we have the display format saved (for validation error recovery)
+            let castingDate = '';
+            if (test.casting_date_display) {
+                // Use the display format if available (from validation errors)
+                castingDate = test.casting_date_display;
+            } else if (test.casting_date) {
+                // Otherwise convert from server format if needed
+                castingDate = typeof test.casting_date === 'string' ? 
+                    (test.casting_date.includes('-') && test.casting_date.split('-')[0].length === 4 ? 
+                        formatDateForDisplay(test.casting_date) : test.casting_date) : 
+                    formatDateForDisplay(test.casting_date);
+            }
+
+            let testingDate = '';
+            if (test.testing_date_display) {
+                // Use the display format if available (from validation errors)
+                testingDate = test.testing_date_display;
+            } else if (test.testing_date) {
+                // Otherwise convert from server format if needed
+                testingDate = typeof test.testing_date === 'string' ? 
+                    (test.testing_date.includes('-') && test.testing_date.split('-')[0].length === 4 ? 
+                        formatDateForDisplay(test.testing_date) : test.testing_date) : 
+                    formatDateForDisplay(test.testing_date);
+            }
+            
+            console.log("Setting dates for row:", test.sr_no, "casting:", castingDate, "testing:", testingDate);
+            row.querySelector('.casting_date').value = castingDate;
+            row.querySelector('.testing_date').value = testingDate;
+            row.querySelector('.age_in_days').value = test.age_in_days || 1;
+            row.querySelector('.num_of_cubes').value = test.num_of_cubes || 1;
+            row.querySelector('.test_method').value = test.test_method || 'IS 516 : 2014';
+            
+            // Initialize datepickers on the populated fields
+            $(row.querySelector('.casting_date')).datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                yearRange: 'c-5:c+5'
+            });
+            
+            // Setup the testing date datepicker (enabled only if casting date is set)
+            if (castingDate) {
+                $(row.querySelector('.testing_date')).datepicker({
+                    dateFormat: 'dd-mm-yy',
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: 'c-5:c+5',
+                    minDate: castingDate
+                });
+                row.querySelector('.testing_date').disabled = false;
+            } else {
+                row.querySelector('.testing_date').disabled = true;
+            }
+            
+            // Setup date change listeners
+            setupDateChangeListeners(row);
+        }
+    });
+</script>
+
+<!-- Initialize and populate materials table -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear existing rows first to prevent duplication
+        document.querySelector('#materialsTable tbody').innerHTML = '';
+        
+        {% if preserved_materials %}
+        // Use preserved data from validation error
+        const materialsData = {{ preserved_materials | tojson }};
+        console.log("Using preserved materials data", materialsData);
+        {% elif edit_mode and materials %}
+        // Use data from database
+        const materialsData = {{ materials | tojson }};
+        console.log("Using database materials data", materialsData);
+        {% else %}
+        // Default empty row
+        const materialsData = [{
+            sr_no: 1,
+            material_name: "",
+            quantity: "",
+            test_requirement: "",
+            test_method: "IS 516 (Part 5/Sec 4) :2020",
+            ulr_number: ""
+        }];
+        console.log("Using default materials data", materialsData);
+        {% endif %}
+        
+        // Initialize the table with existing data
+        for (const material of materialsData) {
+            // Create an empty row by calling the function in form.js
+            window.addMaterialRow();
+            
+            // Get the last row added
+            const tbody = document.querySelector('#materialsTable tbody');
+            const row = tbody.lastElementChild;
+            
+            // Populate the fields
+            row.querySelector('.sr_no').value = material.sr_no || '';
+            row.querySelector('.material_name').value = material.material_name || '';
+            row.querySelector('.quantity').value = material.quantity || '';
+            row.querySelector('.test_requirement').value = material.test_requirement || '';
+            row.querySelector('.test_method').value = material.test_method || '';
+        }
+    });
+</script>
+
+<!-- Enhanced Client-side Validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Phone number validation with real-time formatting
+    function validatePhone(input) {
+        const phonePattern = /^[6-9]\d{9}$/;
+        const value = input.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Update field with cleaned value
+        input.value = value;
+        
+        // Validate
+        if (value && !phonePattern.test(value)) {
+            input.setCustomValidity('Phone number must be 10 digits starting with 6, 7, 8, or 9');
+            input.classList.add('is-invalid');
+        } else {
+            input.setCustomValidity('');
+            input.classList.remove('is-invalid');
+        }
+    }
+    
+    // Email validation
+    function validateEmail(input) {
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const value = input.value.trim().toLowerCase();
+        
+        // Update field with cleaned value
+        input.value = value;
+        
+        if (value && !emailPattern.test(value)) {
+            input.setCustomValidity('Please enter a valid email address');
+            input.classList.add('is-invalid');
+        } else {
+            input.setCustomValidity('');
+            input.classList.remove('is-invalid');
+        }
+    }
+    
+    // Name field validation and formatting
+    function validateName(input) {
+        const namePattern = /^[A-Za-z\s\.\-\']+$/;
+        let value = input.value;
+        
+        if (value && !namePattern.test(value)) {
+            input.setCustomValidity('Name must contain only letters, spaces, periods, hyphens, and apostrophes');
+            input.classList.add('is-invalid');
+        } else {
+            // Auto-capitalize names
+            value = value.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+            input.value = value;
+            input.setCustomValidity('');
+            input.classList.remove('is-invalid');
+        }
+    }
+    
+    // Text field validation for safety
+    function validateTextSafety(input) {
+        const dangerousPatterns = /<script|javascript:|onclick=|onerror=|drop\s+table|delete\s+from|insert\s+into/i;
+        
+        if (dangerousPatterns.test(input.value)) {
+            input.setCustomValidity('Invalid characters detected in input');
+            input.classList.add('is-invalid');
+        } else {
+            input.setCustomValidity('');
+            input.classList.remove('is-invalid');
+        }
+    }
+    
+    // Number field validation
+    function validatePositiveNumber(input) {
+        const value = parseFloat(input.value);
+        
+        if (input.value && (isNaN(value) || value < 0)) {
+            input.setCustomValidity('Please enter a valid positive number');
+            input.classList.add('is-invalid');
+        } else {
+            input.setCustomValidity('');
+            input.classList.remove('is-invalid');
+        }
+    }
+    
+    // Apply validation to phone fields
+    document.querySelectorAll('input[name="phone"], input[id*="phone"]').forEach(input => {
+        input.addEventListener('input', () => validatePhone(input));
+        input.addEventListener('blur', () => validatePhone(input));
+    });
+    
+    // Apply validation to email fields
+    document.querySelectorAll('input[type="email"], input[name="email"]').forEach(input => {
+        input.addEventListener('input', () => validateEmail(input));
+        input.addEventListener('blur', () => validateEmail(input));
+    });
+    
+    // Apply validation to name fields
+    document.querySelectorAll('input[name*="name"], input[id*="name"]').forEach(input => {
+        if (!input.type === 'email' && !input.name.includes('site')) {
+            input.addEventListener('input', () => validateName(input));
+            input.addEventListener('blur', () => validateName(input));
+        }
+    });
+    
+    // Apply safety validation to text areas and text inputs
+    document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+        input.addEventListener('input', () => validateTextSafety(input));
+    });
+    
+    // Apply validation to number fields
+    document.querySelectorAll('input[type="number"], .sr_no, .age_in_days, .num_of_cubes').forEach(input => {
+        input.addEventListener('input', () => validatePositiveNumber(input));
+    });
+    
+    // Form submission validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const invalidFields = this.querySelectorAll('.is-invalid');
+        
+        if (invalidFields.length > 0) {
+            e.preventDefault();
+            
+            // Focus on first invalid field
+            invalidFields[0].focus();
+            
+            // Show error message
+            const errorAlert = document.createElement('div');
+            errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+            errorAlert.innerHTML = `
+                <strong>Please fix the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                    ${Array.from(invalidFields).map(field => 
+                        `<li>${field.labels[0]?.textContent || 'Field'}: ${field.validationMessage}</li>`
+                    ).join('')}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert error at top of form
+            this.insertBefore(errorAlert, this.firstChild);
+            
+            // Scroll to top
+            this.scrollIntoView({ behavior: 'smooth' });
+            
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

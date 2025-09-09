@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Fly Ash/GGBS Test Report (Preview)</h2>
+    <div class="alert alert-info">PDF generation for Fly Ash/GGBS reports is coming soon.</div>
+    <div class="mb-3">
+        <strong>Customer:</strong> {{ customer_name }}<br>
+        <strong>Inward Date:</strong> {{ inward_date }}
+    </div>
+    <a href="{{ url_for('flyash_testing_workflow', customer_name=customer_name, inward_date=inward_date) }}" class="btn btn-secondary">Back to Workflow</a>
+    <a href="{{ url_for('other_services') }}" class="btn btn-outline-primary ms-2">Other Services</a>
+</div>
+{% endblock %} 

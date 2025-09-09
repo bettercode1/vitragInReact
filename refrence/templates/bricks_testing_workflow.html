@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Bricks Testing Workflow - Demo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-brick me-2"></i>Bricks Testing Workflow</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Customer:</strong> {{ customer_name }}<br>
+                        <strong>Material Inward Date:</strong> {{ inward_date }}<br>
+                        <strong>Brick Type:</strong> {{ brick_type }}
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-primary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-balance-scale fa-2x text-primary mb-2"></i>
+                                    <h6>Compressive Strength</h6>
+                                    <p class="small text-muted">Test the compressive strength of the bricks.</p>
+                                    <a href="{{ url_for('bricks_compressive_strength', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-outline-primary btn-sm w-100">Enter Data</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-success">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tint fa-2x text-success mb-2"></i>
+                                    <h6>Water Absorption</h6>
+                                    <p class="small text-muted">Measure water absorption of the bricks.</p>
+                                    <a href="{{ url_for('bricks_water_absorption', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-outline-success btn-sm w-100">Enter Data</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-warning">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-ruler fa-2x text-warning mb-2"></i>
+                                    <h6>Dimensions</h6>
+                                    <p class="small text-muted">Check the dimensions of the bricks.</p>
+                                    <a href="{{ url_for('bricks_dimensions', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-outline-warning btn-sm w-100">Enter Data</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-dark">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clipboard-list fa-2x text-dark mb-2"></i>
+                                    <h6>Observation Sheet</h6>
+                                    <p class="small text-muted">Fill in the observation sheet for the test.</p>
+                                    <a href="{{ url_for('bricks_observation_sheet', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-outline-dark btn-sm w-100">Enter Data</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('bricks_generate_report', customer_name=customer_name, inward_date=inward_date, brick_type=brick_type) }}" class="btn btn-danger btn-lg">
+                            <i class="fas fa-file-alt me-2"></i>Generate Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
