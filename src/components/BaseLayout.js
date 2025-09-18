@@ -8,7 +8,7 @@ const BaseLayout = ({ children }) => {
   return (
     <>
       {/* Navigation - Exact match to Flask template */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <nav className="navbar navbar-expand-lg navbar-dark" style={{ backgroundColor: '#1C2333' }}>
         <div className="container">
           <Link className="navbar-brand d-flex align-items-center" to="/">
             <img 
@@ -89,6 +89,15 @@ const BaseLayout = ({ children }) => {
                   <span className="d-lg-inline">Customers</span>
                 </Link>
               </li>
+              {/* <li className="nav-item">
+                <Link 
+                  className={`nav-link ${location.pathname === '/cube-testing-services' ? 'active' : ''}`} 
+                  to="/cube-testing-services"
+                >
+                  <i className="fas fa-cube me-2"></i>
+                  <span className="d-lg-inline">Cube Testing</span>
+                </Link>
+              </li> */}
               <li className="nav-item">
                 <Link 
                   className={`nav-link ${location.pathname === '/other-services' ? 'active' : ''}`} 
@@ -109,7 +118,7 @@ const BaseLayout = ({ children }) => {
       </div>
 
       {/* Footer - Exact match to Flask template */}
-      <footer className="footer mt-5 py-3 bg-dark">
+      <footer className="footer mt-5 py-3" style={{ backgroundColor: '#1C2333' }}>
         <div className="container">
           <div className="row">
             <div className="col-md-6">
