@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Cement Testing - 1{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                                                         <h1 class="h3 mb-0"><i class="fas fa-industry me-2"></i>Cement Testing - 1</h1>
+                            <p class="mb-0">Determination of Specific Gravity of Cement</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-warning me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Other Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate>
+        <!-- Form Navigation Buttons -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ url_for('cement_testing_form_1') }}" class="btn btn-primary active btn-lg me-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                1
+                            </a>
+                            <a href="{{ url_for('cement_testing_form_2') }}" class="btn btn-outline-primary btn-lg mx-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                2
+                            </a>
+                            <a href="{{ url_for('cement_testing_form_3') }}" class="btn btn-outline-primary btn-lg mx-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                3
+                            </a>
+                            <a href="{{ url_for('cement_testing_form_4') }}" class="btn btn-outline-primary btn-lg mx-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                4
+                            </a>
+                            <a href="{{ url_for('cement_testing_form_5') }}" class="btn btn-outline-primary btn-lg ms-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                5
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- General Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                    </div>
+                                         <div class="card-body">
+                         <div class="row">
+                             <div class="col-md-6">
+                                 <div class="mb-3">
+                                     <label for="customer_id" class="form-label">Customer Name *</label>
+                                     <select class="form-select" id="customer_id" name="customer_id" required>
+                                         <option value="">-- Select Customer --</option>
+                                         {% for customer in customers %}
+                                         <option value="{{ customer.id }}">{{ customer.name }}</option>
+                                         {% endfor %}
+                                     </select>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="sample_description" class="form-label">Sample Description *</label>
+                                     <textarea class="form-control" id="sample_description" name="sample_description" rows="3" placeholder="Describe the cement sample..." required></textarea>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="date_of_receipt" class="form-label">Date of Receipt *</label>
+                                     <input type="date" class="form-control" id="date_of_receipt" name="date_of_receipt" required>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="cement_type" class="form-label">Type of Cement *</label>
+                                     <select class="form-select" id="cement_type" name="cement_type" required>
+                                         <option value="">-- Select Cement Type --</option>
+                                         <option value="Ordinary Portland Cement (OPC)">Ordinary Portland Cement (OPC)</option>
+                                         <option value="Portland Pozzolana Cement (PPC)">Portland Pozzolana Cement (PPC)</option>
+                                         <option value="Portland Blast Furnace Cement (PBFC)">Portland Blast Furnace Cement (PBFC)</option>
+                                         <option value="Rapid Hardening Cement">Rapid Hardening Cement</option>
+                                         <option value="Quick Setting Cement">Quick Setting Cement</option>
+                                         <option value="Low Heat Cement">Low Heat Cement</option>
+                                         <option value="Sulfate Resisting Cement">Sulfate Resisting Cement</option>
+                                         <option value="White Cement">White Cement</option>
+                                         <option value="Colored Cement">Colored Cement</option>
+                                         <option value="Other">Other</option>
+                                     </select>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="test_method" class="form-label">Test Method *</label>
+                                     <select class="form-select" id="test_method" name="test_method" required>
+                                         <option value="">-- Select Test Method --</option>
+                                         <option value="IS 4031 (Part 1) - 1996">IS 4031 (Part 1) - 1996</option>
+                                         <option value="IS 4031 (Part 2) - 1999">IS 4031 (Part 2) - 1999</option>
+                                         <option value="IS 4031 (Part 3) - 1988">IS 4031 (Part 3) - 1988</option>
+                                         <option value="IS 4031 (Part 4) - 1988">IS 4031 (Part 4) - 1988</option>
+                                         <option value="IS 4031 (Part 5) - 1988">IS 4031 (Part 5) - 1988</option>
+                                         <option value="IS 4031 (Part 6) - 1988">IS 4031 (Part 6) - 1988</option>
+                                         <option value="IS 4031 (Part 7) - 1988">IS 4031 (Part 7) - 1988</option>
+                                         <option value="IS 4031 (Part 8) - 1988">IS 4031 (Part 8) - 1988</option>
+                                         <option value="IS 4031 (Part 9) - 1988">IS 4031 (Part 9) - 1988</option>
+                                         <option value="IS 4031 (Part 10) - 1988">IS 4031 (Part 10) - 1988</option>
+                                         <option value="IS 4031 (Part 11) - 1988">IS 4031 (Part 11) - 1988</option>
+                                         <option value="IS 4031 (Part 12) - 1988">IS 4031 (Part 12) - 1988</option>
+                                         <option value="IS 4031 (Part 13) - 1988">IS 4031 (Part 13) - 1988</option>
+                                         <option value="IS 4031 (Part 14) - 1988">IS 4031 (Part 14) - 1988</option>
+                                         <option value="IS 4031 (Part 15) - 1988">IS 4031 (Part 15) - 1988</option>
+                                         <option value="IS 4031 (Part 16) - 1988">IS 4031 (Part 16) - 1988</option>
+                                         <option value="ASTM C150">ASTM C150</option>
+                                         <option value="ASTM C595">ASTM C595</option>
+                                         <option value="BS EN 197-1">BS EN 197-1</option>
+                                         <option value="Other">Other</option>
+                                     </select>
+                                 </div>
+                             </div>
+                             <div class="col-md-6">
+                                 <div class="mb-3">
+                                     <label for="sample_test_code" class="form-label">Sample Test Code Number *</label>
+                                     <input type="text" class="form-control" id="sample_test_code" name="sample_test_code" placeholder="e.g., SCN-2024001" required>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="date_of_testing" class="form-label">Date of Testing *</label>
+                                     <input type="date" class="form-control" id="date_of_testing" name="date_of_testing" required>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="cement_grade" class="form-label">Grade of Cement *</label>
+                                     <select class="form-select" id="cement_grade" name="cement_grade" required>
+                                         <option value="">-- Select Grade --</option>
+                                         <option value="33 Grade">33 Grade</option>
+                                         <option value="43 Grade">43 Grade</option>
+                                         <option value="53 Grade">53 Grade</option>
+                                         <option value="Other">Other</option>
+                                     </select>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="environmental_conditions" class="form-label">Environmental Conditions</label>
+                                     <input type="text" class="form-control" id="environmental_conditions" name="environmental_conditions" placeholder="e.g., Laboratory Conditions, Temperature: 27±2°C, RH: 65±5%">
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+                 <!-- Test Report Details -->
+         <div class="row mb-4">
+             <div class="col-12">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Test Report Details</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="row">
+                             <div class="col-md-6">
+                                 <div class="mb-3">
+                                     <label for="customer_site_address" class="form-label">Customer/Site Name & Address</label>
+                                     <textarea class="form-control" id="customer_site_address" name="customer_site_address" rows="3" placeholder="Enter customer/site name and address"></textarea>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="date_of_report" class="form-label">Date of Report</label>
+                                     <input type="date" class="form-control" id="date_of_report" name="date_of_report">
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="reference_number" class="form-label">Reference Number</label>
+                                     <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="Enter reference number">
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="date_of_material_receipt" class="form-label">Date of Material Receipt</label>
+                                     <input type="date" class="form-control" id="date_of_material_receipt" name="date_of_material_receipt">
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="type_grade_cement" class="form-label">Type and Grade of Cement</label>
+                                     <input type="text" class="form-control" id="type_grade_cement" name="type_grade_cement" placeholder="e.g., OPC 43 Grade, PPC 53 Grade">
+                                 </div>
+                             </div>
+                             <div class="col-md-6">
+                                 <div class="mb-3">
+                                     <label for="url_number" class="form-label">ULR Number *</label>
+                                     <input type="text" class="form-control" id="url_number" name="url_number" placeholder="Enter ULR number" required>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="job_code_number" class="form-label">Job Code Number *</label>
+                                     <input type="text" class="form-control" id="job_code_number" name="job_code_number" placeholder="Enter job code number" required>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="period_of_testing" class="form-label">Period of Testing</label>
+                                     <input type="text" class="form-control" id="period_of_testing" name="period_of_testing" placeholder="e.g., 24 hours, 7 days, 28 days">
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="condition_of_sample" class="form-label">Condition of Sample</label>
+                                     <select class="form-select" id="condition_of_sample" name="condition_of_sample">
+                                         <option value="">-- Select Condition --</option>
+                                         <option value="As Received">As Received</option>
+                                         <option value="Sealed">Sealed</option>
+                                         <option value="Exposed">Exposed</option>
+                                         <option value="Processed">Processed</option>
+                                         <option value="Other">Other</option>
+                                     </select>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="location_of_testing" class="form-label">Location of Testing</label>
+                                     <input type="text" class="form-control" id="location_of_testing" name="location_of_testing" placeholder="e.g., Laboratory, Site, etc.">
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Test Results Table -->
+         <div class="row mb-4">
+             <div class="col-12">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-table me-2"></i>Test Results</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="table-responsive">
+                             <table class="table table-bordered table-sm" style="font-size: 0.875rem; table-layout: fixed;">
+                                 <thead class="table-dark">
+                                     <tr>
+                                         <th style="width: 350px; text-align: center; font-size: 1.2rem !important; font-weight: bold !important;">Number of Tests</th>
+                                         <th style="width: 120px; text-align: center; font-size: 1.2rem !important; font-weight: bold !important;">01</th>
+                                         <th style="width: 120px; text-align: center; font-size: 1.2rem !important; font-weight: bold !important;">02</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody>
+                                     <tr>
+                                         <td style="vertical-align: middle; padding: 8px; text-align: left !important; padding-left: 8px !important;">Liquid taken for determination of specific gravity</td>
+                                         <td><input type="number" class="form-control form-control-sm" name="liquid_taken_01" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                         <td><input type="number" class="form-control form-control-sm" name="liquid_taken_02" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                     </tr>
+                                     <tr>
+                                         <td style="vertical-align: middle; padding: 8px; text-align: left !important; padding-left: 8px !important;">Specific Gravity of the liquid</td>
+                                         <td><input type="number" class="form-control form-control-sm" name="specific_gravity_liquid_01" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                         <td><input type="number" class="form-control form-control-sm" name="specific_gravity_liquid_02" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                     </tr>
+                                     <tr>
+                                         <td style="vertical-align: middle; padding: 8px; text-align: left !important; padding-left: 8px !important;">Weight of cement taken for determination of specific gravity</td>
+                                         <td><input type="number" class="form-control form-control-sm" name="weight_cement_01" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                         <td><input type="number" class="form-control form-control-sm" name="weight_cement_02" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                     </tr>
+                                     <tr>
+                                         <td style="vertical-align: middle; padding: 8px; text-align: left !important; padding-left: 8px !important;">Initial Reading on the flask</td>
+                                         <td><input type="number" class="form-control form-control-sm" name="initial_reading_01" step="0.1" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                         <td><input type="number" class="form-control form-control-sm" name="initial_reading_02" step="0.1" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                     </tr>
+                                     <tr>
+                                         <td style="vertical-align: middle; padding: 8px; text-align: left !important; padding-left: 8px !important;">Final Reading on the flask after cement is added</td>
+                                         <td><input type="number" class="form-control form-control-sm" name="final_reading_01" step="0.1" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                         <td><input type="number" class="form-control form-control-sm" name="final_reading_02" step="0.1" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" oninput="calculateAverages()"></td>
+                                     </tr>
+                                     <!-- Average Row -->
+                                     <tr class="table-secondary">
+                                         <td class="text-end fw-bold" style="font-size: 1.2rem;">Average</td>
+                                         <td colspan="2" class="text-center fw-bold">
+                                             <input type="number" class="form-control form-control-sm" id="avg_combined" name="avg_combined" step="0.001" placeholder="" style="font-size: 0.8rem; padding: 0.25rem;" readonly>
+                                         </td>
+                                     </tr>
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+
+
+        <!-- Verification Section -->
+         <div class="row mb-4">
+             <div class="col-12">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Verification</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="row">
+                                                           <div class="col-md-4">
+                                  <h6 class="text-white mb-3">Tested By:</h6>
+                                  <div class="mb-3">
+                                      <label for="tested_by_name" class="form-label">Name *</label>
+                                      <input type="text" class="form-control" id="tested_by_name" name="tested_by_name" required>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label for="tested_by_date" class="form-label">Date *</label>
+                                      <input type="date" class="form-control" id="tested_by_date" name="tested_by_date" required>
+                                  </div>
+                              </div>
+                              <div class="col-md-4">
+                                  <h6 class="text-white mb-3">Checked By:</h6>
+                                  <div class="mb-3">
+                                      <label for="checked_by_name" class="form-label">Name *</label>
+                                      <input type="text" class="form-control" id="checked_by_name" name="checked_by_name" required>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label for="checked_by_date" class="form-label">Date *</label>
+                                      <input type="date" class="form-control" id="checked_by_date" name="checked_by_date" required>
+                                  </div>
+                              </div>
+                              <div class="col-md-4">
+                                  <h6 class="text-white mb-3">Verified By:</h6>
+                                  <div class="mb-3">
+                                      <label for="verified_by_name" class="form-label">Name</label>
+                                      <input type="text" class="form-control" id="verified_by_name" name="verified_by_name" value="Prakarsh A Sangave" readonly>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label for="verified_by_date" class="form-label">Date *</label>
+                                      <input type="date" class="form-control" id="verified_by_date" name="verified_by_date" required>
+                                  </div>
+                              </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Remarks Section -->
+         <div class="row mb-4">
+             <div class="col-12">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Remarks</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="mb-3">
+                             <label for="remarks" class="form-label">Additional Remarks</label>
+                             <textarea class="form-control" id="remarks" name="remarks" rows="4" placeholder="Enter any additional remarks or observations..."></textarea>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Reviewed By and Authorized By Section -->
+         <div class="row mb-4">
+             <div class="col-md-6">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Reviewed By</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="mb-3">
+                             <label for="reviewed_by" class="form-label">Select Reviewer:</label>
+                             <select class="form-select" id="reviewed_by" name="reviewed_by">
+                                 <option value="Lalita S. Dussa - Quality Manager" selected>Lalita S. Dussa - Quality Manager</option>
+                                 <option value="Other Reviewer">Other Reviewer</option>
+                             </select>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <div class="col-md-6">
+                 <div class="card">
+                     <div class="card-header">
+                         <h5 class="mb-0"><i class="fas fa-user-lock me-2"></i>Authorized By</h5>
+                     </div>
+                     <div class="card-body">
+                         <div class="mb-3">
+                             <label for="authorized_by" class="form-label">Authorized By:</label>
+                             <input type="text" class="form-control" id="authorized_by" name="authorized_by" value="Prakarsh Sangave" readonly>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+                 <!-- Action Buttons -->
+         <div class="row">
+             <div class="col-12 text-center">
+                 <a href="{{ url_for('other_services') }}" class="btn btn-dark btn-lg me-3">
+                     <i class="fas fa-times me-2"></i>Cancel
+                 </a>
+                                   <button type="submit" class="btn btn-primary btn-lg">
+                      <i class="fas fa-save me-2"></i>Save and Next
+                  </button>
+             </div>
+         </div>
+    </form>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.form-check-input:checked {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.form-check-input:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+</style>
+
+<script>
+        // Set current date for verification section
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Set current date for all verification date fields
+            const dateFields = [
+                'tested_by_date',
+                'checked_by_date', 
+                'verified_by_date'
+            ];
+            
+            dateFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !field.value) {
+                    field.value = today;
+                }
+            });
+        });
+
+        // Calculate averages function
+        function calculateAverages() {
+            // Calculate combined average of all test values
+            var liquidTaken01 = parseFloat(document.querySelector('input[name="liquid_taken_01"]').value) || 0;
+            var specificGravityLiquid01 = parseFloat(document.querySelector('input[name="specific_gravity_liquid_01"]').value) || 0;
+            var weightCement01 = parseFloat(document.querySelector('input[name="weight_cement_01"]').value) || 0;
+            var initialReading01 = parseFloat(document.querySelector('input[name="initial_reading_01"]').value) || 0;
+            var finalReading01 = parseFloat(document.querySelector('input[name="final_reading_01"]').value) || 0;
+            
+            var liquidTaken02 = parseFloat(document.querySelector('input[name="liquid_taken_02"]').value) || 0;
+            var specificGravityLiquid02 = parseFloat(document.querySelector('input[name="specific_gravity_liquid_02"]').value) || 0;
+            var weightCement02 = parseFloat(document.querySelector('input[name="weight_cement_02"]').value) || 0;
+            var initialReading02 = parseFloat(document.querySelector('input[name="initial_reading_02"]').value) || 0;
+            var finalReading02 = parseFloat(document.querySelector('input[name="final_reading_02"]').value) || 0;
+            
+            // Calculate combined average of all 10 values
+            var totalSum = liquidTaken01 + specificGravityLiquid01 + weightCement01 + initialReading01 + finalReading01 +
+                          liquidTaken02 + specificGravityLiquid02 + weightCement02 + initialReading02 + finalReading02;
+            var avgCombined = totalSum / 10;
+            document.querySelector('input[name="avg_combined"]').value = avgCombined.toFixed(3);
+        }
+
+
+
+        // Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

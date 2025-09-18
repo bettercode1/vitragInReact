@@ -1,34 +1,56 @@
-import React from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import SignOutConfirmation from './SignOutConfirmation';
 
 const BaseLayout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+
+  const handleSignOutClick = () => {
+    setShowSignOutModal(true);
+  };
+
+  const handleSignOutConfirm = () => {
+    setShowSignOutModal(false);
+    // Navigate to sign in page and replace current history entry
+    // This prevents the back button from returning to the previous page
+    navigate('/signin', { replace: true });
+  };
+
+  const handleSignOutCancel = () => {
+    setShowSignOutModal(false);
+  };
 
   return (
     <>
       {/* Navigation - Exact match to Flask template */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div className="container">
+        <div className="container-fluid px-3">
           <Link className="navbar-brand d-flex align-items-center" to="/">
             <img 
               src="/logo.png" 
               alt="Vitrag Associates Logo" 
-              height="40" 
-              className="me-2 d-none d-sm-block"
+              height="45" 
+              className="me-3 d-none d-sm-block"
             />
             <img 
               src="/logo.png" 
               alt="Vitrag Associates Logo" 
-              height="32" 
+              height="35" 
               className="me-2 d-sm-none"
             />
-            <span style={{ color: '#FFD700' }} className="d-none d-md-inline">
-              Vitrag Associates LLP
-            </span>
-            <span style={{ color: '#FFD700' }} className="d-md-none">
-              Vitrag
-            </span>
+            <div className="d-flex flex-column">
+              <span style={{ color: '#FFD700', fontSize: '1.1rem', fontWeight: '600', lineHeight: '1.2' }} className="d-none d-md-inline">
+                Vitrag Associates LLP
+              </span>
+              <span style={{ color: '#FFD700', fontSize: '1.1rem', fontWeight: '600' }} className="d-md-none">
+                Vitrag
+              </span>
+            </div>
           </Link>
           
           <button 
@@ -41,64 +63,94 @@ const BaseLayout = ({ children }) => {
           </button>
           
           <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
+            <ul className="navbar-nav mx-auto">
+              <li className="nav-item mx-1">
                 <Link 
-                  className={`nav-link ${location.pathname === '/' ? 'active' : ''}`} 
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/' ? 'active' : ''}`} 
                   to="/"
                 >
-                  <i className="fas fa-home me-2"></i>
-                  <span className="d-lg-inline">Home</span>
+                  <i className="fas fa-home mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Home</span>
                 </Link>
               </li>
-              <li className="nav-item">
+              <li className="nav-item mx-1">
                 <Link 
-                  className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`} 
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/dashboard' ? 'active' : ''}`} 
                   to="/dashboard"
                 >
-                  <i className="fas fa-tachometer-alt me-2"></i>
-                  <span className="d-lg-inline">Dashboard</span>
+                  <i className="fas fa-tachometer-alt mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Dashboard</span>
                 </Link>
               </li>
-              <li className="nav-item">
+              <li className="nav-item mx-1">
                 <Link 
-                  className={`nav-link ${location.pathname === '/test-request' ? 'active' : ''}`} 
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/test-request' ? 'active' : ''}`} 
                   to="/test-request"
                 >
-                  <i className="fas fa-file-alt me-2"></i>
-                  <span className="d-lg-inline d-none d-md-inline">New Cube Test</span>
-                  <span className="d-md-none">Test</span>
+                  <i className="fas fa-file-alt mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline d-none d-md-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>New Cube Test</span>
+                  <span className="d-md-none" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Test</span>
                 </Link>
               </li>
-              <li className="nav-item">
+              <li className="nav-item mx-1">
                 <Link 
-                  className={`nav-link ${location.pathname === '/samples' ? 'active' : ''}`} 
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/samples' ? 'active' : ''}`} 
                   to="/samples"
                 >
-                  <i className="fas fa-list me-2"></i>
-                  <span className="d-lg-inline d-none d-md-inline">Sample Cube Test Register</span>
-                  <span className="d-md-none">List</span>
+                  <i className="fas fa-list mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline d-none d-md-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Sample Cube Test Register</span>
+                  <span className="d-md-none" style={{ fontSize: '0.9rem', fontWeight: '500' }}>List</span>
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link 
-                  className={`nav-link ${location.pathname === '/customers' ? 'active' : ''}`} 
+              <li className="nav-item mx-1">
+                <Link
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/customers' ? 'active' : ''}`} 
                   to="/customers"
                 >
-                  <i className="fas fa-users me-2"></i>
-                  <span className="d-lg-inline">Customers</span>
+                  <i className="fas fa-users mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Customers</span>
                 </Link>
               </li>
-              <li className="nav-item">
+              <li className="nav-item mx-1">
                 <Link 
-                  className={`nav-link ${location.pathname === '/other-services' ? 'active' : ''}`} 
+                  className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/other-services' ? 'active' : ''}`} 
                   to="/other-services"
                 >
-                  <i className="fas fa-tools me-2"></i>
-                  <span className="d-lg-inline">Calibration</span>
+                  <i className="fas fa-tools mb-1" style={{ fontSize: '1.2rem' }}></i>
+                  <span className="d-lg-inline" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Calibration</span>
                 </Link>
               </li>
             </ul>
+            
+            {/* Sign Out Button */}
+            <div className="d-flex align-items-center ms-3">
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={handleSignOutClick}
+                className="d-flex align-items-center px-3 py-2"
+                style={{ 
+                  borderColor: '#dc3545',
+                  color: '#dc3545',
+                  backgroundColor: 'transparent',
+                  fontWeight: '500',
+                  fontSize: '0.9rem',
+                  borderRadius: '6px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#dc3545';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#dc3545';
+                }}
+              >
+                <FontAwesomeIcon icon={faSignOutAlt} className="me-2" style={{ fontSize: '0.9rem' }} />
+                <span className="d-none d-lg-inline">Sign Out</span>
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
@@ -125,6 +177,13 @@ const BaseLayout = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Sign Out Confirmation Modal */}
+      <SignOutConfirmation
+        show={showSignOutModal}
+        onHide={handleSignOutCancel}
+        onConfirm={handleSignOutConfirm}
+      />
     </>
   );
 };

@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Fine Aggregate Testing - Form 2{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-sand me-2"></i>Fine Aggregate Testing - 2</h1>
+                            <p class="mb-0">Sieve Analysis of Fine Aggregate</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-warning me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Other Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <!-- Form Navigation Buttons -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ url_for('fine_aggregate_form_1') }}" class="btn btn-outline-primary btn-lg me-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                1
+                            </a>
+                            <a href="{{ url_for('fine_aggregate_form_2') }}" class="btn btn-primary active btn-lg mx-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                2
+                            </a>
+                            <a href="{{ url_for('fine_aggregate_form_3') }}" class="btn btn-outline-primary btn-lg ms-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                3
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- General Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sample_description" class="form-label">Sample Description *</label>
+                                    <textarea class="form-control" id="sample_description" name="sample_description" rows="3" placeholder="Describe the sample..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date_of_receipt" class="form-label">Date of Receipt *</label>
+                                    <input type="date" class="form-control" id="date_of_receipt" name="date_of_receipt" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="proposed_use" class="form-label">Proposed Use *</label>
+                                    <select class="form-select" id="proposed_use" name="proposed_use" required>
+                                        <option value="">-- Select Proposed Use --</option>
+                                        <option value="Concrete">Concrete</option>
+                                        <option value="Mortar">Mortar</option>
+                                        <option value="Plaster">Plaster</option>
+                                        <option value="Road Construction">Road Construction</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="test_method" class="form-label">Test Method *</label>
+                                    <select class="form-select" id="test_method" name="test_method" required>
+                                        <option value="">-- Select Test Method --</option>
+                                        <option value="IS 2386 (Part I) - 1963">IS 2386 (Part I) - 1963</option>
+                                        <option value="ASTM C136/C136M">ASTM C136/C136M</option>
+                                        <option value="BS 812-103.1:1985">BS 812-103.1:1985</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sample_test_code" class="form-label">Sample Test Code Number *</label>
+                                    <input type="text" class="form-control" id="sample_test_code" name="sample_test_code" placeholder="e.g., SCN-2024001" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date_of_testing" class="form-label">Date of Testing *</label>
+                                    <input type="date" class="form-control" id="date_of_testing" name="date_of_testing" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="source" class="form-label">Source *</label>
+                                    <input type="text" class="form-control" id="source" name="source" placeholder="e.g., Quarry, Supplier, Location" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environmental_conditions" class="form-label">Environmental Conditions</label>
+                                    <input type="text" class="form-control" id="environmental_conditions" name="environmental_conditions" placeholder="e.g., Laboratory Conditions, Temperature: 27±2°C">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sieve Analysis Table -->
+        <div class="row mb-4" style="border: none !important; outline: none !important;">
+            <div class="col-12" style="border: none !important; outline: none !important;">
+                <div style="border: none !important; box-shadow: none !important; background: transparent !important; outline: none !important; margin: 0 !important; padding: 0 !important;">
+                    <div style="border: none !important; background: transparent !important; padding: 10px 0;">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Test Result</h5>
+                    </div>
+                    
+                    <!-- Total Weight Input Row -->
+                    <div style="border: none !important; padding: 8px 0; background: transparent !important; outline: none !important;">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="input-group justify-content-center" style="max-width: 500px; margin: 0 auto;">
+                                    <span class="input-group-text" style="font-weight: bold; background-color: #495057; color: white; border: 1px solid #dee2e6;">Total Weight of Sample taken =</span>
+                                    <input type="number" class="form-control" step="0.01" placeholder="Enter weight in gm" style="height: 38px; border: 1px solid #dee2e6;">
+                                    <span class="input-group-text" style="background-color: #495057; color: white; border: 1px solid #dee2e6;">gm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="border: none !important; padding: 8px; background: transparent !important; outline: none !important;">
+                        <div class="table-responsive" style="max-height: none !important; overflow: visible !important;">
+                            <table class="table table-striped" style="font-size: 0.9rem; margin-bottom: 0; table-layout: fixed; width: 100%; border: 1px solid #dee2e6; border-collapse: collapse; border-spacing: 0; outline: none !important; box-shadow: none !important; height: auto !important; border-radius: 8px; overflow: hidden;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th rowspan="2" style="width: 75px; padding: 6px; border: 1px solid #dee2e6; text-align: center; text-align-last: center; font-size: 1rem; vertical-align: middle;">IS Sieve</th>
+                                        <th rowspan="2" style="width: 75px; padding: 6px; border: 1px solid #dee2e6; text-align: center; text-align-last: center; font-size: 1rem; vertical-align: middle;">Weigh. Retained (gm)</th>
+                                        <th rowspan="2" style="width: 75px; padding: 6px; border: 1px solid #dee2e6; text-align: center; text-align-last: center; font-size: 1rem; vertical-align: middle;">% Weight Retained</th>
+                                        <th rowspan="2" style="width: 85px; padding: 6px; border: 1px solid #dee2e6; text-align: center; text-align-last: center; font-size: 1rem; vertical-align: middle;">Cumulative % Weight Retained</th>
+                                        <th rowspan="2" style="width: 55px; padding: 6px; border: 1px solid #dee2e6; text-align: center; text-align-last: center; font-size: 1rem; vertical-align: middle;">% Passing</th>
+                                        <th colspan="4" style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-size: 1rem;">Zoning as per Table 9 of IS 383</th>
+                                    </tr>
+                                    <tr>
+                                                                               <th style="width: 180px; padding: 6px; border: 1px solid #dee2e6; text-align: center; font-size: 0.9rem;">Zone I</th>
+                                       <th style="width: 180px; padding: 6px; border: 1px solid #dee2e6; text-align: center; font-size: 0.9rem;">Zone II</th>
+                                       <th style="width: 180px; padding: 6px; border: 1px solid #dee2e6; text-align: center; font-size: 0.9rem;">Zone III</th>
+                                       <th style="width: 180px; padding: 6px; border: 1px solid #dee2e6; text-align: center; font-size: 0.9rem;">Zone IV</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">10 mm</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">100</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">4.75 mm</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">90-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">90-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">90-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">95-100</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">2.36 mm</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">60-95</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">75-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">85-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">95-100</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">1.18 mm</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">30-70</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">55-90</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">75-100</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">90-100</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">600 mic.</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">15-34</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">35-59</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">60-79</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">80-100</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">300 mic.</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">5-20</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">8-30</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">12-40</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">15-50</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">150 mic.</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">0-10</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">0-10</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">0-10</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">0-15</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">75 mic.</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center; font-weight: bold;">Pan</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 25px; border: none; text-align: center;"></td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                        <td style="padding: 6px; border: 1px solid #dee2e6; text-align: center;">---</td>
+                                    </tr>
+                                    
+                                    <!-- Calculation Rows -->
+                                    <tr>
+                                        <td colspan="5" style="padding: 8px; border: 1px solid #dee2e6; text-align: left; vertical-align: middle; font-weight: bold; font-size: 1.1rem;">
+                                            Sum of Cumulative % Weight Retained (Excluding Pan) =
+                                        </td>
+                                        <td colspan="4" style="padding: 8px; border: 1px solid #dee2e6; text-align: center; vertical-align: middle; border-radius: 8px;">
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td colspan="5" style="padding: 8px; border: 1px solid #dee2e6; text-align: left; vertical-align: middle; font-weight: bold; font-size: 1.1rem;">
+                                            Fineness Modulus = (Sum of Cumulative % weight retained/100) =
+                                        </td>
+                                        <td colspan="4" style="padding: 8px; border: 1px solid #dee2e6; text-align: center; vertical-align: middle; border-radius: 8px;">
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td colspan="5" style="padding: 8px; border: 1px solid #dee2e6; text-align: left; vertical-align: middle; font-weight: bold; font-size: 1.1rem;">
+                                            Zone to which Fine Aggregate belongs as per IS 383 =
+                                        </td>
+                                        <td colspan="4" style="padding: 8px; border: 1px solid #dee2e6; text-align: center; vertical-align: middle; border-radius: 8px;">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Verification</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Tested By</h6>
+                                <div class="mb-3">
+                                    <label for="tested_by_name" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" id="tested_by_name" name="tested_by_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tested_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="tested_by_date" name="tested_by_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Checked By</h6>
+                                <div class="mb-3">
+                                    <label for="checked_by_name" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" id="checked_by_name" name="checked_by_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="checked_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="checked_by_date" name="checked_by_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Verified By</h6>
+                                <div class="mb-3">
+                                    <label for="verified_by_name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="verified_by_name" name="verified_by_name" value="Prakarsh A Sangave" readonly style="background-color: rgba(108, 117, 125, 0.1); border-color: #495057; opacity: 0.9;">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="verified_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="verified_by_date" name="verified_by_date" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Remarks</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="remarks" name="remarks" rows="4" placeholder="Enter any additional remarks or observations..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviewed By and Authorized By Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Reviewed By</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="reviewed_by" class="form-label">Select Reviewer:</label>
+                            <select class="form-select" id="reviewed_by" name="reviewed_by" required>
+                                <option value="">-- Select a reviewer --</option>
+                                <option value="Lalita S. Dussa - Quality Manager" data-name="Lalita S. Dussa" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)" selected>Lalita S. Dussa - Quality Manager</option>
+                                <option value="Prakarsha A. Sangave - Quality Manager" data-name="Prakarsha A. Sangave" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Prakarsha A. Sangave - Quality Manager</option>
+                                <option value="Harsha Prakarsha Sangave - Quality Manager" data-name="Harsha Prakarsha Sangave" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Harsha Prakarsha Sangave - Quality Manager</option>
+                                <option value="Amol A Adam - Quality Manager" data-name="Amol A Adam" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Amol A Adam - Quality Manager</option>
+                                <option value="Aaquib J. Shaikh - Quality Manager" data-name="Aaquib J. Shaikh" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Aaquib J. Shaikh - Quality Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Authorized By</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="authorized_by" class="form-label">Authorized By:</label>
+                            <input type="text" class="form-control" id="authorized_by" name="authorized_by" value="Prakarsh Sangave" readonly style="background-color: rgba(108, 117, 125, 0.1); border-color: #495057; opacity: 0.9;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('fine_aggregate_form_1') }}" class="btn btn-secondary btn-lg me-md-2">
+                        <i class="fas fa-arrow-left me-2"></i>Previous Form
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg me-md-2">
+                        <i class="fas fa-save me-2"></i>Save and Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Set default dates for date fields
+document.addEventListener('DOMContentLoaded', function() {
+    const dateFields = [
+        'date_of_receipt',
+        'date_of_testing',
+        'tested_by_date',
+        'checked_by_date',
+        'verified_by_date'
+    ];
+    
+    dateFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value) {
+            field.value = new Date().toISOString().split('T')[0];
+        }
+    });
+    
+    // Handle Save and Next button click
+    const saveAndNextBtn = document.querySelector('button[type="submit"]');
+    if (saveAndNextBtn) {
+        saveAndNextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Navigate to next form immediately
+            window.location.href = "{{ url_for('fine_aggregate_form_3') }}";
+        });
+    }
+});
+</script>
+{% endblock %}

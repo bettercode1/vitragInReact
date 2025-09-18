@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Fine Aggregate Testing Form{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-sand me-2"></i>Fine Aggregate Testing</h1>
+                            <p class="mb-0">Sand quality & grading analysis form</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-warning me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Other Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <!-- Customer Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Customer Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.customer_id.label(class="form-label") }}
+                                    {{ form.customer_id(class="form-select" + (" is-invalid" if form.customer_id.errors else "")) }}
+                                    {% if form.customer_id.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.customer_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Test Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.url_number.label(class="form-label") }}
+                                    {{ form.url_number(class="form-control" + (" is-invalid" if form.url_number.errors else "")) }}
+                                    {% if form.url_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.url_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.job_code_number.label(class="form-label") }}
+                                    {{ form.job_code_number(class="form-control" + (" is-invalid" if form.job_code_number.errors else "")) }}
+                                    {% if form.job_code_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.job_code_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.reference_number.label(class="form-label") }}
+                                    {{ form.reference_number(class="form-control" + (" is-invalid" if form.reference_number.errors else "")) }}
+                                    {% if form.reference_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.reference_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-box me-2"></i>Sample Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.sample_description.label(class="form-label") }}
+                                    {{ form.sample_description(class="form-control" + (" is-invalid" if form.sample_description.errors else ""), rows=3) }}
+                                    {% if form.sample_description.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.sample_description.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.date_of_receipt.label(class="form-label") }}
+                                    {{ form.date_of_receipt(class="form-control" + (" is-invalid" if form.date_of_receipt.errors else ""), type="date") }}
+                                    {% if form.date_of_receipt.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.date_of_receipt.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.date_of_testing.label(class="form-label") }}
+                                    {{ form.date_of_testing(class="form-control" + (" is-invalid" if form.date_of_testing.errors else ""), type="date") }}
+                                    {% if form.date_of_testing.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.date_of_testing.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.sample_test_code.label(class="form-label") }}
+                                    {{ form.sample_test_code(class="form-control" + (" is-invalid" if form.sample_test_code.errors else "")) }}
+                                    {% if form.sample_test_code.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.sample_test_code.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quality Parameters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Quality Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.fineness_modulus.label(class="form-label") }}
+                                    {{ form.fineness_modulus(class="form-control" + (" is-invalid" if form.fineness_modulus.errors else ""), step="0.01") }}
+                                    {% if form.fineness_modulus.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.fineness_modulus.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.specific_gravity.label(class="form-label") }}
+                                    {{ form.specific_gravity(class="form-control" + (" is-invalid" if form.specific_gravity.errors else ""), step="0.001") }}
+                                    {% if form.specific_gravity.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.specific_gravity.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.water_absorption.label(class="form-label") }}
+                                    {{ form.water_absorption(class="form-control" + (" is-invalid" if form.water_absorption.errors else ""), step="0.01") }}
+                                    {% if form.water_absorption.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.water_absorption.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    {{ form.bulk_density.label(class="form-label") }}
+                                    {{ form.bulk_density(class="form-control" + (" is-invalid" if form.bulk_density.errors else ""), step="0.1") }}
+                                    {% if form.bulk_density.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.bulk_density.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('other_services') }}" class="btn btn-secondary btn-lg me-md-2">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    {{ form.submit(class="btn btn-success btn-lg") }}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

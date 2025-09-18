@@ -360,6 +360,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
   color: var(--vitrag-primary-text);
   padding: 2rem 0;
   margin-bottom: 2rem;
+  border-radius: 15px;
 }
 
 /* Logo Styles */
@@ -536,6 +537,237 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
 /* Loading Spinner */
 .spinner-vitrag {
   color: var(--vitrag-orange);
+}
+
+/* Transparent Input Box Styles for Specific Sections */
+.transparent-input-section .form-control {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.transparent-input-section .form-control:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+.transparent-input-section .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.transparent-input-section .form-select {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.transparent-input-section .form-select:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+.transparent-input-section .form-label {
+  color: #ffffff !important;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.transparent-input-section .form-control[readonly] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Transparent Table Row Styles for Test Results */
+.transparent-table {
+  border-collapse: collapse !important;
+}
+
+.transparent-table th,
+.transparent-table td {
+  border: 1px solid #dee2e6 !important;
+}
+
+.transparent-table tbody tr {
+  background-color: transparent !important;
+}
+
+.transparent-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.transparent-table tbody tr td {
+  background-color: transparent !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.transparent-table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Keep Average row with original blue background formatting but make cells transparent */
+.transparent-table tbody tr.table-info {
+  background-color: #d1ecf1 !important;
+}
+
+.transparent-table tbody tr.table-info:hover {
+  background-color: #bee5eb !important;
+}
+
+.transparent-table tbody tr.table-info td {
+  background-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  background-clip: content-box !important;
+  background-origin: content-box !important;
+  background-attachment: scroll !important;
+  background-position: 0% 0% !important;
+  background-repeat: no-repeat !important;
+  background-size: auto !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+/* Make form controls in Average row cells keep dark background - Higher specificity */
+.transparent-table tbody tr.table-info td .form-control {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  border: 1px solid var(--bs-gray-700) !important;
+  color: #ffffff !important;
+}
+
+.transparent-table tbody tr.table-info td .form-control:focus {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+/* Additional override for any remaining background styles */
+.transparent-table tbody tr.table-info .form-control[readonly] {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  border: 1px solid var(--bs-gray-700) !important;
+  color: #ffffff !important;
+}
+
+/* Force white text in Average row input field - Maximum specificity */
+.average-input-transparent,
+.average-input-transparent.form-control,
+.transparent-table tbody tr.table-info td .average-input-transparent,
+.transparent-table tbody tr.table-info .average-input-transparent.form-control,
+input.average-input-transparent,
+input[name="average_relative_density"],
+input[name="average_relative_density"].form-control,
+input[type="number"].average-input-transparent,
+input[type="number"][name="average_relative_density"].form-control {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  background-image: none !important;
+  border: 1px solid var(--bs-gray-700) !important;
+  color: #ffffff !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.average-input-transparent:focus,
+.average-input-transparent.form-control:focus,
+.transparent-table tbody tr.table-info td .average-input-transparent:focus,
+.transparent-table tbody tr.table-info .average-input-transparent.form-control:focus,
+input.average-input-transparent:focus,
+input[name="average_relative_density"]:focus,
+input[name="average_relative_density"].form-control:focus,
+input[type="number"].average-input-transparent:focus,
+input[type="number"][name="average_relative_density"].form-control:focus {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  background-image: none !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+/* Make form controls inside table cells transparent */
+.transparent-table .form-control {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.transparent-table .form-control:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+/* Average row input field - Using Bootstrap variables */
+input[type="number"][name="average_relative_density"],
+.average-input-transparent {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  background-image: none !important;
+  border: 1px solid var(--bs-gray-700) !important;
+  color: #ffffff !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+input[type="number"][name="average_relative_density"]:focus,
+.average-input-transparent:focus {
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
+  border-color: var(--vitrag-orange) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+/* Force Average row cell to be fully transparent like other data rows */
+.transparent-table tbody tr.table-info td {
+  background-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  background-clip: content-box !important;
+  background-origin: content-box !important;
+  background-attachment: scroll !important;
+  background-position: 0% 0% !important;
+  background-repeat: no-repeat !important;
+  background-size: auto !important;
+}
+
+.transparent-table tbody tr.table-info td:last-child {
+  background-color: #d1ecf1 !important; /* Light blue background */
+  background: #d1ecf1 !important; /* Light blue background */
+  background-image: none !important;
+  background-clip: content-box !important;
+  background-origin: content-box !important;
+  background-attachment: scroll !important;
+  background-position: 0% 0% !important;
+  background-repeat: no-repeat !important;
+  background-size: auto !important;
+  border: 1px solid #dee2e6 !important;
+  /* Removed border-radius to make outer rectangle regular (not rounded) */
+}
+
+/* Ultra-specific rule to force white text in Average input */
+.transparent-table tbody tr.table-info td:last-child input[type="number"][name="average_relative_density"] {
+  color: #ffffff !important;
+  background-color: var(--bs-dark) !important;
+  background: var(--bs-dark) !important;
 }
 
 /* Custom Scrollbar */

@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Fine Aggregate Testing - Form 3{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-0"><i class="fas fa-sand me-2"></i>Fine Aggregate Testing - 3</h1>
+                            <p class="mb-0">Determination of Specific Gravity & Water Absorption of Fine Aggregate</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('other_services') }}" class="btn btn-warning me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Other Services
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <!-- Form Navigation Buttons -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ url_for('fine_aggregate_form_1') }}" class="btn btn-outline-primary btn-lg me-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                1
+                            </a>
+                            <a href="{{ url_for('fine_aggregate_form_2') }}" class="btn btn-outline-primary btn-lg mx-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; margin-right: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                2
+                            </a>
+                            <a href="{{ url_for('fine_aggregate_form_3') }}" class="btn btn-primary active btn-lg ms-5" style="font-size: 1.5rem; font-weight: bold; width: 80px; height: 80px; border-radius: 50%; margin-left: 5rem !important; display: flex; align-items: center; justify-content: center;">
+                                3
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- General Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>General Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sample_description" class="form-label">Sample Description *</label>
+                                    <textarea class="form-control" id="sample_description" name="sample_description" rows="3" placeholder="Describe the sample..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date_of_receipt" class="form-label">Date of Receipt *</label>
+                                    <input type="date" class="form-control" id="date_of_receipt" name="date_of_receipt" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="type_of_aggregate" class="form-label">Type of Aggregate *</label>
+                                    <select class="form-select" id="type_of_aggregate" name="type_of_aggregate" required>
+                                        <option value="">-- Select Type of Aggregate --</option>
+                                        <option value="Fine Aggregate">Fine Aggregate</option>
+                                        <option value="Coarse Aggregate">Coarse Aggregate</option>
+                                        <option value="All-in Aggregate">All-in Aggregate</option>
+                                        <option value="Natural Sand">Natural Sand</option>
+                                        <option value="Crushed Sand">Crushed Sand</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="test_method" class="form-label">Test Method *</label>
+                                    <select class="form-select" id="test_method" name="test_method" required>
+                                        <option value="">-- Select Test Method --</option>
+                                        <option value="IS 2386 (Part III) - 1963">IS 2386 (Part III) - 1963</option>
+                                        <option value="ASTM C29/C29M">ASTM C29/C29M</option>
+                                        <option value="BS 812-2:1995">BS 812-2:1995</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sample_test_code" class="form-label">Sample Test Code Number *</label>
+                                    <input type="text" class="form-control" id="sample_test_code" name="sample_test_code" placeholder="e.g., SCN-2024001" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date_of_testing" class="form-label">Date of Testing *</label>
+                                    <input type="date" class="form-control" id="date_of_testing" name="date_of_testing" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max_nominal_size" class="form-label">Maximum Nominal Size of Aggregate *</label>
+                                    <select class="form-select" id="max_nominal_size" name="max_nominal_size" required>
+                                        <option value="">-- Select Maximum Nominal Size --</option>
+                                        <option value="4.75mm">4.75mm</option>
+                                        <option value="10mm">10mm</option>
+                                        <option value="12.5mm">12.5mm</option>
+                                        <option value="16mm">16mm</option>
+                                        <option value="20mm">20mm</option>
+                                        <option value="25mm">25mm</option>
+                                        <option value="31.5mm">31.5mm</option>
+                                        <option value="40mm">40mm</option>
+                                        <option value="50mm">50mm</option>
+                                        <option value="63mm">63mm</option>
+                                        <option value="80mm">80mm</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environmental_conditions" class="form-label">Environmental Conditions</label>
+                                    <input type="text" class="form-control" id="environmental_conditions" name="environmental_conditions" placeholder="e.g., Laboratory Conditions, Temperature: 27±2°C">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Result -->
+        <div class="row mb-4" style="border: none !important; outline: none !important;">
+            <div class="col-12" style="border: none !important; outline: none !important;">
+                <div style="border: none !important; box-shadow: none !important; background: transparent !important; outline: none !important; margin: 0 !important; padding: 0 !important;">
+                    <div style="border: none !important; background: transparent !important; padding: 10px 0;">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Test Result</h5>
+                    </div>
+                    <div style="border: none !important; padding: 16px; background: transparent !important; outline: none !important;">
+                        <div class="table-responsive" style="max-height: none !important; overflow: visible !important;">
+                            <table class="table table-striped" style="font-size: 1.1rem; margin-bottom: 0; table-layout: fixed; width: 100%; border: none !important; border-collapse: collapse; border-spacing: 0; --bs-table-border-color: transparent !important; outline: none !important; box-shadow: none !important; height: auto !important; border-radius: 8px; overflow: hidden;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 550px; padding: 6px; border-right: 1px solid white !important; outline: none !important; font-size: 1.3rem;">Number of Tests</th>
+                                        <th style="width: 140px; padding: 4px; text-align: center; text-align-last: center; vertical-align: middle; border-right: 1px solid white !important; outline: none !important; font-size: 1.3rem;">01</th>
+                                        <th style="width: 140px; padding: 4px; text-align: center; text-align-last: center; vertical-align: middle; border-right: 1px solid white !important; outline: none !important; font-size: 1.3rem;">02</th>
+                                        <th style="width: 140px; padding: 4px; text-align: center; text-align-last: center; vertical-align: middle; outline: none !important; font-size: 1.3rem;">03</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Wt. of Saturated Surface Dry Aggregate (gm)</strong> <span style="float: right; margin-right: 8px; font-weight: bold;">(A)</span></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Wt. of Pycnometer + Aggregate + Water (gm)</strong> <span style="float: right; margin-right: 8px; font-weight: bold;">(B)</span></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Wt. of Pycnometer + Water (gm)</strong> <span style="float: right; margin-right: 8px; font-weight: bold;">(C)</span></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Wt. of Oven Dried Aggregate (gm)</strong> <span style="float: right; margin-right: 8px; font-weight: bold;">(D)</span></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Specific Gravity = [D/A-(B-C)]</strong></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.001" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.001" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.001" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td style="font-size: 1rem; padding: 6px; text-align: center;"><strong>Mean of Specific Gravity</strong></td>
+                                        <td colspan="3" style="padding: 6px;"><input type="number" class="form-control form-control-sm" step="0.001" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-size: 1rem; padding: 6px; padding-left: 12px; text-align: left; text-align-last: left;"><strong>Water Absorption (%)= [(A-D)/D]*100</strong></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                        <td style="width: 140px; padding: 4px;" class="text-center"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td style="font-size: 1rem; padding: 6px; text-align: center;"><strong>Mean of Water Absorption</strong></td>
+                                        <td colspan="3" style="padding: 6px;"><input type="number" class="form-control form-control-sm" step="0.01" style="height: 30px;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Verification</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Tested By</h6>
+                                <div class="mb-3">
+                                    <label for="tested_by_name" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" id="tested_by_name" name="tested_by_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tested_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="tested_by_date" name="tested_by_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Checked By</h6>
+                                <div class="mb-3">
+                                    <label for="checked_by_name" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" id="checked_by_name" name="checked_by_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="checked_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="checked_by_date" name="checked_by_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Verified By</h6>
+                                <div class="mb-3">
+                                    <label for="verified_by_name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="verified_by_name" name="verified_by_name" value="Prakarsh A Sangave" readonly style="background-color: rgba(108, 117, 125, 0.1); border-color: #495057; opacity: 0.9;">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="verified_by_date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="verified_by_date" name="verified_by_date" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Remarks</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="remarks" name="remarks" rows="4" placeholder="Enter any additional remarks or observations..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviewed By and Authorized By Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Reviewed By</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="reviewed_by" class="form-label">Select Reviewer:</label>
+                            <select class="form-select" id="reviewed_by" name="reviewed_by" required>
+                                <option value="">-- Select a reviewer --</option>
+                                <option value="Lalita S. Dussa - Quality Manager" data-name="Lalita S. Dussa" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)" selected>Lalita S. Dussa - Quality Manager</option>
+                                <option value="Prakarsha A. Sangave - Quality Manager" data-name="Prakarsha A. Sangave" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Prakarsha A. Sangave - Quality Manager</option>
+                                <option value="Harsha Prakarsha Sangave - Quality Manager" data-name="Harsha Prakarsha Sangave" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Harsha Prakarsha Sangave - Quality Manager</option>
+                                <option value="Amol A Adam - Quality Manager" data-name="Amol A Adam" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Amol A Adam - Quality Manager</option>
+                                <option value="Aaquib J. Shaikh - Quality Manager" data-name="Aaquib J. Shaikh" data-designation="Quality Manager" data-graduation="B.Tech.(Civil)">Aaquib J. Shaikh - Quality Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Authorized By</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="authorized_by" class="form-label">Authorized By:</label>
+                            <input type="text" class="form-control" id="authorized_by" name="authorized_by" value="Prakarsh Sangave" readonly style="background-color: rgba(108, 117, 125, 0.1); border-color: #495057; opacity: 0.9;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('fine_aggregate_form_2') }}" class="btn btn-secondary btn-lg me-md-2">
+                        <i class="fas fa-arrow-left me-2"></i>Previous Form
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg me-md-2">
+                        <i class="fas fa-save me-2"></i>Save Test Data
+                    </button>
+                    <a href="{{ url_for('other_services') }}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Set default dates for date fields
+document.addEventListener('DOMContentLoaded', function() {
+    const dateFields = [
+        'date_of_receipt',
+        'date_of_testing',
+        'tested_by_date',
+        'checked_by_date',
+        'verified_by_date'
+    ];
+    
+    dateFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value) {
+            field.value = new Date().toISOString().split('T')[0];
+        }
+    });
+});
+</script>
+{% endblock %}
