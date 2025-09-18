@@ -1,127 +1,118 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-const { spawn } = require('child_process');
+const { Pool } = require('pg');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
+
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: "postgresql://neondb_owner:npg_eHZv0ncD8irC@ep-muddy-pond-a6nccqdf.us-west-2.aws.neon.tech/neondb?sslmode=require"
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
 
-// PDF Generation endpoint
-app.post('/api/generate-pdf', async (req, res) => {
+// Test database connection
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL database');
+});
+
+pool.on('error', (err) => {
+  console.error('Database connection error:', err);
+});
+
+// Routes
+app.get('/api/test-requests', async (req, res) => {
   try {
-    const { test_request, customer, main_test, reviewer_info } = req.body;
-    
-    console.log('Generating PDF for job:', test_request.job_number);
-    
-    // Call Python PDF generator
-    const pdfPath = await generatePDFWithPython(req.body);
-    
-    if (pdfPath && fs.existsSync(pdfPath)) {
-      // Read the generated PDF file
-      const pdfBuffer = fs.readFileSync(pdfPath);
-      
-      // Set headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="Test_Report_${test_request.job_number}.pdf"`);
-      res.setHeader('Content-Length', pdfBuffer.length);
-      
-      // Send the PDF content
-      res.send(pdfBuffer);
-      
-      // Clean up temporary file
-      try {
-        fs.unlinkSync(pdfPath);
-      } catch (cleanupError) {
-        console.warn('Could not delete temporary PDF file:', cleanupError);
-      }
-    } else {
-      throw new Error('PDF generation failed - no file created');
-    }
-    
+    const result = await pool.query('SELECT * FROM test_requests ORDER BY id DESC');
+    res.json(result.rows);
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ error: 'Failed to generate PDF: ' + error.message });
+    console.error('Error fetching test requests:', error);
+    res.status(500).json({ error: 'Failed to fetch test requests' });
   }
 });
 
-// Function to call Python PDF generator
-function generatePDFWithPython(data) {
-  return new Promise((resolve, reject) => {
-    const pythonProcess = spawn('python', ['pdf_generator.py', JSON.stringify(data)], {
-      cwd: __dirname,
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-    
-    let stdout = '';
-    let stderr = '';
-    
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-    
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-    
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        const pdfPath = stdout.trim();
-        resolve(pdfPath);
-      } else {
-        console.error('Python process error:', stderr);
-        reject(new Error(`Python process exited with code ${code}: ${stderr}`));
-      }
-    });
-    
-    pythonProcess.on('error', (error) => {
-      console.error('Failed to start Python process:', error);
-      reject(new Error(`Failed to start Python process: ${error.message}`));
-    });
-  });
-}
+app.get('/api/test-requests/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM test_requests WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Test request not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching test request:', error);
+    res.status(500).json({ error: 'Failed to fetch test request' });
+  }
+});
 
-// Mock PDF generation function
-function generateMockPDF(test_request, customer, main_test, reviewer_info) {
-  // This is a placeholder - in real implementation, you would:
-  // 1. Call your Python PDF generation function
-  // 2. Use a library like pdfkit or puppeteer
-  // 3. Or integrate with your existing Python backend
-  
-  // For now, return a simple text response
-  const pdfContent = `
-    TEST REPORT
-    ===========
-    
-    Job Number: ${test_request.job_number}
-    Customer: ${customer.name}
-    Site: ${customer.address}
-    Date: ${test_request.receipt_date}
-    
-    Test Details:
-    - Grade: ${main_test.grade}
-    - Age: ${main_test.age_in_days} days
-    - Compressive Strength: ${main_test.compressive_strength} N/mm²
-    - Average Strength: ${main_test.average_strength} N/mm²
-    
-    Reviewed by: ${reviewer_info.name}
-    Designation: ${reviewer_info.designation}
-  `;
-  
-  // In a real implementation, this would be actual PDF binary data
-  return Buffer.from(pdfContent, 'utf8');
-}
+app.get('/api/customers', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM customers ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({ error: 'Failed to fetch customers' });
+  }
+});
 
-// Health check endpoint
+app.get('/api/customers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM customers WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching customer:', error);
+    res.status(500).json({ error: 'Failed to fetch customer' });
+  }
+});
+
+app.get('/api/samples', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM samples ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching samples:', error);
+    res.status(500).json({ error: 'Failed to fetch samples' });
+  }
+});
+
+app.get('/api/samples/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM samples WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Sample not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching sample:', error);
+    res.status(500).json({ error: 'Failed to fetch sample' });
+  }
+});
+
+app.get('/api/test-results/:testRequestId', async (req, res) => {
+  try {
+    const { testRequestId } = req.params;
+    const result = await pool.query('SELECT * FROM samples WHERE test_request_id = $1', [testRequestId]);
+    res.json(result.rows[0] || {});
+  } catch (error) {
+    console.error('Error fetching test results:', error);
+    res.status(500).json({ error: 'Failed to fetch test results' });
+  }
+});
+
+// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'PDF Generation Server is running' });
+  res.json({ status: 'OK', message: 'API is running' });
 });
 
 app.listen(PORT, () => {
-  console.log(`PDF Generation Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API available at http://localhost:${PORT}/api`);
 });

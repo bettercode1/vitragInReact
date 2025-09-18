@@ -1,115 +1,53 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faSearch, 
-  faEye, 
   faEdit, 
   faChartLine, 
-  faCheckCircle, 
-  faFileAlt,
-  faPlus
+  faFilePdf,
+  faVial,
+  faUser,
+  faBuilding
 } from '@fortawesome/free-solid-svg-icons';
 
 const Samples = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  // Mock detailed sample data - This is the specific test from the form
+  const sampleData = {
+    id: 1,
+    jobNumber: 'T-2501690',
+    customer: 'Lords Developers',
+    contactPerson: 'jamkhandey',
+    phone: '9067877490',
+    email: '',
+    siteName: 'shivyogi residency',
+    receiptDate: '25-08-2025',
+    completionDate: '09-08-2025',
+    status: 'pending',
+    cubeTests: [{
+      srNo: 1.0,
+      idMark: '—',
+      locationNature: 'column',
+      grade: 'M-25',
+      castingDate: '11-08-2025',
+      testingDate: '08-09-2025',
+      ageInDays: 28.0,
+      noOfCubes: 3,
+      method: 'IS 516 (Part1/Sec1):2021'
+    }]
+  };
 
-  // Mock data
-  const sampleData = [
-    {
-      id: 1,
-      receiptDate: '2024-01-15',
-      ulrNumber: 'ULR-001',
-      jobNumber: 'VIT-2024-001',
-      customer: 'ABC Construction',
-      siteName: 'Mumbai Project',
-      sample: 'Concrete Cube',
-      qty: '6',
-      testRequirement: 'Compressive Strength',
-      castingDate: '2024-01-10',
-      testingDate: '2024-01-17',
-      reportDate: '2024-01-20',
-      disposalDate: '2024-01-25',
-      remarks: 'Test completed successfully',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      receiptDate: '2024-01-14',
-      ulrNumber: 'ULR-002',
-      jobNumber: 'VIT-2024-002',
-      customer: 'XYZ Builders',
-      siteName: 'Pune Development',
-      sample: 'Concrete Cube',
-      qty: '9',
-      testRequirement: 'Compressive Strength',
-      castingDate: '2024-01-09',
-      testingDate: '2024-01-16',
-      reportDate: '',
-      disposalDate: '',
-      remarks: 'Testing in progress',
-      status: 'testing'
-    },
-    {
-      id: 3,
-      receiptDate: '2024-01-13',
-      ulrNumber: 'ULR-003',
-      jobNumber: 'VIT-2024-003',
-      customer: 'DEF Engineers',
-      siteName: 'Delhi Complex',
-      sample: 'Concrete Cube',
-      qty: '12',
-      testRequirement: 'Compressive Strength',
-      castingDate: '2024-01-08',
-      testingDate: '',
-      reportDate: '',
-      disposalDate: '',
-      remarks: 'Sample received',
-      status: 'received'
-    },
-    {
-      id: 4,
-      receiptDate: '2024-01-12',
-      ulrNumber: 'ULR-004',
-      jobNumber: 'VIT-2024-004',
-      customer: 'GHI Contractors',
-      siteName: 'Bangalore Site',
-      sample: 'Concrete Cube',
-      qty: '6',
-      testRequirement: 'Compressive Strength',
-      castingDate: '2024-01-07',
-      testingDate: '2024-01-14',
-      reportDate: '2024-01-17',
-      disposalDate: '2024-01-22',
-      remarks: 'Test completed',
-      status: 'completed'
-    },
-    {
-      id: 5,
-      receiptDate: '2024-01-11',
-      ulrNumber: 'ULR-005',
-      jobNumber: 'VIT-2024-005',
-      customer: 'JKL Developers',
-      siteName: 'Chennai Project',
-      sample: 'Concrete Cube',
-      qty: '9',
-      testRequirement: 'Compressive Strength',
-      castingDate: '2024-01-06',
-      testingDate: '2024-01-13',
-      reportDate: '',
-      disposalDate: '',
-      remarks: 'Report generation in progress',
-      status: 'reporting'
-    }
-  ];
+  const handleEnterObservations = (testId) => {
+    alert('Navigate to data entry page for test ID: ' + testId);
+  };
+
+  const handleGenerateGraph = (testId) => {
+    alert('Navigate to strength graph page for test ID: ' + testId);
+  };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      'pending': { variant: 'warning', text: 'Sample Received' },
       'received': { variant: 'secondary', text: 'Sample Received' },
       'testing': { variant: 'warning', text: 'Testing' },
       'reporting': { variant: 'info', text: 'Generating Report' },
@@ -120,269 +58,186 @@ const Samples = () => {
     return <Badge bg={config.variant}>{config.text}</Badge>;
   };
 
-  const filteredData = sampleData.filter(sample => {
-    const matchesSearch = 
-      sample.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sample.jobNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sample.siteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sample.ulrNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = !statusFilter || sample.status === statusFilter;
-    const matchesType = !typeFilter || sample.sample.toLowerCase().includes(typeFilter.toLowerCase());
-    
-    const matchesDateFrom = !dateFrom || new Date(sample.receiptDate) >= new Date(dateFrom);
-    const matchesDateTo = !dateTo || new Date(sample.receiptDate) <= new Date(dateTo);
-    
-    return matchesSearch && matchesStatus && matchesType && matchesDateFrom && matchesDateTo;
-  });
-
-  const resetFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setTypeFilter('');
-    setDateFrom('');
-    setDateTo('');
-  };
-
   return (
-    <div>
-      {/* Header */}
-      <div className="header-vitrag">
-        <Container>
-          <Row className="align-items-center">
-            <Col md={8}>
-              <div className="d-flex align-items-center">
-                <i className="fas fa-flask me-3" style={{ fontSize: '2rem' }}></i>
-                <div>
-                  <h1 style={{ color: 'var(--vitrag-gold)', fontWeight: '700', margin: 0 }}>
-                    Vitrag Associates LLP
-                  </h1>
-                  <h4 style={{ color: 'var(--vitrag-orange)', fontWeight: '500', margin: 0 }}>
-                    Sample Test Record Register
-                  </h4>
-                </div>
-              </div>
-            </Col>
-            <Col md={4} className="text-end">
-              <Button 
-                as={Link} 
-                to="/test-request" 
-                variant="primary" 
-                className="btn-vitrag-primary"
-              >
-                <FontAwesomeIcon icon={faPlus} className="me-2" />
-                New Test Request
-              </Button>
-            </Col>
-          </Row>
-        </Container>
-      </div>
-
+    <div className="container-fluid">
       <Container>
-        {/* Search and Filter Section */}
-        <Card className="card-vitrag mb-4">
-          <Card.Body>
-            <Row className="align-items-end">
-              <Col md={3} className="mb-3">
-                <Form.Group>
-                  <Form.Label>Search</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>
-                      <FontAwesomeIcon icon={faSearch} />
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search by customer, job number, site..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="form-control-vitrag"
-                    />
-                  </InputGroup>
-                </Form.Group>
-              </Col>
-              <Col md={2} className="mb-3">
-                <Form.Group>
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="form-control-vitrag"
-                  >
-                    <option value="">All Status</option>
-                    <option value="received">Sample Received</option>
-                    <option value="testing">Testing</option>
-                    <option value="reporting">Generating Report</option>
-                    <option value="completed">Completed</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={2} className="mb-3">
-                <Form.Group>
-                  <Form.Label>Type</Form.Label>
-                  <Form.Select
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                    className="form-control-vitrag"
-                  >
-                    <option value="">All Types</option>
-                    <option value="concrete">Concrete Cube</option>
-                    <option value="aggregate">Aggregate</option>
-                    <option value="cement">Cement</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={2} className="mb-3">
-                <Form.Group>
-                  <Form.Label>Date From</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="form-control-vitrag"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={2} className="mb-3">
-                <Form.Group>
-                  <Form.Label>Date To</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="form-control-vitrag"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={1} className="mb-3">
-                <Button
-                  variant="outline-secondary"
-                  onClick={resetFilters}
-                  className="w-100"
-                  title="Reset Filters"
-                >
-                  <FontAwesomeIcon icon={faSearch} />
-                </Button>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
+        {/* Header Banner */}
+        <Row className="mb-4">
+          <Col>
+            <Card className="card-vitrag">
+              <Card.Header className="d-flex justify-content-between align-items-center" style={{backgroundColor: '#FFA500', color: 'white'}}>
+                <div className="d-flex align-items-center">
+                  <img src="/logo.png" alt="Vitrag Associates" height="40" className="me-3" />
+                  <div>
+                    <h3 className="mb-0">Vitrag Associates LLP - Sample Test Request</h3>
+                    <p className="mb-0">Job Number: {sampleData.jobNumber}</p>
+                  </div>
+                </div>
+                <div>
+                  <Button variant="light" className="me-2">
+                    <FontAwesomeIcon icon={faEdit} className="me-1" />
+                    Edit
+                  </Button>
+                  <Button variant="light" className="me-2">
+                    <FontAwesomeIcon icon={faVial} className="me-1" />
+                    Capture Images & Observations
+                  </Button>
+                  <Button variant="light">
+                    <FontAwesomeIcon icon={faChartLine} className="me-1" />
+                    Generate Graph
+                  </Button>
+                </div>
+              </Card.Header>
+            </Card>
+          </Col>
+        </Row>
 
-        {/* Data Table */}
-        <Card className="card-vitrag">
-          <Card.Body className="p-0">
-            <div className="table-responsive">
-              <Table className="table-vitrag mb-0">
-                <thead>
-                  <tr>
-                    <th>Date of Receipt</th>
-                    <th>ULR Number</th>
-                    <th>Sample Test Job Number</th>
-                    <th>Name of Customer</th>
-                    <th>Site Name</th>
-                    <th>Sample</th>
-                    <th>Qty</th>
-                    <th>Test Requirement</th>
-                    <th>Date of Casting</th>
-                    <th>Date of Testing</th>
-                    <th>Date of Report</th>
-                    <th>Date of Disposal</th>
-                    <th>Remarks</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((sample) => (
-                    <tr key={sample.id}>
-                      <td>{sample.receiptDate}</td>
-                      <td>{sample.ulrNumber}</td>
-                      <td>{sample.jobNumber}</td>
-                      <td>{sample.customer}</td>
-                      <td>{sample.siteName}</td>
-                      <td>{sample.sample}</td>
-                      <td>{sample.qty}</td>
-                      <td>{sample.testRequirement}</td>
-                      <td>{sample.castingDate || '-'}</td>
-                      <td>{sample.testingDate || '-'}</td>
-                      <td>{sample.reportDate || '-'}</td>
-                      <td>{sample.disposalDate || '-'}</td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span className="me-2">{sample.remarks}</span>
-                          {getStatusBadge(sample.status)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            title="View Details"
-                          >
-                            <FontAwesomeIcon icon={faEye} />
-                          </Button>
-                          <Button
-                            variant="outline-warning"
-                            size="sm"
-                            title="Edit"
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </Button>
-                          {sample.status === 'testing' && (
-                            <Button
-                              variant="outline-info"
-                              size="sm"
-                              title="Generate Graph"
-                            >
-                              <FontAwesomeIcon icon={faChartLine} />
-                            </Button>
-                          )}
-                          {sample.status === 'testing' && (
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              title="Finalize Test"
-                            >
-                              <FontAwesomeIcon icon={faCheckCircle} />
-                            </Button>
-                          )}
-                          {sample.status === 'completed' && (
-                            <Button
-                              variant="outline-secondary"
-                              size="sm"
-                              title="Preview Report"
-                            >
-                              <FontAwesomeIcon icon={faFileAlt} />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
+        {/* Customer Information */}
+        <Row className="mb-4">
+          <Col md={6}>
+            <Card className="card-vitrag h-100">
+              <Card.Header style={{backgroundColor: '#FFA500', color: 'white'}}>
+                <h5 className="mb-0">
+                  <FontAwesomeIcon icon={faUser} className="me-2" />
+                  Customer Information
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <Table responsive>
+                  <tbody>
+                    <tr>
+                      <td><strong>Name of Customer:</strong></td>
+                      <td>{sampleData.customer} {sampleData.siteName}</td>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-            
-            {filteredData.length === 0 && (
-              <div className="text-center py-5">
-                <FontAwesomeIcon icon={faSearch} size="3x" className="text-muted mb-3" />
-                <h5 className="text-muted">No samples found</h5>
-                <p className="text-muted">Try adjusting your search criteria</p>
-              </div>
-            )}
-          </Card.Body>
-        </Card>
+                    <tr>
+                      <td><strong>Contact Person:</strong></td>
+                      <td>{sampleData.contactPerson}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Phone/Mobile:</strong></td>
+                      <td>{sampleData.phone}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>E-mail:</strong></td>
+                      <td>{sampleData.email || '—'}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        {/* Summary */}
-        <Row className="mt-4">
+          {/* Sample Information */}
+          <Col md={6}>
+            <Card className="card-vitrag h-100">
+              <Card.Header style={{backgroundColor: '#FFA500', color: 'white'}}>
+                <h5 className="mb-0">
+                  <FontAwesomeIcon icon={faVial} className="me-2" />
+                  Sample Information
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <Table responsive>
+                  <tbody>
+                    <tr>
+                      <td><strong>Receipt Date:</strong></td>
+                      <td>{sampleData.receiptDate}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Site Name:</strong></td>
+                      <td>{sampleData.siteName}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Probable Completion Date:</strong></td>
+                      <td>{sampleData.completionDate}</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Status:</strong></td>
+                      <td>{getStatusBadge(sampleData.status)}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Testing Requirement (Concrete Cube/Core) */}
+        <Row className="mb-4">
+          <Col>
+            <Card className="card-vitrag">
+              <Card.Header style={{backgroundColor: '#FFA500', color: 'white'}}>
+                <h5 className="mb-0">
+                  <FontAwesomeIcon icon={faBuilding} className="me-2" />
+                  Testing Requirement (Concrete Cube/Core)
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <div className="table-responsive">
+                  <Table bordered hover>
+                    <thead className="table-dark">
+                      <tr>
+                        <th>Sr No</th>
+                        <th>ID Mark</th>
+                        <th>Location/Nature/Work</th>
+                        <th>Grade</th>
+                        <th>Casting Date</th>
+                        <th>Testing Date</th>
+                        <th>Age in days</th>
+                        <th>No of cubes/Cores</th>
+                        <th>Method/</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sampleData.cubeTests.map((test, index) => (
+                        <tr key={index}>
+                          <td>{test.srNo}</td>
+                          <td>{test.idMark}</td>
+                          <td>{test.locationNature}</td>
+                          <td>{test.grade}</td>
+                          <td>{test.castingDate}</td>
+                          <td>{test.testingDate}</td>
+                          <td>{test.ageInDays}</td>
+                          <td>{test.noOfCubes}</td>
+                          <td>{test.method}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Action Buttons */}
+        <Row className="mb-4">
           <Col>
             <Card className="card-vitrag">
               <Card.Body className="text-center">
-                <h5 style={{ color: 'var(--vitrag-gold)' }}>
-                  Total Samples: {filteredData.length}
-                </h5>
-                <p className="text-muted mb-0">
-                  Showing {filteredData.length} of {sampleData.length} samples
-                </p>
+                <h5 className="mb-3">Next Steps</h5>
+                <div className="d-flex justify-content-center gap-3">
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => handleEnterObservations(sampleData.id)}
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="me-2" />
+                    Enter Observations
+                  </Button>
+                  <Button 
+                    variant="success" 
+                    size="lg"
+                    onClick={() => handleGenerateGraph(sampleData.id)}
+                  >
+                    <FontAwesomeIcon icon={faChartLine} className="me-2" />
+                    Generate Graph
+                  </Button>
+                  <Link to={`/generate-pdf/${sampleData.id}`} className="btn btn-danger btn-lg">
+                    <FontAwesomeIcon icon={faFilePdf} className="me-2" />
+                    Generate PDF
+                  </Link>
+                </div>
               </Card.Body>
             </Card>
           </Col>
