@@ -12,9 +12,9 @@ import {
   faFlask,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
-import FineAggregateTestSelection from './FineAggregateTestSelection';
-import CoarseAggregateTestSelection from './CoarseAggregateTestSelection';
-import CementTestingSelection from './CementTestingSelection';
+import FineAggregateTestSelection from './otherServices/FineAggregate/FineAggregateTestSelection';
+import CoarseAggregateTestSelection from './otherServices/CoarseAggregate/CoarseAggregateTestSelection';
+import CementTestingSelection from './otherServices/CementTesting/CementTestingSelection';
 
 const OtherServices = () => {
   const navigate = useNavigate();

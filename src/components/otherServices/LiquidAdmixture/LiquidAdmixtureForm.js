@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,8 +12,12 @@ import {
   faFlask,
   faTable,
   faUserCheck,
-  faComment
+  faComment,
+  faEye,
+  faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
+import LiquidAdmixturePreview from './LiquidAdmixturePreview';
+import { generateLiquidAdmixturePDF } from './LiquidAdmixturePDFGenerator';
 
 const LiquidAdmixtureForm = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -28,6 +32,8 @@ const LiquidAdmixtureForm = () => {
     sample_test_code: '',
     date_of_testing: new Date().toISOString().split('T')[0],
     environmental_conditions: 'Laboratory Conditions',
+    site_name: '',
+    site_address: '',
     
     // Test Results
     colour_texture_1: '', volume_ml_1: '400', temperature_c_1: '', hydrometer_reading_1: '', relative_density_1: '',
@@ -47,20 +53,45 @@ const LiquidAdmixtureForm = () => {
     remarks: ''
   });
 
+  // Calculate average on component mount
+  useEffect(() => {
+    // Delay calculation to ensure formData is properly initialized
+    setTimeout(() => {
+      calculateAverage();
+    }, 100);
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    setFormData(prev => {
+      const updatedFormData = {
+        ...prev,
+        [name]: value
+      };
+      
+      // Auto-calculate average when relative density values change
+      if (name.startsWith('relative_density_')) {
+        setTimeout(() => {
+          calculateAverage(updatedFormData);
+        }, 0);
+      }
+      
+      return updatedFormData;
+    });
   };
 
-  const calculateAverage = () => {
+  const calculateAverage = (currentFormData = formData) => {
     let sum = 0;
     let count = 0;
     
+    console.log('Calculating average with data:', currentFormData);
+    
     for (let row = 1; row <= 3; row++) {
-      const relativeDensity = parseFloat(formData[`relative_density_${row}`]) || 0;
+      const fieldName = `relative_density_${row}`;
+      const relativeDensity = parseFloat(currentFormData[fieldName]) || 0;
+      console.log(`Row ${row}: ${fieldName} = ${currentFormData[fieldName]} -> parsed: ${relativeDensity}`);
+      
       if (relativeDensity > 0) {
         sum += relativeDensity;
         count++;
@@ -68,10 +99,97 @@ const LiquidAdmixtureForm = () => {
     }
     
     const average = count > 0 ? sum / count : 0;
+    console.log(`Sum: ${sum}, Count: ${count}, Average: ${average}`);
+    
     setFormData(prev => ({
       ...prev,
       average_relative_density: average > 0 ? average.toFixed(4) : ''
     }));
+  };
+
+  // Test function for debugging - can be called from browser console
+  window.testCalculation = () => {
+    console.log('Current formData:', formData);
+    calculateAverage();
+  };
+
+  // Preview and PDF functions
+  const handleSaveTestData = () => {
+    // Create URL parameters from form data
+    const params = new URLSearchParams();
+    
+    // General Information (for Observation Report)
+    params.append('sample_description', formData.sample_description || '');
+    params.append('date_of_receipt', formData.date_of_receipt || '');
+    params.append('sample_test_code', formData.sample_test_code || '');
+    params.append('date_of_testing', formData.date_of_testing || '');
+    params.append('environmental_conditions', formData.environmental_conditions || '');
+    
+    // Test Results (for Observation Report)
+    for (let i = 1; i <= 3; i++) {
+      params.append(`colour_texture_${i}`, formData[`colour_texture_${i}`] || '');
+      params.append(`temperature_c_${i}`, formData[`temperature_c_${i}`] || '');
+      params.append(`hydrometer_reading_${i}`, formData[`hydrometer_reading_${i}`] || '');
+      params.append(`relative_density_${i}`, formData[`relative_density_${i}`] || '');
+    }
+    
+    // Verification (for Observation Report)
+    params.append('tested_by_name', formData.tested_by_name || '');
+    params.append('tested_by_date', formData.tested_by_date || '');
+    params.append('checked_by_name', formData.checked_by_name || '');
+    params.append('checked_by_date', formData.checked_by_date || '');
+    params.append('verified_by_name', formData.verified_by_name || '');
+    params.append('verified_by_date', formData.verified_by_date || '');
+    
+    // Remarks (for Observation Report)
+    params.append('remarks', formData.remarks || '');
+    
+    // Customer Information (for Test Report)
+    const customerNames = {
+      '1': 'ABC Construction Ltd.',
+      '2': 'XYZ Builders', 
+      '3': 'DEF Infrastructure'
+    };
+    params.append('customer_name', customerNames[formData.customer_id] || formData.customer_id || '');
+    params.append('site_name', formData.site_name || '');
+    params.append('site_address', formData.site_address || '');
+    params.append('ulr_number', formData.url_number || '');
+    params.append('job_code_number', formData.job_code_number || '');
+    params.append('reference_number', formData.reference_number || '');
+    params.append('date_of_report', new Date().toISOString().split('T')[0]);
+    params.append('date_of_material_receipt', formData.date_of_receipt || '');
+    params.append('material_description', formData.sample_description || '');
+    params.append('condition_of_sample', 'Acceptable');
+    params.append('location_of_testing', 'Lab');
+    
+    // Test Results Summary (for Test Report)
+    params.append('specific_gravity_result', formData.average_relative_density || '0.0000');
+    
+    // Authorization (for Test Report)
+    params.append('reviewed_by', formData.reviewed_by || 'Lalita S. Dussa - Quality Manager');
+    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
+    
+    // Redirect to HTML report page
+    const reportUrl = `/LiquidAdmixtureReport.html?${params.toString()}`;
+    window.open(reportUrl, '_blank');
+  };
+
+  const handleEditForm = () => {
+    setShowPreview(false);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const success = await generateLiquidAdmixturePDF(formData);
+      if (success) {
+        alert('PDF downloaded successfully!');
+      } else {
+        alert('Error generating PDF. Please try again.');
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Error generating PDF. Please try again.');
+    }
   };
 
   const fillRandomData = () => {
@@ -118,15 +236,23 @@ const LiquidAdmixtureForm = () => {
     setShowPreview(true);
   };
 
-  const handleConfirmSubmit = () => {
-    // Handle final form submission here
+  const handleConfirmSubmit = async () => {
+    // Handle final form submission and generate PDF
     console.log('Form submitted:', formData);
-    alert('Test data saved successfully!');
-    setShowPreview(false);
-  };
-
-  const handleEditForm = () => {
-    setShowPreview(false);
+    
+    try {
+      // Generate and download PDF
+      const success = await generateLiquidAdmixturePDF(formData);
+      if (success) {
+        alert('Test data saved successfully! PDF has been downloaded.');
+        setShowPreview(false);
+      } else {
+        alert('Test data saved, but PDF generation failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Test data saved, but PDF generation failed. Please try again.');
+    }
   };
 
   // Preview Form Component
@@ -441,6 +567,29 @@ const LiquidAdmixtureForm = () => {
                           onChange={handleInputChange}
                           placeholder="Describe the liquid admixture sample..."
                           required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3">
+                        <Form.Label>Site Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="site_name"
+                          value={formData.site_name}
+                          onChange={handleInputChange}
+                          placeholder="Enter site name"
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3">
+                        <Form.Label>Site Address</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          name="site_address"
+                          value={formData.site_address}
+                          onChange={handleInputChange}
+                          placeholder="Enter site address"
                         />
                       </Form.Group>
                       
@@ -808,13 +957,13 @@ const LiquidAdmixtureForm = () => {
                 Fill Random Data
               </Button>
               <Button 
-                type="submit" 
+                onClick={handleSaveTestData}
                 variant="primary" 
                 size="lg" 
                 className="me-3"
               >
-                <FontAwesomeIcon icon={faSave} className="me-2" />
-                Save Test Data
+                <FontAwesomeIcon icon={faEye} className="me-2" />
+                Preview Report
               </Button>
               <Button 
                 as={Link} 
@@ -830,6 +979,15 @@ const LiquidAdmixtureForm = () => {
           </Row>
         </Form>
       </Container>
+
+      {/* Preview Section */}
+      {showPreview && (
+        <LiquidAdmixturePreview 
+          formData={formData}
+          onEdit={handleEditForm}
+          onDownloadPDF={handleDownloadPDF}
+        />
+      )}
     </div>
   );
 };

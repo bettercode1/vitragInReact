@@ -6,49 +6,56 @@ import { faCubes, faTimes } from '@fortawesome/free-solid-svg-icons';
 const CoarseAggregateTestSelection = ({ show, onHide, onProceed }) => {
   const [selectedTests, setSelectedTests] = useState({
     selectAll: true,
-    bulkDensity: true,
     sieveAnalysis: true,
-    specificGravity: true,
+    crushingValue: true,
     impactValue: true,
-    crushingValue: true
+    flakinessElongation: true,
+    bulkDensity: true,
+    specificGravity: true
   });
 
   const testOptions = [
     {
-      id: 'bulkDensity',
-      label: '1. Determination of Bulk Density of Coarse Aggregate (Rodded & Loose)',
-      checked: selectedTests.bulkDensity
-    },
-    {
       id: 'sieveAnalysis',
-      label: '2. Sieve Analysis of Coarse Aggregate (10/20 mm)',
+      label: '1. Sieve analysis of Coarse Aggregate',
       checked: selectedTests.sieveAnalysis
     },
     {
-      id: 'specificGravity',
-      label: '3. Determination of Specific Gravity & Water Absorption of Coarse Aggregate',
-      checked: selectedTests.specificGravity
+      id: 'crushingValue',
+      label: '2. Determination of Aggregate Crushing Value',
+      checked: selectedTests.crushingValue
     },
     {
       id: 'impactValue',
-      label: '4. Determination of Impact Value of Coarse Aggregate',
+      label: '3. Determination of Aggregate Impact Value Test',
       checked: selectedTests.impactValue
     },
     {
-      id: 'crushingValue',
-      label: '5. Determination of Crushing Value of Coarse Aggregate',
-      checked: selectedTests.crushingValue
+      id: 'flakinessElongation',
+      label: '4. Determination of Flakiness & Elongation Index of Aggregate',
+      checked: selectedTests.flakinessElongation
+    },
+    {
+      id: 'bulkDensity',
+      label: '5. Determination of Bulk Density of Aggregate (Rodded & Loose)',
+      checked: selectedTests.bulkDensity
+    },
+    {
+      id: 'specificGravity',
+      label: '6. Determination of Specific Gravity & Water Absorption of Coarse Aggregate',
+      checked: selectedTests.specificGravity
     }
   ];
 
   const handleSelectAll = (checked) => {
     setSelectedTests({
       selectAll: checked,
-      bulkDensity: checked,
       sieveAnalysis: checked,
-      specificGravity: checked,
+      crushingValue: checked,
       impactValue: checked,
-      crushingValue: checked
+      flakinessElongation: checked,
+      bulkDensity: checked,
+      specificGravity: checked
     });
   };
 
@@ -59,11 +66,12 @@ const CoarseAggregateTestSelection = ({ show, onHide, onProceed }) => {
     };
     
     // Update selectAll based on individual selections
-    const allSelected = newSelectedTests.bulkDensity && 
-                       newSelectedTests.sieveAnalysis && 
-                       newSelectedTests.specificGravity &&
+    const allSelected = newSelectedTests.sieveAnalysis && 
+                       newSelectedTests.crushingValue && 
                        newSelectedTests.impactValue &&
-                       newSelectedTests.crushingValue;
+                       newSelectedTests.flakinessElongation &&
+                       newSelectedTests.bulkDensity &&
+                       newSelectedTests.specificGravity;
     
     setSelectedTests({
       ...newSelectedTests,
@@ -74,30 +82,33 @@ const CoarseAggregateTestSelection = ({ show, onHide, onProceed }) => {
   const handleClearAll = () => {
     setSelectedTests({
       selectAll: false,
-      bulkDensity: false,
       sieveAnalysis: false,
-      specificGravity: false,
+      crushingValue: false,
       impactValue: false,
-      crushingValue: false
+      flakinessElongation: false,
+      bulkDensity: false,
+      specificGravity: false
     });
   };
 
   const handleProceed = () => {
     const selectedTestIds = [];
-    if (selectedTests.bulkDensity) selectedTestIds.push('bulkDensity');
     if (selectedTests.sieveAnalysis) selectedTestIds.push('sieveAnalysis');
-    if (selectedTests.specificGravity) selectedTestIds.push('specificGravity');
-    if (selectedTests.impactValue) selectedTestIds.push('impactValue');
     if (selectedTests.crushingValue) selectedTestIds.push('crushingValue');
+    if (selectedTests.impactValue) selectedTestIds.push('impactValue');
+    if (selectedTests.flakinessElongation) selectedTestIds.push('flakinessElongation');
+    if (selectedTests.bulkDensity) selectedTestIds.push('bulkDensity');
+    if (selectedTests.specificGravity) selectedTestIds.push('specificGravity');
     
     onProceed(selectedTestIds);
   };
 
-  const hasAnySelected = selectedTests.bulkDensity || 
-                        selectedTests.sieveAnalysis || 
-                        selectedTests.specificGravity ||
+  const hasAnySelected = selectedTests.sieveAnalysis || 
+                        selectedTests.crushingValue || 
                         selectedTests.impactValue ||
-                        selectedTests.crushingValue;
+                        selectedTests.flakinessElongation ||
+                        selectedTests.bulkDensity ||
+                        selectedTests.specificGravity;
 
   return (
     <Modal 

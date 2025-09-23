@@ -29,8 +29,6 @@ const BaseLayout = ({ children }) => {
     <>
       {/* Navigation - Exact match to Flask template */}
       <nav className="navbar navbar-expand-lg navbar-dark" style={{ backgroundColor: '#1C2333' }}>
-        <div className="container">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid px-3">
           <Link className="navbar-brand d-flex align-items-center" to="/">
             <img 
@@ -122,7 +120,6 @@ const BaseLayout = ({ children }) => {
                   <span className="d-lg-inline">Cube Testing</span>
                 </Link>
               </li> */}
-              <li className="nav-item">
               <li className="nav-item mx-1">
                 <Link 
                   className={`nav-link d-flex flex-column align-items-center py-2 px-3 ${location.pathname === '/other-services' ? 'active' : ''}`} 

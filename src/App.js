@@ -22,65 +22,51 @@ import ViewSample from './components/ViewSample';
 import TestObservations from './components/TestObservations';
 import StrengthGraph from './components/StrengthGraph';
 import OtherServicesDashboard from './components/OtherServicesDashboard';
-import AACBlocksForm from './components/AACBlocksForm';
-import FineAggregateForm from './components/FineAggregateForm';
-import LiquidAdmixtureForm from './components/LiquidAdmixtureForm';
-import BulkDensityMoistureForm from './components/BulkDensityMoistureForm';
-import CementTestingForm from './components/CementTestingForm';
-import CoarseAggregateForm from './components/CoarseAggregateForm';
+import AACBlocksForm from './components/otherServices/AACBlock/AACBlocksForm';
+import FineAggregateForm from './components/otherServices/FineAggregate/FineAggregateForm';
+import LiquidAdmixtureForm from './components/otherServices/LiquidAdmixture/LiquidAdmixtureForm';
+import BulkDensityMoistureForm from './components/otherServices/BulkDensity/BulkDensityMoistureForm';
+import CementTestingForm from './components/otherServices/CementTesting/CementTestingForm';
+import CoarseAggregateForm from './components/otherServices/CoarseAggregate/CoarseAggregateForm';
 
 function App() {
   return (
     <DataProvider>
       <Router>
         <div className="App">
-          <BaseLayout>
-            <Routes>
-              <Route path="/" element={<Homepage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/test-request" element={<TestRequestForm />} />
-              <Route path="/samples" element={<Samples />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/other-services" element={<OtherServices />} />
-              <Route path="/cube-testing-services" element={<CubeTestingServices />} />
-              <Route path="/view-sample" element={<ViewSample />} />
-              <Route path="/test-observations" element={<TestObservations />} />
-              <Route path="/strength-graph" element={<StrengthGraph />} />
-              <Route path="/generate-pdf/:testRequestId?" element={<GeneratePDF />} />
-            </Routes>
-          </BaseLayout>
+          <Routes>
+            {/* Sign In Route - No BaseLayout */}
+            <Route path="/signin" element={<SignIn />} />
+            
+            {/* All other routes with BaseLayout */}
+            <Route path="/*" element={
+              <BaseLayout>
+                <Routes>
+                  <Route path="/" element={<Homepage />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/test-request" element={<TestRequestForm />} />
+                  <Route path="/samples" element={<Samples />} />
+                  <Route path="/customers" element={<Customers />} />
+                  <Route path="/other-services" element={<OtherServices />} />
+                  <Route path="/other-services-dashboard" element={<OtherServicesDashboard />} />
+                  <Route path="/cube-testing-services" element={<CubeTestingServices />} />
+                  <Route path="/view-sample" element={<ViewSample />} />
+                  <Route path="/test-observations" element={<TestObservations />} />
+                  <Route path="/strength-graph" element={<StrengthGraph />} />
+                  <Route path="/generate-pdf/:testRequestId?" element={<GeneratePDF />} />
+                  <Route path="/bulk-density-moisture-form" element={<BulkDensityMoistureForm />} />
+                  <Route path="/liquid-admixture-form" element={<LiquidAdmixtureForm />} />
+                  <Route path="/aac-blocks-form" element={<AACBlocksForm />} />
+                  <Route path="/cement-testing-form" element={<CementTestingForm />} />
+                  <Route path="/fine-aggregate-form" element={<FineAggregateForm />} />
+                  <Route path="/coarse-aggregate-form" element={<CoarseAggregateForm />} />
+                </Routes>
+              </BaseLayout>
+            } />
+          </Routes>
         </div>
       </Router>
     </DataProvider>
-    <Router>
-      <div className="App">
-        <Routes>
-          {/* Sign In Route - No BaseLayout */}
-          <Route path="/signin" element={<SignIn />} />
-          
-          {/* All other routes with BaseLayout */}
-          <Route path="/*" element={
-            <BaseLayout>
-              <Routes>
-                <Route path="/" element={<Homepage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/test-request" element={<TestRequestForm />} />
-                <Route path="/samples" element={<Samples />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/other-services" element={<OtherServices />} />
-                <Route path="/other-services-dashboard" element={<OtherServicesDashboard />} />
-                <Route path="/bulk-density-moisture-form" element={<BulkDensityMoistureForm />} />
-                <Route path="/liquid-admixture-form" element={<LiquidAdmixtureForm />} />
-                <Route path="/aac-blocks-form" element={<AACBlocksForm />} />
-                <Route path="/cement-testing-form" element={<CementTestingForm />} />
-                <Route path="/fine-aggregate-form" element={<FineAggregateForm />} />
-                <Route path="/coarse-aggregate-form" element={<CoarseAggregateForm />} />
-              </Routes>
-            </BaseLayout>
-          } />
-        </Routes>
-      </div>
-    </Router>
   );
 }
 
