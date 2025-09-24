@@ -141,6 +141,40 @@ const Homepage = () => {
           </p>
         </div>
       </div>
+
+      {/* PDF Report Access Section */}
+      <div className="row justify-content-center mb-5">
+        <div className="col-md-8 text-center">
+          <div className="p-4 border rounded" style={{ backgroundColor: '#f8f9fa' }}>
+            <div className="d-flex align-items-center justify-content-center mb-3">
+              <div className="bg-success bg-opacity-10 rounded p-2 me-3">
+                <i className="fas fa-file-pdf fa-lg text-success"></i>
+              </div>
+              <div>
+                <h4 className="mb-1 fw-bold">Cube Testing Report Template</h4>
+                <p className="text-muted mb-0">Access the professional PDF report template</p>
+              </div>
+            </div>
+            <p className="text-muted mb-3">
+              View and download the professional cube testing report template with NABL certification and company branding.
+            </p>
+            <Button 
+              variant="success" 
+              size="lg" 
+              className="px-4 py-2"
+              onClick={() => window.open('/cubeTestingReport.html', '_blank')}
+            >
+              <i className="fas fa-file-pdf me-2"></i>
+              View PDF Report Template
+            </Button>
+            <div className="mt-2">
+              <small className="text-muted">
+                <i className="fas fa-info-circle me-1"></i>Opens in new tab for PDF generation
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

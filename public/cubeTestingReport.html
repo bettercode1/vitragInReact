@@ -123,17 +123,263 @@
             margin-bottom: 15px;
         }
 
-        .report-title-header {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 18px;
-            font-weight: bold;
-            color: #000000;
-            text-decoration: underline;
-            text-decoration-thickness: 1px;
-            text-underline-offset: 2px;
-            margin-top: -10px;
-            margin-bottom: -15px;
+        /* Extended divider for pages 2 and 3 */
+        .header-divider-extended {
+            width: 100%;
+            height: 2px;
+            background-color: #000000;
+            margin-bottom: 15px;
+            margin-top: 10px;
         }
+
+        /* ANNEXURE Page Styling */
+        .annexure-content {
+            margin: 20px 0;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .annexure-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+            margin: 20px 0 0 0;
+        }
+
+        .annexure-table th,
+        .annexure-table td {
+            border: 0.5px solid #000000;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .annexure-table th {
+            font-weight: bold;
+            font-size: 11px;
+            background-color: transparent;
+        }
+
+        .annexure-table td {
+            width: 33.33%;
+            height: 200px;
+        }
+
+        .annexure-image {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+
+        .annexure-caption {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid #000000;
+            padding: 5px;
+           
+        }
+
+        .formula-box {
+            width: 60%;
+            margin: 20px 0;
+            border: 1px solid #000000;
+            padding: 15px;
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        .formula-text {
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .formula-fraction {
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 5px;
+            font-size: 16px;
+        }
+
+        .formula-numerator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .formula-line {
+            border-top: 1px solid #000000;
+            margin: 2px 0;
+            width: 100%;
+        }
+
+        .formula-denominator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .formula-explanation {
+            margin-top: 15px;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        /* Mathematical Fraction Styling */
+        .math-fraction {
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 8px;
+            text-align: center;
+        }
+
+        .math-numerator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            padding-bottom: 2px;
+        }
+
+        .math-denominator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            padding-top: 2px;
+            border-top: 1px solid #000000;
+        }
+
+        .test-witnessed {
+            margin-top: 34px;
+            text-align: left;
+            font-weight: bold;
+            text-decoration: underline;
+            color: #004080;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Observations Page Styling */
+        .observations-content {
+            margin: 20px 0;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .observations-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+            margin: 20px 0;
+        }
+
+        .observations-table th,
+        .observations-table td {
+            border: 0.5px solid #000000;
+            padding: 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .observations-table th {
+            font-weight: bold;
+            font-size: 16px;
+            background-color: transparent;
+            width: 50%;
+        }
+
+        .observations-table td {
+            font-size: 15px;
+            width: 50%;
+        }
+
+        .chart-container {
+            margin: 30px 0 80px 0;
+            text-align: center;
+        }
+
+
+
+        .bar-chart {
+            width: 75%;
+            justify-self: center;
+            height: 300px;
+            border: 1px solid #000000;
+            margin: 20px 0;
+            position: relative;
+            background-color: #fafafa;
+        }
+
+        .chart-caption {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        .chart-legend {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .legend-blue {
+            background-color: #0066cc;
+        }
+
+        .legend-orange {
+            background-color: #ff6600;
+        }
+
+.report-title-header {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    margin-top: -10px;
+    margin-bottom: -15px;
+    margin-right: 70px;
+    text-align: center;
+    margin-left: 0;
+}
+
+/* First page header - different styling */
+.report-title-header-page1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    margin-top: -10px;
+    margin-bottom: -15px;
+    text-align: center;
+    margin-left: 0;
+}
 
 
         .logo-right {
@@ -240,7 +486,7 @@
 
         .age-divider {
             width: 1px;
-            height: 30px;
+            height: 24px;
             margin-top: -10px;
             margin-bottom: -10px;
             margin-left: 55px;
@@ -460,54 +706,118 @@
         /* Signature Section */
         .signature-section {
             margin: 20px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            margin-top: 40px;
+            position: relative;
+            height: 120px;
         }
 
-        .signature-left,
-        .signature-right {
-            width: 30%;
+        /* Reviewed by section - Left side */
+        .reviewed-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 250px;
             text-align: left;
         }
 
-        .signature-label {
+        .reviewed-section .title {
             font-weight: bold;
-            color: #00509F;
-            text-align: left;
-            margin-bottom: 8px;
-            margin-left: 0px;
+            margin-bottom: 5px;
+            margin-left: 65px;
+            color: #004080;
             font-size: 12px;
         }
 
-        .signature-name {
+        .reviewed-section .name {
             font-weight: bold;
-            color: #00509F;
+            color: #004080;
+            font-size: 12px;
+            margin-left: 125px;
+        }
+
+        .reviewed-section .subtitle {
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 12px;
+            margin-left: 125px;
+            color: #004080;
+        }
+
+        .reviewed-section .details {
+            margin-top: 5px;
+            font-size: 12px;
+            margin-left: 125px;
+            color: #004080;
+        }
+
+        /* Stamp section - Center */
+        .stamp-section {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .stamp-section .stamp {
+            width: 120px;
+            height: auto;
+        }
+
+        /* Authorized by section - Right side */
+        .authorized-section {
+            position: absolute;
+            margin-left: -10px;
+            right: 0;
+            top: 0;
+            width: 250px;
+            text-align: right;
+        }
+
+        .authorized-section .title {
+            font-weight: bold;
             margin-bottom: 5px;
-            margin-left: 20px;
-            font-size: 14px;
+            margin-right: 165px;
+            color: #004080;
+            font-size: 12px;
         }
 
-        .signature-designation {
+        .authorized-section .name {
+            font-weight: bold;
+            color: #004080;
+            margin-right: 65px;
+            font-size: 12px;
+        }
+
+        .authorized-section .subtitle {
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 11px;
+            margin-right: 78px;
+
+            color: #004080;
+        }
+
+        .authorized-section .details {
+            margin-top: 5px;
             font-size: 10px;
-            color: #00509F;
-            line-height: 1.2;
-            margin-left: 20px;
+            margin-right: 78px;
+            color: #004080;
         }
 
-        .stamp-placeholder {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Specific styling for different designations in authorized section */
+        .authorized-section .qualification-1 {
+            margin-top: 5px;
+            font-size: 12px;
+            margin-right: 78px;
+            color: #004080;
         }
 
-        .stamp-image {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
+        .authorized-section .qualification-2 {
+            margin-top: 5px;
+            font-size: 11px;
+            /* margin-right: 2px; */
+            color: #004080;
         }
 
         /* Page Header for additional pages */
@@ -549,28 +859,29 @@
         }
 
         .footer-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            margin-top: 5px;
-        }
-
-        .footer-contact {
-            text-align: center;
-            color: #ff0000;
-            font-size: 11px;
-            line-height: 1.2;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
+            margin-top: 10px;
         }
 
-        .footer-page-info {
-            text-align: right;
-            color: #000000;
+        .footer-left {
+            text-align: left;
+            flex: 1;
+        }
+
+        .footer-center {
+            text-align: center;
+            flex: 2;
+            color: red;
             font-size: 11px;
-            line-height: 1.2;
+        }
+
+        .footer-right {
+            text-align: right;
+            flex: 1;
         }
 
         /* Print Optimization */
@@ -643,7 +954,7 @@
                 <div class="company-name">VITRAG ASSOCIATES LLP</div>
                 <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
                 <div class="header-divider"></div>
-                <div class="report-title-header">TEST REPORT</div>
+                <div class="report-title-header-page1">TEST REPORT</div>
             </div>
 
             <!-- Right Column - NABL Logo and Certificate Number -->
@@ -819,19 +1130,26 @@
 
         <!-- Signature Section -->
         <div class="signature-section">
-            <div class="signature-left">
-                <div class="signature-label">Reviewed by –</div>
-                <div class="signature-name">Lalita S. Dussa</div>
-                <div class="signature-designation">(Quality Manager)<br>B.Tech.(Civil)</div>
+            <!-- Left side -->
+            <div class="reviewed-section">
+                <div class="title">Reviewed by -</div>
+                <div class="name">Lalita S. Dussa</div>
+                <div class="subtitle">(Quality Manager)</div>
+                <div class="details">B.Tech.(Civil)</div>
             </div>
-            <div class="stamp-placeholder">
-                <img src="/stamp_clear.png" alt="Vitrag Associates Stamp" class="stamp-image">
+
+            <!-- Middle stamp -->
+            <div class="stamp-section">
+                <img src="/stamp_clear.png" alt="Stamp" class="stamp">
             </div>
-            <div class="signature-right">
-                <div class="signature-label">Authorized by –</div>
-                <div class="signature-name">Mr. Sangave P. A</div>
-                <div class="signature-designation">(Chief Executive Officer)<br>M.E (Civil-Structures)<br>MTech
-                    (Civil-Geotechnical), M.I.E, F.I.E.</div>
+
+            <!-- Right side -->
+            <div class="authorized-section">
+                <div class="title">Authorized by -</div>
+                <div class="name">Mr. Prakarsh A Sangave</div>
+                <div class="subtitle">(Chief Executive Officer)</div>
+                <div class="qualification-1">M.E (Civil-Structures)</div>
+                <div class="qualification-2">M.Tech (Civil-Geotechnical), M.I.E, F.I.E.</div>
             </div>
         </div>
 
@@ -839,12 +1157,16 @@
         <div class="footer">
             <div class="footer-divider">X———X———X——— END OF REPORT ——X———X———X</div>
             <div class="footer-content">
-                <div class="footer-contact">
-                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur<br>
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
                     Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
                 </div>
-                <div class="footer-page-info">
-                    Page 1 of 1<br>Issue No. 03
+                <div class="footer-right">
+                    Page 1 of 1 <br>
+                    Issue No. 03
                 </div>
             </div>
         </div>
@@ -852,54 +1174,222 @@
 
     <!-- Page 2 - A4 Size -->
     <div class="page">
-        <div class="page-header">
-            <div class="company-name">VITRAG ASSOCIATES LLP</div>
-            <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
-            <div class="header-divider"></div>
+        <!-- Header Section - 3 Column Flexbox -->
+        <div class="header">
+            <!-- Left Column - Company Logo -->
+            <div class="header-left">
+                <div class="logo-left">
+                    <img src="/logo.png" alt="Vitrag Associates Logo">
+                </div>
+            </div>
+
+            <!-- Center Column - Company Name and Report Title -->
+            <div class="header-center">
+                <div class="company-name">VITRAG ASSOCIATES LLP</div>
+                <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
+                <div class="header-divider-extended"></div>
+                <div class="report-title-header">ANNEXURE - I</div>
+            </div>
+
+            <!-- Right Column - Empty for pages 2 and 3 -->
+            <div class="header-right">
+                <!-- NABL logo removed for pages 2 and 3 -->
+            </div>
         </div>
 
-        <!-- Additional Test Results or Data can go here -->
-        <div class="page-content">
-            <h3>Additional Test Information</h3>
-            <p>This is page 2 content. You can add more test results, graphs, or additional information here.</p>
+        <!-- ANNEXURE - I Content -->
+        <div class="annexure-content">
+            <!-- Main Table -->
+            <table class="annexure-table">
+                <thead>
+                    <tr>
+                        <th>Pictorial View of Front side failure of cube specimen</th>
+                        <th>Digital reading of Load & Compressive Strength</th>
+                        <th>Pictorial View of Back side failure of Cube Specimen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><img src="/cube1_front.jpg" alt="Cube 1 Front" class="annexure-image"></td>
+                        <td><img src="/cube1_screen.jpg" alt="Cube 1 Screen" class="annexure-image"></td>
+                        <td><img src="/cube1_back.jpg" alt="Cube 1 Back" class="annexure-image"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/cube2_front.jpg" alt="Cube 2 Front" class="annexure-image"></td>
+                        <td><img src="/cube2_screen.jpg" alt="Cube 2 Screen" class="annexure-image"></td>
+                        <td><img src="/cube2_back.jpg" alt="Cube 2 Back" class="annexure-image"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/cube3_front.jpg" alt="Cube 3 Front" class="annexure-image"></td>
+                        <td><img src="/cube3_screen.jpg" alt="Cube 3 Screen" class="annexure-image"></td>
+                        <td><img src="/cube3_back.jpg" alt="Cube 3 Back" class="annexure-image"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Caption -->
+            <div class="annexure-caption">
+                Fig 1 - Pictorial view of Failure Pattern of Concrete Cube with Digital Readings
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box">
+                <div class="formula-text">
+                    <div style="text-align: left; font-size: 16px;">
+                        <strong>Compressive Strength = </strong>
+                        <span class="math-fraction">
+                            <span class="math-numerator">P</span>
+                            <span class="math-denominator">LB</span>
+                        </span>
+                        <strong> = </strong>
+                        <span class="math-fraction">
+                            <span class="math-numerator">Peak Load (N)</span>
+                            <span class="math-denominator">Surface Area (mm²)</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Witnessed Section -->
+            <div class="test-witnessed">
+                TEST WITNESSED:
+            </div>
         </div>
 
         <!-- Footer for Page 2 -->
         <div class="footer">
-            <div class="footer-divider">X———X———X——— END OF REPORT ——X———X———X</div>
-            <div class="footer-contact">
-                34A/26 West, New Pachha Peth, Ashok Chowk, Solapur<br>
-                Mob. No.-9552529235, 8767420940. &nbsp; E-mail: vitragassociates3@gmail.com
-            </div>
-            <div class="footer-page-info">
-                Page No 2 of 3<br>Issue No. 01
+            <div class="footer-content">
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
+                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                </div>
+                <div class="footer-right">
+                    Page 2 of 3 <br>
+                    Issue No. 03
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Page 3 - A4 Size -->
     <div class="page">
-        <div class="page-header">
-            <div class="company-name">VITRAG ASSOCIATES LLP</div>
-            <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
-            <div class="header-divider"></div>
+        <!-- Header Section - 3 Column Flexbox -->
+        <div class="header">
+            <!-- Left Column - Company Logo -->
+            <div class="header-left">
+                <div class="logo-left">
+                    <img src="/logo.png" alt="Vitrag Associates Logo">
+                </div>
+            </div>
+
+            <!-- Center Column - Company Name and Report Title -->
+            <div class="header-center">
+                <div class="company-name">VITRAG ASSOCIATES LLP</div>
+                <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
+                <div class="header-divider-extended"></div>
+                <div class="report-title-header">Observations</div>
+            </div>
+
+            <!-- Right Column - Empty for pages 2 and 3 -->
+            <div class="header-right">
+                <!-- NABL logo removed for pages 2 and 3 -->
+            </div>
         </div>
 
-        <!-- Additional content for Page 3 -->
-        <div class="page-content">
-            <h3>Test Analysis and Conclusions</h3>
-            <p>This is page 3 content. You can add test analysis, conclusions, or any other relevant information here.</p>
+        <!-- Observations Content -->
+        <div class="observations-content">
+            <!-- Observations Table -->
+            <table class="observations-table">
+                <tbody>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">1</td>
+                        <td style="width: 70%;">Compressive Strength acquired after specified duration</td>
+                        <td style="width: 25%; text-align: center;">--</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">2</td>
+                        <td style="width: 70%;">Individual test results within ±15% of average strength</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">3</td>
+                        <td style="width: 70%;">Weight of cube</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">4</td>
+                        <td style="width: 70%;">Type of failure Pattern as per IS 516(Part-1/Sec-1): - 2021 Fig 1</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">5</td>
+                        <td style="width: 70%;">Bonding between Aggregates and cement paste.</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">6</td>
+                        <td style="width: 70%;">Compressive Strength as per acceptance criteria as C1,16.1 of IS 456:2000 (Fck+4) From Table No.11</td>
+                        <td style="width: 25%; text-align: center;">--</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Bar Chart Section -->
+            <div class="chart-container">
+                
+                <div class="bar-chart">
+                    <!-- Blank space for graph - will be replaced with generated chart -->
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-style: italic;">
+                        Graph will be placed here
+                    </div>
+                </div>
+                <div class="chart-caption">Fig. 2 - Graphical Representation of Comparison of Compressive Strengths</div>
+            </div>
+        </div>
+
+        <!-- Signature Section for Page 3 -->
+        <div class="signature-section">
+            <!-- Left side -->
+            <div class="reviewed-section">
+                <div class="title">Reviewed by -</div>
+                <div class="name">Lalita S. Dussa</div>
+                <div class="subtitle">(Quality Manager)</div>
+                <div class="details">B.Tech.(Civil)</div>
+            </div>
+
+            <!-- Middle stamp -->
+            <div class="stamp-section">
+                <img src="/stamp_clear.png" alt="Stamp" class="stamp">
+            </div>
+
+            <!-- Right side -->
+            <div class="authorized-section">
+                <div class="title">Authorized by -</div>
+                <div class="name">Mr. Prakarsh A Sangave</div>
+                <div class="subtitle">(Chief Executive Officer)</div>
+                <div class="qualification-1">M.E (Civil-Structures)</div>
+                <div class="qualification-2">M.Tech (Civil-Geotechnical), M.I.E, F.I.E.</div>
+            </div>
         </div>
 
         <!-- Footer for Page 3 -->
         <div class="footer">
-            <div class="footer-divider">X———X———X——— END OF REPORT ——X———X———X</div>
-            <div class="footer-contact">
-                34A/26 West, New Pachha Peth, Ashok Chowk, Solapur<br>
-                Mob. No.-9552529235, 8767420940. &nbsp; E-mail: vitragassociates3@gmail.com
-            </div>
-            <div class="footer-page-info">
-                Page No 3 of 3<br>Issue No. 01
+            <div class="footer-divider">X———X———X——— END OF ANNEXURE 1 ——X———X———X</div>
+            <div class="footer-content">
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
+                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                </div>
+                <div class="footer-right">
+                    Page 3 of 3 <br>
+                    Issue No. 03
+                </div>
             </div>
         </div>
     </div>
