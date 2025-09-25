@@ -39,6 +39,7 @@
   --vitrag-danger: #dc3545;
   --vitrag-secondary: #6c757d;
   --vitrag-primary: #0d6efd;
+  --vitrag-brown: #8B4513;
   
   /* Form Element Colors */
   --vitrag-input-bg: #212529;
@@ -786,4 +787,9 @@ input[type="number"][name="average_relative_density"]:focus,
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--vitrag-orange-hover);
+}
+
+/* Custom Brown Color for Soil Testing */
+.bg-brown {
+  background-color: var(--vitrag-brown) !important;
 }

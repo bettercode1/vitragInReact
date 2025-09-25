@@ -27,6 +27,7 @@ import FineAggregateForm from './components/otherServices/FineAggregate/FineAggr
 import LiquidAdmixtureForm from './components/otherServices/LiquidAdmixture/LiquidAdmixtureForm';
 import BulkDensityMoistureForm from './components/otherServices/BulkDensity/BulkDensityMoistureForm';
 import CementTestingForm from './components/otherServices/CementTesting/CementTestingForm';
+import SoilTestingForm from './components/otherServices/SoilTesting/SoilTestingForm';
 import CoarseAggregateForm from './components/otherServices/CoarseAggregate/CoarseAggregateForm';
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
                   <Route path="/liquid-admixture-form" element={<LiquidAdmixtureForm />} />
                   <Route path="/aac-blocks-form" element={<AACBlocksForm />} />
                   <Route path="/cement-testing-form" element={<CementTestingForm />} />
+                  <Route path="/soil-testing-form" element={<SoilTestingForm />} />
                   <Route path="/fine-aggregate-form" element={<FineAggregateForm />} />
                   <Route path="/coarse-aggregate-form" element={<CoarseAggregateForm />} />
                 </Routes>

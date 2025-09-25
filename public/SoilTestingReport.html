@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="timestamp" content="2025-01-27-v1">
+  <title>Vitrag Associates LLP - Soil Testing Compaction Test Report (A4)</title>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --paper-width:210mm;
+      --paper-height:297mm;
+      --page-padding:14mm;
+      --title-color:#b30000;
+      --subtitle-color:#063a6c;
+      --inner-border:1px solid #222;
+      --muted:#666;
+      --header-font:'Times New Roman', Times, serif;
+      --base-font-size:16px;
+    }
+
+    @page { size: A4; margin: 10mm; }
+    html,body{height:100%; margin:0; padding:0;}
+    body{
+      font-family:var(--header-font);
+      -webkit-print-color-adjust:exact;
+      background:#ffffff;
+      margin:0;
+      padding:0;
+      color:#111;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    .page{
+      width:var(--paper-width);
+      min-height:var(--paper-height);
+      background:#fff;
+      box-shadow:0 0 20px rgba(0,0,0,0.1);
+      padding:var(--page-padding);
+      box-sizing:border-box;
+      position:relative;
+      font-size:var(--base-font-size);
+      line-height:1.15;
+      margin:20px 0;
+      border:1px solid #ddd;
+    }
+
+     /* Header */
+     .header{ width:100%; border-collapse:collapse; table-layout:fixed; }
+     .header td{ border:1px solid #111; vertical-align:middle; padding:12px 16px; }
+     .logo-cell{ width:3.26cm; text-align:center; }
+     .logo-cell img{ width:3.26cm; height:auto; object-fit:contain; }
+     .title-cell{ text-align:center; font-weight:700; }
+     .title-cell h1{ margin:0; font-size:33px; font-weight:700; color:var(--title-color); text-transform:uppercase; line-height:1.0; }
+     .title-cell .subtitle{ display:block; margin-top:8px; font-size:19px; font-weight:700; color:var(--subtitle-color); line-height:1.0; white-space:nowrap; }
+
+     /* Title box */
+     .box{ margin-top:10px; border:1px solid #111; font-weight:700; font-size:16px; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; height:1cm; width:100%; display:flex; align-items:center; justify-content:center; }
+
+    /* Metadata table */
+    .meta-wrap{ margin-top:10px; }
+    table.meta{ 
+      width:100% !important; 
+      border-collapse:collapse; 
+      table-layout:fixed !important; 
+      word-wrap: break-word;
+    }
+    
+    /* Force table layout and column widths */
+    table.meta col:nth-child(1) { width: 20% !important; }
+    table.meta col:nth-child(2) { width: 30% !important; }
+    table.meta col:nth-child(3) { width: 20% !important; }
+    table.meta col:nth-child(4) { width: 30% !important; }
+    table.meta td{ 
+      border:1px solid #111; 
+      padding:0 6px; 
+      height:0.7cm; 
+      vertical-align:middle; 
+      font-size:14.67px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+    
+    /* Force column widths with constraints */
+    table.meta td:nth-child(1){ 
+      width: 20% !important; 
+      max-width: 20% !important; 
+      min-width: 20% !important; 
+      overflow: hidden;
+    }
+    table.meta td:nth-child(2){ 
+      width: 30% !important; 
+      max-width: 30% !important; 
+      min-width: 30% !important; 
+    }
+    table.meta td:nth-child(3){ 
+      width: 20% !important; 
+      max-width: 20% !important; 
+      min-width: 20% !important; 
+      overflow: hidden;
+    }
+    table.meta td:nth-child(4){ 
+      width: 30% !important; 
+      max-width: 30% !important; 
+      min-width: 30% !important; 
+    }
+    
+    /* Special case for merged cell in Sample Condition row */
+    table.meta tr:nth-child(5) td:nth-child(3){ 
+      width: 50% !important; 
+      max-width: 50% !important; 
+      min-width: 50% !important; 
+    }
+    
+    /* Responsive text sizing for long content */
+    #sample-description, #environmental-conditions {
+        font-size: 12px !important;
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Adjust cell height for smaller text */
+    #sample-description, #environmental-conditions {
+        height: auto !important;
+        min-height: 0.7cm;
+        padding: 2px 6px !important;
+    }
+
+    /* Test result */
+    .test-result{ margin-top:24px; padding:0; }
+     .test-result h3{ margin:0; text-align:center; font-size:16px; font-weight:700; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; border:none; }
+
+    table.results{ width:100%; border-collapse:collapse; margin-top:8px; font-size:14.67px; table-layout:auto; }
+    table.results th, table.results td{ border:1px solid #111; text-align:center; vertical-align:middle; }
+    table.results thead th{ background:#f7f2f2; font-weight:700; font-size:16px; padding:4px; }
+    table.results tbody tr{ height:0.8cm; }
+    table.results th:first-child, table.results td:first-child{ width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important; }
+    table.results th:nth-child(2){ width:50%; text-align:center; }
+    table.results td:nth-child(2){ width:50%; text-align:left; padding-left:8px; }
+    table.results th:nth-child(3), table.results td:nth-child(3){ width:10%; }
+    table.results th:nth-child(4), table.results td:nth-child(4){ width:10%; }
+    table.results th:nth-child(5), table.results td:nth-child(5){ width:10%; }
+    table.results th:nth-child(6), table.results td:nth-child(6){ width:10%; }
+    table.results th:nth-child(7), table.results td:nth-child(7){ width:10%; }
+    table.results tfoot td{ border:1px solid #111; height:1.2cm; font-weight:700; text-align:left; padding-left:6px; }
+    table.results tfoot td:first-child{ text-align:right; padding-right:6px; }
+    table.results tfoot td:last-child{ text-align:center; }
+    table.results tfoot tr:nth-child(2) td{ height:60mm; vertical-align:top; text-align:left; padding:8px; font-weight:normal; }
+    table.results tfoot tr:nth-child(3) td, table.results tfoot tr:nth-child(4) td, table.results tfoot tr:nth-child(5) td{ height:0.7cm; font-weight:700; padding:4px; text-align:left; }
+    
+    /* Force column widths for signature table */
+    table.results tfoot tr:nth-child(3) td:first-child{ width:25% !important; }
+    table.results tfoot tr:nth-child(3) td:nth-child(2){ width:30% !important; }
+    table.results tfoot tr:nth-child(3) td:last-child{ width:35% !important; }
+    table.results tfoot tr:nth-child(4) td:first-child{ width:25% !important; }
+    table.results tfoot tr:nth-child(4) td:nth-child(2){ width:30% !important; }
+    table.results tfoot tr:nth-child(4) td:last-child{ width:35% !important; }
+    table.results tfoot tr:nth-child(5) td:first-child{ width:25% !important; }
+    table.results tfoot tr:nth-child(5) td:nth-child(2){ width:30% !important; }
+    table.results tfoot tr:nth-child(5) td:last-child{ width:35% !important; }
+
+    .sig-title{ font-weight:700; }
+
+     .doc-footer{ position:absolute; bottom:2mm; left:var(--page-padding); right:var(--page-padding); text-align:center; font-size:16px; color:var(--muted); }
+
+
+    /* Download PDF Button */
+    .download-btn{ 
+      position:fixed; 
+      top:20px; 
+      right:20px; 
+      background:#28a745; 
+      color:white; 
+      border:none; 
+      padding:12px 20px; 
+      border-radius:6px; 
+      font-size:14px; 
+      font-weight:bold; 
+      cursor:pointer; 
+      box-shadow:0 2px 8px rgba(0,0,0,0.2);
+      z-index:1000;
+    }
+    .download-btn:hover{ background:#218838; }
+
+    @media print{ 
+      body{ 
+        background:white; 
+        margin: 0;
+                padding: 0;
+            }
+      .page{ 
+        box-shadow:none; 
+        margin: 0;
+        padding: 14mm;
+        width: 210mm;
+        min-height: 297mm;
+        max-height: 297mm;
+        overflow: hidden;
+      } 
+      .download-btn{ display:none !important; }
+      
+      /* Ensure exact A4 dimensions */
+      @page {
+        size: A4;
+                margin: 0;
+            }
+            
+      /* Hide any elements that might cause page breaks */
+      .page * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+            }
+        }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+             <table class="header">
+        <tr>
+          <td class="logo-cell"><img src="/logo.png" alt="Vitrag Associates logo"></td>
+          <td class="title-cell">
+            <h1>VITRAG ASSOCIATES LLP</h1>
+            <div class="subtitle">(CONSTRUCTION MATERIAL TESTING LABORATORY)</div>
+          </td>
+        </tr>
+             </table>
+
+    <div class="meta-wrap">
+      <table class="meta">
+        <colgroup>
+          <col style="width: 20%;">
+          <col style="width: 30%;">
+          <col style="width: 20%;">
+          <col style="width: 30%;">
+        </colgroup>
+        <tr>
+          <td colspan="4" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21.33px; height:1cm;">Determination of Compaction Test (Light/Heavy)</td>
+        </tr>
+        <tr>
+          <td><strong>Sample Test Code Number</strong></td>
+          <td id="sample-test-code"></td>
+          <td><strong>Sample Description</strong></td>
+          <td id="sample-description"></td>
+        </tr>
+        <tr>
+          <td><strong>Date of Receipt</strong></td>
+          <td id="date-of-receipt"></td>
+          <td><strong>Date of Testing</strong></td>
+          <td id="date-of-testing"></td>
+        </tr>
+        <tr>
+          <td><strong>Quantity</strong></td>
+          <td id="quantity"></td>
+          <td><strong>Test Method</strong></td>
+          <td id="test-method" style="text-align: left; vertical-align: middle; font-weight: bold;"><strong>IS 2720 (PART 7-1980)<br>IS 2720 (PART 8-1983)</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Sample Condition</strong></td>
+          <td colspan="3" id="sample-condition"></td>
+        </tr>
+      </table>
+            </div>
+
+            <div class="test-result">
+      <table class="results">
+                    <thead>
+                        <tr>
+                            <td colspan="7" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21.33px; height:1cm;">TEST RESULT</td>
+                        </tr>
+                        <tr>
+            <th style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">Sr. No.</th>
+            <th>Description</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                            <th>5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">1</td>
+                            <td>Weight of the mould Wm (gm)</td>
+                            <td id="weight-mould-1"></td>
+                            <td id="weight-mould-2"></td>
+                            <td id="weight-mould-3"></td>
+                            <td id="weight-mould-4"></td>
+                            <td id="weight-mould-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">2</td>
+                            <td>Weight of the Mould + compacted soil W (gm)</td>
+                            <td id="weight-mould-soil-1"></td>
+                            <td id="weight-mould-soil-2"></td>
+                            <td id="weight-mould-soil-3"></td>
+                            <td id="weight-mould-soil-4"></td>
+                            <td id="weight-mould-soil-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">3</td>
+                            <td>Moisture Container No.</td>
+                            <td id="container-no-1"></td>
+                            <td id="container-no-2"></td>
+                            <td id="container-no-3"></td>
+                            <td id="container-no-4"></td>
+                            <td id="container-no-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">4</td>
+                            <td>Weight of moisture container W₁ (gm)</td>
+                            <td id="weight-container-1"></td>
+                            <td id="weight-container-2"></td>
+                            <td id="weight-container-3"></td>
+                            <td id="weight-container-4"></td>
+                            <td id="weight-container-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">5</td>
+                            <td>Weight of Container + Wet Soil W₂ (gm)</td>
+                            <td id="weight-wet-soil-1"></td>
+                            <td id="weight-wet-soil-2"></td>
+                            <td id="weight-wet-soil-3"></td>
+                            <td id="weight-wet-soil-4"></td>
+                            <td id="weight-wet-soil-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">6</td>
+                            <td>Weight of Container + Dry Soil W₃ (gm)</td>
+                            <td id="weight-dry-soil-1"></td>
+                            <td id="weight-dry-soil-2"></td>
+                            <td id="weight-dry-soil-3"></td>
+                            <td id="weight-dry-soil-4"></td>
+                            <td id="weight-dry-soil-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">7</td>
+                            <td>Wet Density γm = (W-Wm)/ Vm (gm/cm³)</td>
+                            <td id="wet-density-1"></td>
+                            <td id="wet-density-2"></td>
+                            <td id="wet-density-3"></td>
+                            <td id="wet-density-4"></td>
+                            <td id="wet-density-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">8</td>
+                            <td>Moisture Content w% = (W₂-W₃) ×100/(W₃-W₁)</td>
+                            <td id="moisture-content-1"></td>
+                            <td id="moisture-content-2"></td>
+                            <td id="moisture-content-3"></td>
+                            <td id="moisture-content-4"></td>
+                            <td id="moisture-content-5"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">9</td>
+                            <td>Dry Density γd = γm/ (1+w/100) (gm/cm³)</td>
+                            <td id="dry-density-1"></td>
+                            <td id="dry-density-2"></td>
+                            <td id="dry-density-3"></td>
+                            <td id="dry-density-4"></td>
+                            <td id="dry-density-5"></td>
+                        </tr>
+                        <!-- First Observation Table attached to main table -->
+                        <tr>
+                            <td colspan="7" style="border: 1px solid #111; padding: 6px; font-weight: bold; text-decoration: underline; text-align: center; font-size: 21.33px;">Observation</td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">1</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Volume of Mould, Vm :</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="volume-mould"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">2</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Weight of the Rammer :</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="weight-rammer"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">3</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Percentage passing <span id="sieve-size-passing"></span> mm Sieve:</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="percentage-passing"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">4</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Percentage retained on <span id="sieve-size-retained"></span> mm Sieve:</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="percentage-retained"></td>
+                        </tr>
+                        <!-- Second Observation Section -->
+                        <tr>
+                            <td colspan="7" style="border: 1px solid #111; padding: 6px; font-weight: bold; text-decoration: underline; text-align: center; font-size: 21.33px;">Observation</td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">1</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Maximum Dry Density</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="max-dry-density"></td>
+                        </tr>
+                        <tr>
+                            <td style="width:0.5% !important; min-width:0.5% !important; max-width:0.5% !important;">2</td>
+                            <td style="border: 1px solid #111; padding: 6px;">Optimum Moisture Content</td>
+                            <td colspan="5" style="border: 1px solid #111; padding: 6px; text-align: center;" id="optimum-moisture"></td>
+                        </tr>
+        </tbody>
+                </table>
+            </div>
+
+            <!-- Signatures Section -->
+            <div style="margin-top: 24px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #111;">
+                    <tr>
+                        <td class="sig-title" colspan="2" style="width:25% !important; border: 1px solid #111; padding: 6px;">Tested By: <span id="tested-by-name">John Doe</span></td>
+                        <td class="sig-title" colspan="2" style="width:30% !important; border: 1px solid #111; padding: 6px;">Checked By: <span id="checked-by-name">Jane Smith</span></td>
+                        <td class="sig-title" colspan="3" style="width:35% !important; border: 1px solid #111; padding: 6px;">Verified By: <span id="verified-by-name">Prakarsh A Sangave</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="width:25% !important; border: 1px solid #111; padding: 6px;"><strong>Date:</strong> <span id="tested-by-date"></span></td>
+                        <td colspan="2" style="width:30% !important; border: 1px solid #111; padding: 6px;"><strong>Date:</strong> <span id="checked-by-date"></span></td>
+                        <td colspan="3" style="width:35% !important; border: 1px solid #111; padding: 6px;"><strong>Date:</strong> <span id="verified-by-date"></span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="width:25% !important; border: 1px solid #111; padding: 6px;"><strong>Sign:</strong></td>
+                        <td colspan="2" style="width:30% !important; border: 1px solid #111; padding: 6px;"><strong>Sign:</strong></td>
+                        <td colspan="3" style="width:35% !important; border: 1px solid #111; padding: 6px;"><strong>Sign:</strong></td>
+                    </tr>
+                </table>
+            </div>
+
+
+            </div>
+
+
+  <!-- Download PDF Button -->
+  <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
+
+    <script>
+        // Function to populate form data from URL parameters
+        function populateFormData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // General Information (Observation Report)
+      document.getElementById('sample-test-code').textContent = urlParams.get('sample_test_code') || '';
+      document.getElementById('sample-description').textContent = urlParams.get('sample_description') || '';
+      document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '';
+      document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '';
+      document.getElementById('quantity').textContent = urlParams.get('quantity') || '';
+      const testMethodValue = urlParams.get('test_method') || 'IS 2720 (PART 7-1980)\nIS 2720 (PART 8-1983)';
+      document.getElementById('test-method').innerHTML = '<strong>' + testMethodValue.replace(/\n/g, '<br>') + '</strong>';
+      document.getElementById('sample-condition').textContent = urlParams.get('sample_condition') || '';
+            
+            // Test Results (Observation Report) - Form 1 Compaction Test
+      for (let i = 1; i <= 5; i++) {
+                document.getElementById(`weight-mould-${i}`).textContent = urlParams.get(`weight_mould_${i}`) || '';
+                document.getElementById(`weight-mould-soil-${i}`).textContent = urlParams.get(`weight_mould_soil_${i}`) || '';
+                document.getElementById(`container-no-${i}`).textContent = urlParams.get(`container_no_${i}`) || '';
+                document.getElementById(`weight-container-${i}`).textContent = urlParams.get(`weight_container_${i}`) || '';
+                document.getElementById(`weight-wet-soil-${i}`).textContent = urlParams.get(`weight_wet_soil_${i}`) || '';
+                document.getElementById(`weight-dry-soil-${i}`).textContent = urlParams.get(`weight_dry_soil_${i}`) || '';
+                document.getElementById(`wet-density-${i}`).textContent = urlParams.get(`wet_density_${i}`) || '';
+                document.getElementById(`moisture-content-${i}`).textContent = urlParams.get(`moisture_content_${i}`) || '';
+                document.getElementById(`dry-density-${i}`).textContent = urlParams.get(`dry_density_${i}`) || '';
+            }
+            
+            // Observation data
+            document.getElementById('volume-mould').textContent = urlParams.get('volume_mould') || '';
+            document.getElementById('weight-rammer').textContent = urlParams.get('weight_rammer') || '';
+            document.getElementById('sieve-size-passing').textContent = urlParams.get('sieve_size_passing') || '';
+            document.getElementById('percentage-passing').textContent = urlParams.get('percentage_passing') || '';
+            document.getElementById('sieve-size-retained').textContent = urlParams.get('sieve_size_retained') || '';
+            document.getElementById('percentage-retained').textContent = urlParams.get('percentage_retained') || '';
+            document.getElementById('max-dry-density').textContent = urlParams.get('max_dry_density') || '';
+            document.getElementById('optimum-moisture').textContent = urlParams.get('optimum_moisture') || '';
+            
+            // Verification (Observation Report)
+      document.getElementById('tested-by-name').textContent = urlParams.get('tested_by_name') || 'John Doe';
+            document.getElementById('tested-by-date').textContent = urlParams.get('tested_by_date') || '';
+      document.getElementById('checked-by-name').textContent = urlParams.get('checked_by_name') || 'Jane Smith';
+            document.getElementById('checked-by-date').textContent = urlParams.get('checked_by_date') || '';
+      document.getElementById('verified-by-name').textContent = urlParams.get('verified_by_name') || 'Prakarsh A Sangave';
+            document.getElementById('verified-by-date').textContent = urlParams.get('verified_by_date') || '';
+            
+            // Remarks (Observation Report)
+      document.getElementById('remarks-content').textContent = urlParams.get('remarks') || '';
+            
+            // Current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB');
+        }
+        
+
+        // Populate form data when page loads
+        window.onload = function() {
+            populateFormData();
+        };
+
+        // Print function
+        function printReport() {
+            window.print();
+        }
+
+        // Download PDF function - Opens print dialog with custom filename
+        function downloadPDF() {
+            console.log('Download PDF clicked');
+            
+            // Get customer name for default filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const testedByName = urlParams.get('tested_by_name') || 'John_Doe';
+            const sampleTestCode = urlParams.get('sample_test_code') || 'ST-001';
+            const dateOfTesting = urlParams.get('date_of_testing') || new Date().toISOString().split('T')[0];
+            
+            // Create default filename
+            const customerName = testedByName.replace(/\s+/g, '_');
+            const defaultFilename = `Soil_Testing_Compaction_Report_${customerName}_${sampleTestCode}_${dateOfTesting}.pdf`;
+            
+            // Set the document title for print dialog
+            document.title = defaultFilename;
+            
+            // Add print-specific CSS
+            const printStyle = document.createElement('style');
+            printStyle.textContent = `
+              @media print {
+                body { margin: 0; padding: 0; }
+                .page { box-shadow: none; margin: 0; }
+                .no-print { display: none !important; }
+              }
+            `;
+            document.head.appendChild(printStyle);
+            
+            // Hide the download button during print
+            const downloadBtn = document.querySelector('button[onclick="downloadPDF()"]');
+            if (downloadBtn) {
+              downloadBtn.classList.add('no-print');
+            }
+            
+            // Open print dialog directly without pop-up
+            window.print();
+            
+            // Clean up after print
+            setTimeout(() => {
+              if (downloadBtn) {
+                downloadBtn.classList.remove('no-print');
+              }
+              document.head.removeChild(printStyle);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

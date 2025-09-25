@@ -141,9 +141,17 @@ const FineAggregateForm = () => {
     rodded_weight_01: '',
     rodded_weight_02: '',
     rodded_weight_03: '',
+    rodded_density_01: '',
+    rodded_density_02: '',
+    rodded_density_03: '',
     loose_weight_01: '',
     loose_weight_02: '',
     loose_weight_03: '',
+    loose_density_01: '',
+    loose_density_02: '',
+    loose_density_03: '',
+    mean_rodded_density: '',
+    mean_loose_density: '',
     
     // Form 2 - Sieve Analysis
     total_weight: '',
@@ -151,6 +159,27 @@ const FineAggregateForm = () => {
     
     // Form 3 - Specific Gravity
     specific_gravity_data: {},
+    // Form 3 - Specific Gravity & Water Absorption
+    saturated_weight_01: '',
+    saturated_weight_02: '',
+    saturated_weight_03: '',
+    pycnometer_aggregate_water_01: '',
+    pycnometer_aggregate_water_02: '',
+    pycnometer_aggregate_water_03: '',
+    pycnometer_water_01: '',
+    pycnometer_water_02: '',
+    pycnometer_water_03: '',
+    oven_dried_weight_01: '',
+    oven_dried_weight_02: '',
+    oven_dried_weight_03: '',
+    specific_gravity_01: '',
+    specific_gravity_02: '',
+    specific_gravity_03: '',
+    mean_specific_gravity: '',
+    water_absorption_01: '',
+    water_absorption_02: '',
+    water_absorption_03: '',
+    mean_water_absorption: '',
     
     // Verification
     tested_by_name: '',
@@ -164,8 +193,86 @@ const FineAggregateForm = () => {
     remarks: ''
   });
 
+  // Auto-calculate bulk density when form data changes
+  useEffect(() => {
+    if (currentForm === 1 && formData) {
+      // Recalculate all bulk densities when form data changes
+      ['01', '02', '03'].forEach(testNum => {
+        const volume = parseFloat(formData[`volume_${testNum}`] || 0);
+        const roddedWeight = parseFloat(formData[`rodded_weight_${testNum}`] || 0);
+        const looseWeight = parseFloat(formData[`loose_weight_${testNum}`] || 0);
+        
+        if (volume > 0) {
+          if (roddedWeight > 0) {
+            const roddedDensity = roddedWeight / volume;
+            setFormData(prev => ({
+              ...prev,
+              [`rodded_density_${testNum}`]: roddedDensity.toFixed(3)
+            }));
+          }
+          
+          if (looseWeight > 0) {
+            const looseDensity = looseWeight / volume;
+            setFormData(prev => ({
+              ...prev,
+              [`loose_density_${testNum}`]: looseDensity.toFixed(3)
+            }));
+          }
+        }
+      });
+      
+      // Calculate mean values
+      setTimeout(() => {
+        calculateMeanValues();
+      }, 100);
+    }
+  }, [formData?.volume_01, formData?.volume_02, formData?.volume_03, 
+      formData?.rodded_weight_01, formData?.rodded_weight_02, formData?.rodded_weight_03,
+      formData?.loose_weight_01, formData?.loose_weight_02, formData?.loose_weight_03, currentForm]);
+
+  // Auto-calculate specific gravity and water absorption when form data changes (Form 3)
+  useEffect(() => {
+    if (currentForm === 3 && formData) {
+      // Recalculate all specific gravity and water absorption when form data changes
+      ['01', '02', '03'].forEach(testNum => {
+        const A = parseFloat(formData[`saturated_weight_${testNum}`] || 0);
+        const B = parseFloat(formData[`pycnometer_aggregate_water_${testNum}`] || 0);
+        const C = parseFloat(formData[`pycnometer_water_${testNum}`] || 0);
+        const D = parseFloat(formData[`oven_dried_weight_${testNum}`] || 0);
+        
+        if (A > 0 && B > 0 && C > 0 && D > 0) {
+          // Calculate Specific Gravity = [D/A-(B-C)]
+          const specificGravity = D / (A - (B - C));
+          setFormData(prev => ({
+            ...prev,
+            [`specific_gravity_${testNum}`]: specificGravity.toFixed(3)
+          }));
+        }
+        
+        if (A > 0 && D > 0) {
+          // Calculate Water Absorption = [(A-D)/D]*100
+          const waterAbsorption = ((A - D) / D) * 100;
+          setFormData(prev => ({
+            ...prev,
+            [`water_absorption_${testNum}`]: waterAbsorption.toFixed(2)
+          }));
+        }
+      });
+      
+      // Calculate mean values
+      setTimeout(() => {
+        calculateForm3MeanValues();
+      }, 100);
+    }
+  }, [formData?.saturated_weight_01, formData?.saturated_weight_02, formData?.saturated_weight_03,
+      formData?.pycnometer_aggregate_water_01, formData?.pycnometer_aggregate_water_02, formData?.pycnometer_aggregate_water_03,
+      formData?.pycnometer_water_01, formData?.pycnometer_water_02, formData?.pycnometer_water_03,
+      formData?.oven_dried_weight_01, formData?.oven_dried_weight_02, formData?.oven_dried_weight_03, currentForm]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log('handleInputChange called with:', name, value, 'currentForm:', currentForm);
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -173,68 +280,156 @@ const FineAggregateForm = () => {
     
     // Auto-calculate bulk density if it's form 1
     if (currentForm === 1) {
+      console.log('Calling calculateBulkDensity for form 1');
       calculateBulkDensity(name, value);
+    }
+    
+    // Auto-calculate specific gravity and water absorption if it's form 3
+    if (currentForm === 3) {
+      console.log('Calling calculateSpecificGravityAndWaterAbsorption for form 3');
+      calculateSpecificGravityAndWaterAbsorption(name, value);
     }
   };
 
   // Auto-calculation functions matching reference template
 
   const calculateMeanValues = () => {
-    // Calculate mean rodded bulk density
-    const roddedValues = [
-      parseFloat(formData.rodded_density_01) || 0,
-      parseFloat(formData.rodded_density_02) || 0,
-      parseFloat(formData.rodded_density_03) || 0
-    ].filter(val => val > 0);
-    
-    if (roddedValues.length > 0) {
-      const meanRodded = roddedValues.reduce((sum, val) => sum + val, 0) / roddedValues.length;
-      setFormData(prev => ({
+    setFormData(prev => {
+      // Calculate mean rodded bulk density
+      const roddedValues = [
+        parseFloat(prev.rodded_density_01) || 0,
+        parseFloat(prev.rodded_density_02) || 0,
+        parseFloat(prev.rodded_density_03) || 0
+      ].filter(val => val > 0);
+      
+      let meanRodded = '';
+      if (roddedValues.length > 0) {
+        meanRodded = (roddedValues.reduce((sum, val) => sum + val, 0) / roddedValues.length).toFixed(3);
+      }
+      
+      // Calculate mean loose bulk density
+      const looseValues = [
+        parseFloat(prev.loose_density_01) || 0,
+        parseFloat(prev.loose_density_02) || 0,
+        parseFloat(prev.loose_density_03) || 0
+      ].filter(val => val > 0);
+      
+      let meanLoose = '';
+      if (looseValues.length > 0) {
+        meanLoose = (looseValues.reduce((sum, val) => sum + val, 0) / looseValues.length).toFixed(3);
+      }
+      
+      return {
         ...prev,
-        mean_rodded_density: meanRodded.toFixed(3)
-      }));
-    }
-    
-    // Calculate mean loose bulk density
-    const looseValues = [
-      parseFloat(formData.loose_density_01) || 0,
-      parseFloat(formData.loose_density_02) || 0,
-      parseFloat(formData.loose_density_03) || 0
-    ].filter(val => val > 0);
-    
-    if (looseValues.length > 0) {
-      const meanLoose = looseValues.reduce((sum, val) => sum + val, 0) / looseValues.length;
-      setFormData(prev => ({
+        mean_rodded_density: meanRodded,
+        mean_loose_density: meanLoose
+      };
+    });
+  };
+
+  const calculateForm3MeanValues = () => {
+    setFormData(prev => {
+      // Calculate mean specific gravity
+      const specificGravityValues = [
+        parseFloat(prev.specific_gravity_01) || 0,
+        parseFloat(prev.specific_gravity_02) || 0,
+        parseFloat(prev.specific_gravity_03) || 0
+      ].filter(val => val > 0);
+      
+      let meanSpecificGravity = '';
+      if (specificGravityValues.length > 0) {
+        meanSpecificGravity = (specificGravityValues.reduce((sum, val) => sum + val, 0) / specificGravityValues.length).toFixed(3);
+      }
+      
+      // Calculate mean water absorption
+      const waterAbsorptionValues = [
+        parseFloat(prev.water_absorption_01) || 0,
+        parseFloat(prev.water_absorption_02) || 0,
+        parseFloat(prev.water_absorption_03) || 0
+      ].filter(val => val > 0);
+      
+      let meanWaterAbsorption = '';
+      if (waterAbsorptionValues.length > 0) {
+        meanWaterAbsorption = (waterAbsorptionValues.reduce((sum, val) => sum + val, 0) / waterAbsorptionValues.length).toFixed(2);
+      }
+      
+      return {
         ...prev,
-        mean_loose_density: meanLoose.toFixed(3)
-      }));
-    }
+        mean_specific_gravity: meanSpecificGravity,
+        mean_water_absorption: meanWaterAbsorption
+      };
+    });
   };
 
   const calculateBulkDensity = (fieldName, value) => {
+    console.log('calculateBulkDensity called with:', fieldName, value);
+    
     if (fieldName.includes('volume_') || fieldName.includes('rodded_weight_') || fieldName.includes('loose_weight_')) {
       const testNum = fieldName.split('_')[1];
-      const volume = parseFloat(formData[`volume_${testNum}`] || 0);
-      const roddedWeight = parseFloat(formData[`rodded_weight_${testNum}`] || 0);
-      const looseWeight = parseFloat(formData[`loose_weight_${testNum}`] || 0);
+      console.log('Test number:', testNum);
       
-      if (volume > 0) {
-        if (roddedWeight > 0) {
-          const roddedDensity = roddedWeight / volume;
-          setFormData(prev => ({
-            ...prev,
-            [`rodded_density_${testNum}`]: roddedDensity.toFixed(3)
-          }));
+      setFormData(prev => {
+        const updatedData = { ...prev, [fieldName]: value };
+        
+        const volume = parseFloat(updatedData[`volume_${testNum}`] || 0);
+        const roddedWeight = parseFloat(updatedData[`rodded_weight_${testNum}`] || 0);
+        const looseWeight = parseFloat(updatedData[`loose_weight_${testNum}`] || 0);
+        
+        console.log('Values for test', testNum, ':', { volume, roddedWeight, looseWeight });
+        
+        if (volume > 0) {
+          if (roddedWeight > 0) {
+            const roddedDensity = roddedWeight / volume;
+            updatedData[`rodded_density_${testNum}`] = roddedDensity.toFixed(3);
+            console.log('Calculated rodded density:', roddedDensity.toFixed(3));
+          }
+          
+          if (looseWeight > 0) {
+            const looseDensity = looseWeight / volume;
+            updatedData[`loose_density_${testNum}`] = looseDensity.toFixed(3);
+            console.log('Calculated loose density:', looseDensity.toFixed(3));
+          }
         }
         
-        if (looseWeight > 0) {
-          const looseDensity = looseWeight / volume;
-          setFormData(prev => ({
-            ...prev,
-            [`loose_density_${testNum}`]: looseDensity.toFixed(3)
-          }));
+        return updatedData;
+      });
+    }
+  };
+
+  const calculateSpecificGravityAndWaterAbsorption = (fieldName, value) => {
+    console.log('calculateSpecificGravityAndWaterAbsorption called with:', fieldName, value);
+    
+    if (fieldName.includes('saturated_weight_') || fieldName.includes('pycnometer_aggregate_water_') || 
+        fieldName.includes('pycnometer_water_') || fieldName.includes('oven_dried_weight_')) {
+      const testNum = fieldName.split('_')[1];
+      console.log('Test number:', testNum);
+      
+      setFormData(prev => {
+        const updatedData = { ...prev, [fieldName]: value };
+        
+        const A = parseFloat(updatedData[`saturated_weight_${testNum}`] || 0); // Saturated Surface Dry
+        const B = parseFloat(updatedData[`pycnometer_aggregate_water_${testNum}`] || 0); // Pycnometer + Aggregate + Water
+        const C = parseFloat(updatedData[`pycnometer_water_${testNum}`] || 0); // Pycnometer + Water
+        const D = parseFloat(updatedData[`oven_dried_weight_${testNum}`] || 0); // Oven Dried
+        
+        console.log('Values for test', testNum, ':', { A, B, C, D });
+        
+        // Calculate Specific Gravity = [D/A-(B-C)]
+        if (A > 0 && B > 0 && C > 0 && D > 0) {
+          const specificGravity = D / (A - (B - C));
+          updatedData[`specific_gravity_${testNum}`] = specificGravity.toFixed(3);
+          console.log('Calculated specific gravity:', specificGravity.toFixed(3));
         }
-      }
+        
+        // Calculate Water Absorption = [(A-D)/D]*100
+        if (A > 0 && D > 0) {
+          const waterAbsorption = ((A - D) / D) * 100;
+          updatedData[`water_absorption_${testNum}`] = waterAbsorption.toFixed(2);
+          console.log('Calculated water absorption:', waterAbsorption.toFixed(2));
+        }
+        
+        return updatedData;
+      });
     }
   };
 
@@ -855,6 +1050,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="saturated_weight_01"
+                      value={formData.saturated_weight_01}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -863,6 +1061,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="saturated_weight_02"
+                      value={formData.saturated_weight_02}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -871,6 +1072,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="saturated_weight_03"
+                      value={formData.saturated_weight_03}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -884,6 +1088,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_aggregate_water_01"
+                      value={formData.pycnometer_aggregate_water_01}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -892,6 +1099,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_aggregate_water_02"
+                      value={formData.pycnometer_aggregate_water_02}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -900,6 +1110,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_aggregate_water_03"
+                      value={formData.pycnometer_aggregate_water_03}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -913,6 +1126,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_water_01"
+                      value={formData.pycnometer_water_01}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -921,6 +1137,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_water_02"
+                      value={formData.pycnometer_water_02}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -929,6 +1148,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="pycnometer_water_03"
+                      value={formData.pycnometer_water_03}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -942,6 +1164,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="oven_dried_weight_01"
+                      value={formData.oven_dried_weight_01}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -950,6 +1175,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="oven_dried_weight_02"
+                      value={formData.oven_dried_weight_02}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -958,6 +1186,9 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      name="oven_dried_weight_03"
+                      value={formData.oven_dried_weight_03}
+                      onChange={handleInputChange}
                       className="form-control form-control-sm" 
                       style={{ height: '30px' }}
                     />
@@ -971,24 +1202,27 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.001" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.specific_gravity_01 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                   <td style={{ padding: '4px', textAlign: 'center', border: '1px solid #dee2e6' }}>
                     <Form.Control 
                       type="number" 
                       step="0.001" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.specific_gravity_02 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                   <td style={{ padding: '4px', textAlign: 'center', border: '1px solid #dee2e6' }}>
                     <Form.Control 
                       type="number" 
                       step="0.001" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.specific_gravity_03 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                     </tr>
@@ -1000,6 +1234,8 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.001" 
+                      value={formData.mean_specific_gravity || ''}
+                      readOnly
                       className="form-control form-control-sm average-input-transparent" 
                       style={{ height: '30px', backgroundColor: 'var(--bs-dark)', background: 'var(--bs-dark)', backgroundImage: 'none', border: '1px solid var(--bs-gray-700)', color: '#ffffff', WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none', boxShadow: 'none', outline: 'none' }}
                     />
@@ -1013,24 +1249,27 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.water_absorption_01 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                   <td style={{ padding: '4px', textAlign: 'center', border: '1px solid #dee2e6' }}>
                     <Form.Control 
                       type="number" 
                       step="0.01" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.water_absorption_02 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                   <td style={{ padding: '4px', textAlign: 'center', border: '1px solid #dee2e6' }}>
                     <Form.Control 
                       type="number" 
                       step="0.01" 
-                      className="form-control form-control-sm" 
-                      style={{ height: '30px' }}
+                      value={formData.water_absorption_03 || ''}
+                      readOnly
+                      style={{ height: '30px', backgroundColor: '#f8f9fa' }}
                     />
                   </td>
                     </tr>
@@ -1042,6 +1281,8 @@ const FineAggregateForm = () => {
                     <Form.Control 
                       type="number" 
                       step="0.01" 
+                      value={formData.mean_water_absorption || ''}
+                      readOnly
                       className="form-control form-control-sm average-input-transparent" 
                       style={{ height: '30px', backgroundColor: 'var(--bs-dark)', background: 'var(--bs-dark)', backgroundImage: 'none', border: '1px solid var(--bs-gray-700)', color: '#ffffff', WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none', boxShadow: 'none', outline: 'none' }}
                     />
