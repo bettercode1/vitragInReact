@@ -1,0 +1,236 @@
+/* Styles for sortable table headers */
+.samples-table th.sortable {
+    cursor: pointer;
+    position: relative;
+}
+
+.samples-table th.sortable:hover {
+    background-color: #495057;
+}
+
+.sort-icon {
+    display: inline-block;
+    width: 10px;
+}
+
+/* Highlight current search results */
+.highlight {
+    background-color: yellow;
+    padding: 2px;
+}
+
+/* Make the table more readable */
+.samples-table td, .samples-table th {
+    vertical-align: middle;
+}
+
+/* Make the filter section sticky */
+.filter-section {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #212529;
+    padding: 10px 0;
+    border-bottom: 1px solid #495057;
+}
+
+/* Make table headers sticky */
+.samples-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #2B3245;
+    color: white;
+    border-bottom: 2px solid #dee2e6;
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Ensure table container has proper scrolling */
+.table-responsive {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Improve table body alignment */
+.samples-table tbody td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px 8px;
+    font-size: 13px;
+}
+
+/* Left align text content in certain columns */
+.samples-table tbody td:nth-child(4), /* Customer Name */
+.samples-table tbody td:nth-child(5), /* Site Name */
+.samples-table tbody td:nth-child(8), /* Test Requirement */
+.samples-table tbody td:nth-child(13) /* Remarks */ {
+    text-align: left;
+}
+
+/* Center align action buttons */
+.samples-table tbody td:nth-child(14) { /* Actions column */
+    text-align: center;
+}
+
+/* Sort icon styling */
+.sort-icon {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* Fix form elements to use dark theme */
+.bg-dark .form-control,
+.bg-dark .form-select {
+    background-color: #495057 !important;
+    border-color: #6c757d !important;
+    color: #fff !important;
+}
+
+.bg-dark .form-control:focus,
+.bg-dark .form-select:focus {
+    background-color: #495057 !important;
+    border-color: #FFA500 !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25) !important;
+}
+
+.bg-dark .form-control::placeholder {
+    color: #adb5bd !important;
+}
+
+/* Fix dropdown options */
+.bg-dark .form-select option {
+    background-color: #495057 !important;
+    color: #fff !important;
+}
+
+/* Fix form labels in dark theme */
+.bg-dark .form-label {
+    color: #fff !important;
+}
+
+/* Fix input group buttons */
+.bg-dark .input-group .btn {
+    background-color: #FFA500 !important;
+    border-color: #FFA500 !important;
+}
+
+/* Professional filter section styling */
+.bg-secondary {
+    background-color: #495057 !important;
+}
+
+.bg-secondary .form-control,
+.bg-secondary .form-select {
+    background-color: #212529 !important;
+    border-color: #495057 !important;
+    color: #fff !important;
+}
+
+.bg-secondary .form-control:focus,
+.bg-secondary .form-select:focus {
+    background-color: #212529 !important;
+    border-color: #FFA500 !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 165, 0, 0.25) !important;
+}
+
+.bg-secondary .form-control::placeholder {
+    color: #adb5bd !important;
+}
+
+.bg-secondary .input-group-text {
+    background-color: #212529 !important;
+    border-color: #495057 !important;
+    color: #fff !important;
+}
+
+.bg-secondary .form-select option {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+.bg-secondary .btn-outline-light {
+    border-color: #fff !important;
+    color: #fff !important;
+}
+
+.bg-secondary .btn-outline-light:hover {
+    background-color: #fff !important;
+    color: #212529 !important;
+}
+
+/* Custom table styling */
+.samples-table {
+    font-size: 0.875rem;
+}
+
+.samples-table th {
+    background-color: #2B3245 !important;
+    color: white !important;
+    border-color: #495057 !important;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.samples-table td {
+    border-color: #dee2e6 !important;
+}
+
+.samples-table tbody tr:hover {
+    background-color: rgba(255, 165, 0, 0.1) !important;
+}
+
+/* Orange theme overrides */
+.btn-warning {
+    background-color: #FFA500 !important;
+    border-color: #FFA500 !important;
+    color: #000 !important;
+}
+
+.btn-warning:hover {
+    background-color: #e69500 !important;
+    border-color: #e69500 !important;
+    color: #000 !important;
+}
+
+.badge.bg-warning {
+    background-color: #FFA500 !important;
+    color: #000 !important;
+}
+
+/* Primary button override to orange */
+.btn-primary {
+    background-color: #FFA500 !important;
+    border-color: #FFA500 !important;
+    color: #000 !important;
+}
+
+.btn-primary:hover {
+    background-color: #e69500 !important;
+    border-color: #e69500 !important;
+    color: #000 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .samples-table {
+        font-size: 0.75rem;
+    }
+    
+    .samples-table th,
+    .samples-table td {
+        padding: 6px 4px;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}

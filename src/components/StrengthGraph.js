@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Container, Card, Button, Table, Row, Col, Form, Alert } from 'react-bootstrap';
+import { Container, Card, Button, Table, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faDownload, faChartLine, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import GraphService from '../services/graphService';
 
 const StrengthGraph = () => {
   const navigate = useNavigate();
@@ -26,6 +29,8 @@ const StrengthGraph = () => {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
+  const [generatedGraph, setGeneratedGraph] = useState(null);
+  const [serviceStatus, setServiceStatus] = useState({ available: false });
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -48,6 +53,15 @@ const StrengthGraph = () => {
     }
   }, [observationsData]);
 
+  // Check graph service status on component mount
+  useEffect(() => {
+    const checkService = async () => {
+      const status = await GraphService.checkServiceStatus();
+      setServiceStatus(status);
+    };
+    checkService();
+  }, []);
+
   // Redraw graph when data changes
   useEffect(() => {
     if (showGraph) {
@@ -61,6 +75,100 @@ const StrengthGraph = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Generate graph using Matplotlib service
+  const generateMatplotlibGraph = async () => {
+    if (!serviceStatus.available) {
+      alert('Graph generation service is not available. Please ensure the Python backend is running.');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Prepare test data for graph generation
+      const testResults = [];
+      
+      // Add test results from observations if available
+      if (observationsData?.testRows && observationsData.testRows.length > 0) {
+        observationsData.testRows.forEach((row, index) => {
+          testResults.push({
+            cube_number: index + 1,
+            compressive_strength: parseFloat(row.compressiveStrength) || 0,
+            age_in_days: 28, // Default age
+            casting_date: row.castingDate || 'N/A',
+            testing_date: row.testingDate || 'N/A'
+          });
+        });
+      } else {
+        // Use manual input data
+        if (strengthData.actual_7) {
+          testResults.push({
+            cube_number: 1,
+            compressive_strength: parseFloat(strengthData.actual_7) || 0,
+            age_in_days: 7,
+            casting_date: 'N/A',
+            testing_date: 'N/A'
+          });
+        }
+        if (strengthData.actual_14) {
+          testResults.push({
+            cube_number: 2,
+            compressive_strength: parseFloat(strengthData.actual_14) || 0,
+            age_in_days: 14,
+            casting_date: 'N/A',
+            testing_date: 'N/A'
+          });
+        }
+        if (strengthData.actual_28) {
+          testResults.push({
+            cube_number: 3,
+            compressive_strength: parseFloat(strengthData.actual_28) || 0,
+            age_in_days: 28,
+            casting_date: 'N/A',
+            testing_date: 'N/A'
+          });
+        }
+      }
+
+      if (testResults.length === 0) {
+        alert('Please enter test results before generating the graph.');
+        return;
+      }
+
+      // Prepare test data
+      const testData = {
+        job_number: formData?.jobNumber || testData?.job_number || 'N/A',
+        customer_name: formData?.customerName || testData?.customer_name || 'N/A',
+        site_name: formData?.siteName || testData?.site_name || 'N/A',
+        grade: 'M25', // Default grade
+        casting_date: 'N/A',
+        test_results: testResults
+      };
+
+      // Generate graph
+      const result = await GraphService.generateStrengthGraph(testData);
+      
+      if (result.success) {
+        setGeneratedGraph(result);
+        setShowGraph(true);
+      } else {
+        alert(`Graph generation failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error generating graph:', error);
+      alert('Error generating graph. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Download generated graph
+  const downloadGraph = () => {
+    if (generatedGraph) {
+      const filename = `strength_graph_${generatedGraph.jobNumber || 'test'}.png`;
+      GraphService.downloadGraph(generatedGraph.imageData, filename);
+    }
   };
 
   const fillRandomData = () => {
@@ -522,6 +630,7 @@ const StrengthGraph = () => {
                   </Button>
                   <Button 
                     variant="success" 
+                    className="me-2"
                     size="lg"
                     onClick={generateGraph}
                     disabled={isGenerating}
@@ -533,7 +642,26 @@ const StrengthGraph = () => {
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-chart-bar me-2"></i> Generate Graph
+                        <i className="fas fa-chart-bar me-2"></i> Generate Graph (Chart.js)
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="warning" 
+                    size="lg"
+                    onClick={generateMatplotlibGraph}
+                    disabled={isGenerating || !serviceStatus.available}
+                    title={!serviceStatus.available ? 'Graph service not available' : 'Generate professional graph with Matplotlib'}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} className="me-2" spin />
+                        Generating Matplotlib Graph...
+                      </>
+                    ) : (
+                      <>
+                        <FontAwesomeIcon icon={faChartLine} className="me-2" />
+                        Generate Matplotlib Graph
                       </>
                     )}
                   </Button>
@@ -621,6 +749,69 @@ const StrengthGraph = () => {
                   </Card.Body>
                 </Card>
                 
+                {/* Matplotlib Graph Display */}
+                {generatedGraph && (
+                  <Row className="mt-4">
+                    <Col xs={12}>
+                      <h4 className="text-center mb-3 text-white">
+                        <FontAwesomeIcon icon={faChartLine} className="me-2" />
+                        Professional Matplotlib Graph
+                      </h4>
+                      <Card>
+                        <Card.Body className="text-center">
+                          <div className="d-flex justify-content-center mb-3">
+                            <img 
+                              src={GraphService.getImageDataUrl(generatedGraph.imageData)}
+                              alt="Matplotlib Strength Graph"
+                              style={{ 
+                                maxWidth: '100%', 
+                                height: 'auto',
+                                border: '2px solid #FFA500',
+                                borderRadius: '8px'
+                              }}
+                            />
+                          </div>
+                          <div className="d-flex justify-content-center gap-2">
+                            <Button 
+                              variant="warning" 
+                              onClick={downloadGraph}
+                            >
+                              <FontAwesomeIcon icon={faDownload} className="me-2" />
+                              Download Graph
+                            </Button>
+                            <Button 
+                              variant="outline-light" 
+                              onClick={() => setGeneratedGraph(null)}
+                            >
+                              Close Graph
+                            </Button>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+                )}
+                
+                {/* Service Status Alert */}
+                {!serviceStatus.available && (
+                  <Row className="mt-3">
+                    <Col xs={12}>
+                      <Alert variant="warning">
+                        <Alert.Heading>Graph Service Not Available</Alert.Heading>
+                        <p>
+                          The Matplotlib graph generation service is not running. 
+                          To use professional graph generation:
+                        </p>
+                        <ol>
+                          <li>Install Python dependencies: <code>pip install matplotlib numpy</code></li>
+                          <li>Start the graph server: <code>node graph-server.js</code></li>
+                          <li>Refresh this page</li>
+                        </ol>
+                      </Alert>
+                    </Col>
+                  </Row>
+                )}
+                
                 {/* Complete Test Button */}
                 <div className="text-center mt-4">
                   <Card className="border-success">
@@ -635,7 +826,7 @@ const StrengthGraph = () => {
                         variant="success" 
                         size="lg" 
                         className="px-5 py-3"
-                        onClick={() => navigate('/view-sample', { state: { formData: formData } })}
+                        onClick={() => navigate('/test-report-preview', { state: { testData: { ...formData, ...testData, strengthData } } })}
                       >
                         <i className="fas fa-clipboard-check me-2"></i> Complete Test
                       </Button>

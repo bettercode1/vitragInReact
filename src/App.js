@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './styles/custom.css';
@@ -22,12 +22,21 @@ import ViewSample from './components/ViewSample';
 import TestObservations from './components/TestObservations';
 import StrengthGraph from './components/StrengthGraph';
 import OtherServicesDashboard from './components/OtherServicesDashboard';
+import TestRecords from './components/TestRecords';
+import TestReportPreview from './components/TestReportPreview';
+import PDFView from './components/PDFView';
 import AACBlocksForm from './components/otherServices/AACBlock/AACBlocksForm';
 import FineAggregateForm from './components/otherServices/FineAggregate/FineAggregateForm';
 import LiquidAdmixtureForm from './components/otherServices/LiquidAdmixture/LiquidAdmixtureForm';
 import BulkDensityMoistureForm from './components/otherServices/BulkDensity/BulkDensityMoistureForm';
 import CementTestingForm from './components/otherServices/CementTesting/CementTestingForm';
 import CoarseAggregateForm from './components/otherServices/CoarseAggregate/CoarseAggregateForm';
+
+// Component to handle ViewSample with proper key
+const ViewSampleWithKey = () => {
+  const location = useLocation();
+  return <ViewSample key={location.pathname + location.search} />;
+};
 
 function App() {
   return (
@@ -49,10 +58,13 @@ function App() {
                   <Route path="/customers" element={<Customers />} />
                   <Route path="/other-services" element={<OtherServices />} />
                   <Route path="/other-services-dashboard" element={<OtherServicesDashboard />} />
+                  <Route path="/test-records" element={<TestRecords />} />
                   <Route path="/cube-testing-services" element={<CubeTestingServices />} />
-                  <Route path="/view-sample" element={<ViewSample />} />
+                  <Route path="/view-sample" element={<ViewSampleWithKey />} />
                   <Route path="/test-observations" element={<TestObservations />} />
                   <Route path="/strength-graph" element={<StrengthGraph />} />
+                  <Route path="/test-report-preview" element={<TestReportPreview />} />
+                  <Route path="/pdf-view" element={<PDFView />} />
                   <Route path="/generate-pdf/:testRequestId?" element={<GeneratePDF />} />
                   <Route path="/bulk-density-moisture-form" element={<BulkDensityMoistureForm />} />
                   <Route path="/liquid-admixture-form" element={<LiquidAdmixtureForm />} />
