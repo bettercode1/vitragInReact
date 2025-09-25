@@ -10,7 +10,10 @@ import {
   faClipboardCheck,
   faChartLine,
   faCheckCircle,
-  faFilePdf
+  faFilePdf,
+  faEye,
+  faEdit,
+  faPaperclip
 } from '@fortawesome/free-solid-svg-icons';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { useData } from '../contexts/DataContext';
@@ -20,12 +23,18 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const { testRequests, customers, samples, loading, error, getTestRequestForPDF } = useData();
 
-  // Calculate stats from real data
-  const stats = {
-    totalTests: testRequests.length || 185,
-    pendingTests: testRequests.filter(tr => tr.status === 'pending').length || 184,
-    completedTests: testRequests.filter(tr => tr.status === 'completed').length || 1
+  // Calculate stats from real data or use sample data
+  const sampleStats = {
+    totalTests: 188,
+    pendingTests: 175,
+    completedTests: 13
   };
+  
+  const stats = testRequests.length > 0 ? {
+    totalTests: testRequests.length,
+    pendingTests: testRequests.filter(tr => tr.status === 'pending' || tr.status === 'sample-received').length,
+    completedTests: testRequests.filter(tr => tr.status === 'completed' || tr.status === 'results-available').length
+  } : sampleStats;
 
   const achievements = [
     { id: 1, name: 'First Test', icon: faVial, requirement: 1, completed: Math.min(stats.totalTests, 1), color: 'success', unlocked: true },
@@ -36,7 +45,7 @@ const Dashboard = () => {
     { id: 6, name: '100 Tests', icon: faCheckCircle, requirement: 100, completed: Math.min(stats.totalTests, 100), color: stats.totalTests >= 100 ? 'danger' : 'secondary', unlocked: stats.totalTests >= 100 }
   ];
 
-  // Use real test data from database
+  // Use real test data from database or sample data
   const testData = testRequests.length > 0 ? testRequests.map(tr => ({
     id: tr.id,
     jobNumber: tr.job_number,
@@ -48,10 +57,73 @@ const Dashboard = () => {
   })) : [
     {
       id: 1,
+      jobNumber: 'T-2501690',
+      customer: 'Lords Developers Shivyogi Residency',
+      site: 'shivyogi residency',
+      receiptDate: '25-08-2025',
+      status: 'results-available',
+      statusText: 'Results Available'
+    },
+    {
+      id: 2,
+      jobNumber: 'T-2501609',
+      customer: 'Maheshwari Constrosolution Wadia Hospital',
+      site: 'Wadia Hospital',
+      receiptDate: '18-08-2025',
+      status: 'sample-received',
+      statusText: 'Sample Received'
+    },
+    {
+      id: 3,
+      jobNumber: '2088888',
+      customer: 'Ishan Kishan',
+      site: 'pune',
+      receiptDate: '08-09-2025',
+      status: 'results-available',
+      statusText: 'Results Available'
+    },
+    {
+      id: 4,
       jobNumber: '1414141414',
       customer: 'Shashwat Paratwar',
       site: 'Pune',
       receiptDate: '04-09-2025',
+      status: 'results-available',
+      statusText: 'Results Available'
+    },
+    {
+      id: 5,
+      jobNumber: '-',
+      customer: 'Dhananjay Dube',
+      site: 'Pune',
+      receiptDate: '03-09-2025',
+      status: 'sample-received',
+      statusText: 'Sample Received'
+    },
+    {
+      id: 6,
+      jobNumber: '1896321',
+      customer: 'KI Rahul',
+      site: 'hhH',
+      receiptDate: '14-08-2025',
+      status: 'results-available',
+      statusText: 'Results Available'
+    },
+    {
+      id: 7,
+      jobNumber: 'T-2501500',
+      customer: 'Rishabh Pant',
+      site: 'Delhi',
+      receiptDate: '03-08-2025',
+      status: 'results-available',
+      statusText: 'Results Available'
+    },
+    {
+      id: 8,
+      jobNumber: 'T-2501501',
+      customer: 'Paras Mudholkar',
+      site: 'Mumbai',
+      receiptDate: '03-08-2025',
       status: 'results-available',
       statusText: 'Results Available'
     }
@@ -79,15 +151,15 @@ const Dashboard = () => {
       'pending': 'secondary',
       'sample-received': 'warning',
       'observations-taken': 'info',
-      'results-available': 'primary',
+      'results-available': 'warning',
       'completed': 'success'
     };
     return variants[status] || 'secondary';
   };
 
   const filteredTests = testData.filter(test => {
-    if (activeTab === 'pending') return test.status === 'pending';
-    if (activeTab === 'completed') return test.status === 'completed';
+    if (activeTab === 'pending') return test.status === 'pending' || test.status === 'sample-received';
+    if (activeTab === 'completed') return test.status === 'completed' || test.status === 'results-available';
     return true; // all tests
   });
 
@@ -306,291 +378,274 @@ const Dashboard = () => {
         {/* Test Management */}
         <Row>
           <Col>
-            <div className="p-4" style={{
-              background: 'linear-gradient(135deg, var(--vitrag-card-bg) 0%, #2a3441 100%)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 215, 0, 0.1)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+            <div style={{
+              background: '#1C2333',
+              borderRadius: '15px',
+              padding: '0',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+              overflow: 'hidden'
             }}>
-              <Tabs
-                activeKey={activeTab}
-                onSelect={(k) => setActiveTab(k)}
-                className="mb-4"
-                style={{ 
-                  borderBottom: '3px solid var(--vitrag-orange)',
-                  borderRadius: '10px 10px 0 0'
-                }}
-              >
-                <Tab 
-                  eventKey="pending" 
-                  title="Pending Tests" 
-                  style={{ 
-                    borderBottom: activeTab === 'pending' ? '3px solid var(--vitrag-orange)' : 'none',
-                    backgroundColor: activeTab === 'pending' ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-                    borderRadius: '10px 10px 0 0',
-                    padding: '10px 20px',
-                    fontWeight: '600'
-                  }}
-                >
-                </Tab>
-                <Tab 
-                  eventKey="completed" 
-                  title="Completed Tests"
-                  style={{ 
-                    backgroundColor: activeTab === 'completed' ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-                    borderRadius: '10px 10px 0 0',
-                    padding: '10px 20px',
-                    fontWeight: '600'
-                  }}
-                >
-                </Tab>
-                <Tab 
-                  eventKey="all" 
-                  title="All Tests"
-                  style={{ 
-                    backgroundColor: activeTab === 'all' ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-                    borderRadius: '10px 10px 0 0',
-                    padding: '10px 20px',
-                    fontWeight: '600'
-                  }}
-                >
-                </Tab>
-              </Tabs>
-
-              {/* Bulk Actions */}
-              <div className="mb-4 d-flex gap-2 align-items-center">
-                <Dropdown>
-                  <Dropdown.Toggle 
-                    variant="outline-secondary" 
-                    size="sm"
+              {/* Tab Navigation */}
+              <div style={{
+                background: '#1C2333',
+                padding: '0',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <div className="d-flex">
+                  <button
+                    onClick={() => setActiveTab('pending')}
                     style={{
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontWeight: '500'
+                      background: activeTab === 'pending' ? '#FFA500' : 'transparent',
+                      color: activeTab === 'pending' ? '#000000' : '#ffffff',
+                      border: 'none',
+                      padding: '15px 25px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      borderBottom: activeTab === 'pending' ? '3px solid #FFA500' : '3px solid transparent'
                     }}
                   >
-                    Bulk Actions...
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu style={{
-                    backgroundColor: 'var(--vitrag-card-bg)',
-                    border: '1px solid rgba(255, 215, 0, 0.2)',
-                    borderRadius: '10px'
-                  }}>
-                    <Dropdown.Item style={{ color: 'white' }}>Delete Selected</Dropdown.Item>
-                    <Dropdown.Item style={{ color: 'white' }}>Export Selected</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-                <Button 
-                  size="sm" 
-                  variant="outline-primary"
-                  style={{
-                    borderRadius: '8px',
-                    border: '1px solid var(--vitrag-orange)',
-                    backgroundColor: 'rgba(255, 165, 0, 0.1)',
-                    color: 'var(--vitrag-orange)',
-                    fontWeight: '500'
-                  }}
-                >
-                  Apply
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline-secondary"
-                  style={{
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
-                    fontWeight: '500'
-                  }}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline-secondary"
-                  style={{
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
-                    fontWeight: '500'
-                  }}
-                >
-                  Deselect All
-                </Button>
-                            <PDFDownloadLink
-                              document={<ConcreteCubeFinalTest testData={pdfTestData} />}
-                              fileName={`Simple_${pdfTestData.test_request.job_number}.pdf`}
-                            >
-                              {({ blob, url, loading, error }) => (
-                                <Button
-                                  size="sm"
-                                  variant="success"
-                                  disabled={loading}
-                                  onClick={(e) => {
-                                    if (error) {
-                                      console.error('PDF Error:', error);
-                                      alert('Error: ' + error.message);
-                                      return;
-                                    }
-                                    if (blob && !loading) {
-                                      e.preventDefault();
-                                      const pdfUrl = URL.createObjectURL(blob);
-                                      window.open(pdfUrl, '_blank');
-                                      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
-                                    }
-                                  }}
-                                  style={{
-                                    borderRadius: '8px',
-                                    border: '1px solid #28a745',
-                                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                                    color: '#28a745',
-                                    fontWeight: '500',
-                                    marginLeft: '10px'
-                                  }}
-                                >
-                                  <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-                                  {loading ? 'Generating...' : error ? 'Error!' : 'Simple Working PDF'}
-                                </Button>
-                              )}
-                            </PDFDownloadLink>
-
-                            
-                            <PDFDownloadLink
-                              document={<ConcreteCubeFinalTest testData={invoiceData} />}
-                              fileName={`Invoice_${invoiceData.invoiceNumber}.pdf`}
-                              style={{
-                                textDecoration: 'none',
-                                marginLeft: '10px'
-                              }}
-                            >
-                              {({ blob, url, loading, error }) => (
-                                <Button
-                                  size="sm"
-                                  variant="primary"
-                                  disabled={loading}
-                                  style={{
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--vitrag-orange)',
-                                    backgroundColor: 'rgba(255, 165, 0, 0.1)',
-                                    color: 'var(--vitrag-orange)',
-                                    fontWeight: '500'
-                                  }}
-                                >
-                                  <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-                                  {loading ? 'Generating...' : 'Generate Invoice'}
-                                </Button>
-                              )}
-                            </PDFDownloadLink>
+                    Pending Tests
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('completed')}
+                    style={{
+                      background: activeTab === 'completed' ? '#FFA500' : 'transparent',
+                      color: activeTab === 'completed' ? '#000000' : '#ffffff',
+                      border: 'none',
+                      padding: '15px 25px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      borderBottom: activeTab === 'completed' ? '3px solid #FFA500' : '3px solid transparent'
+                    }}
+                  >
+                    Completed Tests
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    style={{
+                      background: activeTab === 'all' ? '#FFA500' : 'transparent',
+                      color: activeTab === 'all' ? '#000000' : '#ffffff',
+                      border: 'none',
+                      padding: '15px 25px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      borderBottom: activeTab === 'all' ? '3px solid #FFA500' : '3px solid transparent'
+                    }}
+                  >
+                    All Tests
+                  </button>
+                </div>
               </div>
 
-              <div className="table-responsive">
-                <Table className="table-vitrag" style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: '10px',
-                  overflow: 'hidden'
-                }}>
-                  <thead style={{
-                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05))',
-                    borderBottom: '2px solid var(--vitrag-orange)'
+              {/* Table Container */}
+              <div style={{
+                background: '#1C2333',
+                padding: '20px'
+              }}>
+                <div className="table-responsive">
+                  <Table style={{
+                    backgroundColor: '#1C2333',
+                    color: '#ffffff',
+                    margin: '0',
+                    borderCollapse: 'collapse',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
                   }}>
-                    <tr>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
+                    <thead>
+                      <tr style={{
+                        background: 'linear-gradient(135deg, rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.05))',
+                        borderBottom: '2px solid #FFA500'
                       }}>
-                        <Form.Check type="checkbox" />
-                      </th>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
-                      }}>Job Number</th>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
-                      }}>Customer</th>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
-                      }}>Site</th>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
-                      }}>Receipt Date</th>
-                      <th style={{ 
-                        color: 'var(--vitrag-gold)', 
-                        fontWeight: '600',
-                        padding: '15px',
-                        border: 'none'
-                      }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredTests.map((test) => (
-                      <tr key={test.id} style={{
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        transition: 'background-color 0.3s ease'
-                      }}>
-                        <td style={{ padding: '15px', border: 'none' }}>
-                          <Form.Check type="checkbox" />
-                        </td>
-                        <td style={{ 
-                          padding: '15px', 
-                          border: 'none',
-                          color: 'white',
-                          fontWeight: '500'
-                        }}>{test.jobNumber}</td>
-                        <td style={{ 
-                          padding: '15px', 
-                          border: 'none',
-                          color: 'white',
-                          fontWeight: '500'
-                        }}>{test.customer}</td>
-                        <td style={{ 
-                          padding: '15px', 
-                          border: 'none',
-                          color: 'white',
-                          fontWeight: '500'
-                        }}>{test.site}</td>
-                        <td style={{ 
-                          padding: '15px', 
-                          border: 'none',
-                          color: 'white',
-                          fontWeight: '500'
-                        }}>{test.receiptDate}</td>
-                        <td style={{ padding: '15px', border: 'none' }}>
-                          <Button 
-                            size="sm" 
-                            variant="warning" 
-                            className="badge-vitrag"
-                            style={{
-                              borderRadius: '20px',
-                              padding: '8px 16px',
-                              fontWeight: '600',
-                              boxShadow: '0 2px 8px rgba(255, 193, 7, 0.3)',
-                              border: 'none'
-                            }}
-                          >
-                            {test.statusText}
-                          </Button>
-                        </td>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>
+                          <Form.Check type="checkbox" style={{ color: '#FFD700' }} />
+                        </th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Job Number</th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Customer</th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Site</th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Receipt Date</th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Status</th>
+                        <th style={{ 
+                          color: '#FFD700', 
+                          fontWeight: '600',
+                          padding: '15px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          background: 'transparent'
+                        }}>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                    </thead>
+                    <tbody>
+                      {filteredTests.map((test, index) => (
+                        <tr key={test.id} style={{
+                          background: index % 2 === 0 ? '#1C2333' : 'rgba(255, 255, 255, 0.02)',
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                          transition: 'background-color 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255, 165, 0, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = index % 2 === 0 ? '#1C2333' : 'rgba(255, 255, 255, 0.02)';
+                        }}
+                        >
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff'
+                          }}>
+                            <Form.Check type="checkbox" style={{ color: '#ffffff' }} />
+                          </td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            fontWeight: '500'
+                          }}>{test.jobNumber}</td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            fontWeight: '500'
+                          }}>{test.customer}</td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            fontWeight: '500'
+                          }}>{test.site}</td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            fontWeight: '500'
+                          }}>{test.receiptDate}</td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                          }}>
+                            <Button 
+                              size="sm" 
+                              variant={test.status === 'sample-received' ? 'success' : 'warning'}
+                              style={{
+                                borderRadius: '20px',
+                                padding: '8px 16px',
+                                fontWeight: '600',
+                                boxShadow: test.status === 'sample-received' ? '0 2px 8px rgba(40, 167, 69, 0.3)' : '0 2px 8px rgba(255, 193, 7, 0.3)',
+                                border: 'none',
+                                backgroundColor: test.status === 'sample-received' ? '#28a745' : '#ffc107',
+                                color: test.status === 'sample-received' ? '#ffffff' : '#000000',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              {test.status === 'sample-received' ? (
+                                <FontAwesomeIcon icon={faPaperclip} />
+                              ) : (
+                                <FontAwesomeIcon icon={faChartLine} />
+                              )}
+                              {test.statusText}
+                            </Button>
+                          </td>
+                          <td style={{ 
+                            padding: '15px', 
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                          }}>
+                            <div className="d-flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="info"
+                                style={{
+                                  borderRadius: '8px',
+                                  padding: '6px 12px',
+                                  fontWeight: '500',
+                                  backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                                  border: '1px solid #0dcaf0',
+                                  color: '#0dcaf0'
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faEye} className="me-1" />
+                                View
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="info"
+                                style={{
+                                  borderRadius: '8px',
+                                  padding: '6px 12px',
+                                  fontWeight: '500',
+                                  backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                                  border: '1px solid #0dcaf0',
+                                  color: '#0dcaf0'
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faEdit} className="me-1" />
+                                Edit
+                              </Button>
+                              {test.status === 'sample-received' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="primary"
+                                  style={{
+                                    borderRadius: '8px',
+                                    padding: '6px 12px',
+                                    fontWeight: '500',
+                                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                    border: '1px solid #0d6efd',
+                                    color: '#0d6efd'
+                                  }}
+                                >
+                                  <FontAwesomeIcon icon={faCheckCircle} className="me-1" />
+                                  Complete Test
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
               </div>
             </div>
           </Col>

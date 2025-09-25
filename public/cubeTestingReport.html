@@ -1,0 +1,1528 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Vitrag Associates LLP - Cube Testing Test Report (A4)</title>
+
+    <style>
+        :root {
+            --paper-width: 210mm;
+            --paper-height: 297mm;
+            --page-margin: 15mm;
+            --title-color: #b30000;
+            --subtitle-color: #063a6c;
+            --highlight-color: #ffff00;
+            --border-color: #000000;
+            --text-color: #000000;
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
+            color: var(--text-color);
+            line-height: 1.2;
+            background: #ffffff;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+
+        .page {
+            width: var(--paper-width);
+            min-height: var(--paper-height);
+            background: #fff;
+            padding: var(--page-margin);
+            box-sizing: border-box;
+            position: relative;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+        }
+
+        /* Header Section - 3 Column Flexbox */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+            margin-top: -30px;
+        }
+
+        .header-left {
+            flex: 0 0 auto;
+        }
+
+        .header-center {
+            flex: 1;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .header-right {
+            flex: 0 0 auto;
+            text-align: center;
+        }
+
+        .logo-left {
+            height: 90px;
+            width: 130px;
+            border: 2px solid #666666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            margin-top: -32px;
+        }
+
+        .logo-left img {
+            height: 85px;
+            width: 110px;
+            object-fit: contain;
+        }
+
+        .company-name {
+            font-family: 'Times New Roman';
+            font-size: 28px;
+            font-weight: bold;
+            color: #B22222;
+            margin-bottom: 8px;
+            line-height: 1.1;
+            text-align: left;
+        }
+
+        .company-subtitle {
+            font-family: 'Times New Roman';
+            font-size: 18px;
+            /* font-style: italic; */
+            color: #0000CC;
+            margin-bottom: 10px;
+            line-height: 1.1;
+            text-align: left;
+            margin-left: 20px;
+        }
+
+        .header-divider {
+            width: 100%;
+            height: 2px;
+            background-color: #000000;
+            margin-bottom: 15px;
+        }
+
+        /* Extended divider for pages 2 and 3 */
+        .header-divider-extended {
+            width: 100%;
+            height: 2px;
+            background-color: #000000;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        /* ANNEXURE Page Styling */
+        .annexure-content {
+            margin: 20px 0;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .annexure-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+            margin: 20px 0 0 0;
+        }
+
+        .annexure-table th,
+        .annexure-table td {
+            border: 0.5px solid #000000;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .annexure-table th {
+            font-weight: bold;
+            font-size: 11px;
+            background-color: transparent;
+        }
+
+        .annexure-table td {
+            width: 33.33%;
+            height: 200px;
+        }
+
+        .annexure-image {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+
+        .annexure-caption {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid #000000;
+            padding: 5px;
+           
+        }
+
+        .formula-box {
+            width: 60%;
+            margin: 20px 0;
+            border: 1px solid #000000;
+            padding: 15px;
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        .formula-text {
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .formula-fraction {
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 5px;
+            font-size: 16px;
+        }
+
+        .formula-numerator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .formula-line {
+            border-top: 1px solid #000000;
+            margin: 2px 0;
+            width: 100%;
+        }
+
+        .formula-denominator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .formula-explanation {
+            margin-top: 15px;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        /* Mathematical Fraction Styling */
+        .math-fraction {
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 8px;
+            text-align: center;
+        }
+
+        .math-numerator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            padding-bottom: 2px;
+        }
+
+        .math-denominator {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            padding-top: 2px;
+            border-top: 1px solid #000000;
+        }
+
+        .test-witnessed {
+            margin-top: 34px;
+            text-align: left;
+            font-weight: bold;
+            text-decoration: underline;
+            color: #004080;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Observations Page Styling */
+        .observations-content {
+            margin: 20px 0;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .observations-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+            margin: 20px 0;
+        }
+
+        .observations-table th,
+        .observations-table td {
+            border: 0.5px solid #000000;
+            padding: 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .observations-table th {
+            font-weight: bold;
+            font-size: 16px;
+            background-color: transparent;
+            width: 50%;
+        }
+
+        .observations-table td {
+            font-size: 15px;
+            width: 50%;
+        }
+
+        .chart-container {
+            margin: 30px 0 80px 0;
+            text-align: center;
+        }
+
+
+
+        .bar-chart {
+            width: 75%;
+            justify-self: center;
+            height: 300px;
+            border: 1px solid #000000;
+            margin: 20px 0;
+            position: relative;
+            background-color: #fafafa;
+        }
+
+        .chart-caption {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        .chart-legend {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .legend-blue {
+            background-color: #0066cc;
+        }
+
+        .legend-orange {
+            background-color: #ff6600;
+        }
+
+.report-title-header {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    margin-top: -10px;
+    margin-bottom: -15px;
+    margin-right: 70px;
+    text-align: center;
+    margin-left: 0;
+}
+
+/* First page header - different styling */
+.report-title-header-page1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    margin-top: -10px;
+    margin-bottom: -15px;
+    text-align: center;
+    margin-left: 0;
+}
+
+
+        .logo-right {
+            height: 90px;
+            width: auto;
+            /* margin-bottom: 8px; */
+            margin-top: 13px;
+        }
+
+        .logo-right img {
+            height: 90px;
+            width: auto;
+            margin-top: -20px;
+            object-fit: contain;
+        }
+
+        .certificate-number {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+            margin-top: -10px;
+        }
+
+        /* Report Title */
+        .report-title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-color);
+            text-transform: uppercase;
+            /* border-top: 2px solid var(--border-color); */
+            /* border-bottom: 2px solid var(--border-color); */
+            /* padding: 8px 0; */
+            /* margin: 15px 0; */
+        }
+
+        /* Details Table */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            margin-top: -15px;
+            font-size: 12px;
+            font-family: 'Times New Roman';
+        }
+
+        .details-table td {
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            vertical-align: middle;
+            font-family: 'Times New Roman', Times, serif;
+            height: 20px;
+        }
+
+        #age-of-specimen {
+            height: 20px;
+            padding: 2px 6px;
+        }
+
+        .details-table td:first-child {
+            font-weight: normal;
+            width: 25%;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .details-table td:nth-child(2) {
+            width: 25%;
+            font-family: 'Times New Roman', Times, serif;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.2;
+        }
+
+        .details-table td:nth-child(3) {
+            font-weight: normal;
+            width: 25%;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .details-table td:nth-child(4) {
+            width: 25%;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .highlight {
+            background-color: transparent;
+        }
+
+        .highlight-text {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .age-cell-content {
+            display: flex;
+            align-items: center;
+
+            width: 100%;
+        }
+
+        .age-divider {
+            width: 1px;
+            height: 24px;
+            margin-top: -10px;
+            margin-bottom: -10px;
+            margin-left: 55px;
+            margin-right: 6px;
+            background-color: #000000;
+
+        }
+
+        .age-cell-content span:last-child {
+            text-align: left;
+            flex: 1;
+        }
+
+        /* Grade Header in Table */
+        .grade-header {
+            background-color: transparent;
+            padding: 8px 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            width: 31%;
+            vertical-align: top;
+        }
+
+        .grade-text {
+            background-color: var(--highlight-color);
+            padding: 4px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* Sample Description Table */
+    .sample-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+        .sample-table th,
+        .sample-table td {
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            text-align: center;
+            vertical-align: middle;
+            font-family: 'Times New Roman', Times, serif;
+            height: 20px;
+        }
+
+       
+
+    .sample-table th {
+      background-color: transparent;
+      font-weight: bold;
+      padding: 2px 6px;
+      line-height: 1.2;
+      height: 20px;
+    }
+
+    /* Individual column widths for Sample Table */
+    .sample-table th:nth-child(1),
+    
+    .sample-table td:nth-child(1) {
+      width: 8%;
+    }
+
+    .sample-table th:nth-child(2),
+    .sample-table td:nth-child(2) {
+      width: 26%;
+    }
+
+    .sample-table th:nth-child(3),
+    .sample-table td:nth-child(3) {
+      width: 11%;
+    }
+
+    .sample-table th:nth-child(4),
+    .sample-table td:nth-child(4) {
+      width: 11%;
+    }
+
+    .sample-table th:nth-child(5),
+    .sample-table td:nth-child(5) {
+      width: 11%;
+    }
+
+    .sample-table th:nth-child(6),
+    .sample-table td:nth-child(6) {
+      width: 11%;
+    }
+
+    .sample-table th:nth-child(7),
+    .sample-table td:nth-child(7) {
+      width: 11%;
+    }
+
+    .sample-table th:nth-child(8),
+    .sample-table td:nth-child(8) {
+      width: 11%;
+    }
+
+        .sample-table .table-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+        }
+
+        /* Test Result Table */
+        .test-result-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            background-color: transparent;
+            padding: 4px 6px;
+            margin: 2px auto 0 auto;
+            width: 80%;
+            font-family: 'Times New Roman', Times, serif;
+            text-decoration: underline;
+        }
+
+        .test-result-table {
+            width: 75%;
+            border-collapse: collapse;
+            margin: 0 auto 8px auto;
+            font-size: 12px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .test-result-table th,
+        .test-result-table td {
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            text-align: center;
+            vertical-align: middle;
+            font-family: 'Times New Roman', Times, serif;
+            height: 20px;
+        }
+
+        .test-result-table th {
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        .test-result-table .table-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            background-color: transparent;
+        }
+
+        .test-result-table .highlight-cell {
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        .test-result-table .highlight-cell .highlight-text {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        /* Individual column widths for Test Result Table */
+        .test-result-table th:nth-child(1),
+        .test-result-table td:nth-child(1) {
+            width: 10%;
+        }
+
+        .test-result-table th:nth-child(2),
+        .test-result-table td:nth-child(2) {
+            width: 15%;
+        }
+
+        .test-result-table th:nth-child(3),
+        .test-result-table td:nth-child(3) {
+            width: 20%;
+        }
+
+        .test-result-table th:nth-child(4),
+        .test-result-table td:nth-child(4) {
+            width: 25%;
+        }
+
+        .test-result-table th:nth-child(5),
+        .test-result-table td:nth-child(5) {
+            width: 30%;
+        }
+
+        /* Terms & Conditions */
+        .terms-section {
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .terms-section h4 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .terms-section ol {
+            margin-left: 15px;
+        }
+
+        .terms-section li {
+            margin-bottom: 3px;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            margin: 20px 0;
+            margin-top: 40px;
+            position: relative;
+            height: 120px;
+        }
+
+        /* Reviewed by section - Left side */
+        .reviewed-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 250px;
+            text-align: left;
+        }
+
+        .reviewed-section .title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-left: 65px;
+            color: #004080;
+            font-size: 12px;
+        }
+
+        .reviewed-section .name {
+            font-weight: bold;
+            color: #004080;
+            font-size: 12px;
+            margin-left: 125px;
+        }
+
+        .reviewed-section .subtitle {
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 12px;
+            margin-left: 125px;
+            color: #004080;
+        }
+
+        .reviewed-section .details {
+            margin-top: 5px;
+            font-size: 12px;
+            margin-left: 125px;
+            color: #004080;
+        }
+
+        /* Stamp section - Center */
+        .stamp-section {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .stamp-section .stamp {
+            width: 120px;
+            height: auto;
+        }
+
+        /* Authorized by section - Right side */
+        .authorized-section {
+            position: absolute;
+            margin-left: -10px;
+            right: 0;
+            top: 0;
+            width: 250px;
+            text-align: right;
+        }
+
+        .authorized-section .title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-right: 165px;
+            color: #004080;
+            font-size: 12px;
+        }
+
+        .authorized-section .name {
+            font-weight: bold;
+            color: #004080;
+            margin-right: 65px;
+            font-size: 12px;
+        }
+
+        .authorized-section .subtitle {
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 11px;
+            margin-right: 78px;
+
+            color: #004080;
+        }
+
+        .authorized-section .details {
+            margin-top: 5px;
+            font-size: 10px;
+            margin-right: 78px;
+            color: #004080;
+        }
+
+        /* Specific styling for different designations in authorized section */
+        .authorized-section .qualification-1 {
+            margin-top: 5px;
+            font-size: 12px;
+            margin-right: 78px;
+            color: #004080;
+        }
+
+        .authorized-section .qualification-2 {
+            margin-top: 5px;
+            font-size: 11px;
+            /* margin-right: 2px; */
+            color: #004080;
+        }
+
+        /* Page Header for additional pages */
+        .page-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .page-content {
+            margin: 20px 0;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .page-content h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--subtitle-color);
+        }
+
+        /* Footer Section */
+        .footer {
+            position: absolute;
+            bottom: 15mm;
+            left: 15mm;
+            right: 15mm;
+            font-size: 12px;
+            width: calc(100% - 30mm);
+        }
+
+        .footer-divider {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            font-size: 16px;
+            color: #000000;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .footer-left {
+            text-align: left;
+            flex: 1;
+        }
+
+        .footer-center {
+            text-align: center;
+            flex: 2;
+            color: red;
+            font-size: 11px;
+        }
+
+        .footer-right {
+            text-align: right;
+            flex: 1;
+        }
+
+        /* Print Optimization */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .page {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 15mm;
+                width: 210mm;
+                min-height: 297mm;
+                max-height: 297mm;
+                overflow: hidden;
+            }
+
+            .page * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+
+        /* Download Button */
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        @media print {
+            .download-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- Header Section - 3 Column Flexbox -->
+        <div class="header">
+            <!-- Left Column - Company Logo -->
+            <div class="header-left">
+                <div class="logo-left">
+                    <img src="/logo.png" alt="Vitrag Associates Logo">
+                </div>
+            </div>
+
+            <!-- Center Column - Company Name and Report Title -->
+            <div class="header-center">
+                <div class="company-name">VITRAG ASSOCIATES LLP</div>
+                <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
+                <div class="header-divider"></div>
+                <div class="report-title-header-page1">TEST REPORT</div>
+            </div>
+
+            <!-- Right Column - NABL Logo and Certificate Number -->
+            <div class="header-right">
+                <div class="logo-right">
+                    <img src="/nabl_logo_final.png" alt="NABL Logo">
+                </div>
+                <div class="certificate-number">TC-15756</div>
+            </div>
+        </div>
+
+        <!-- Details Table -->
+        <table class="details-table">
+            <tr>
+                <td rowspan="2">Customer/Site Name & Address</td>
+                <td rowspan="2" id="customer-site-name">Lords Developers Shivyogi Residency, shelgi solapur</td>
+                <td>Date of Report</td>
+                <td id="date-of-report">23/09/2025</td>
+            </tr>
+            <tr>
+                <td>ULR Number</td>
+                <td id="ulr-number">TC-1575625000001840F</td>
+            </tr>
+            <tr>
+                <td>Reference Number</td>
+                <td id="reference-number">VA/CC/2025/AUG-74</td>
+                <td>Job Code Number</td>
+                <td id="job-code-number">T-2501690</td>
+            </tr>
+            <tr>
+                <td>Location/Structure Type</td>
+                <td id="location-structure">column</td>
+                <td>Age of Specimen</td>
+                <td id="age-of-specimen">
+                    <div class="age-cell-content">
+                        <span class="highlight-text">28</span>
+                        <div class="age-divider"></div>
+                        <span>Days</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Date of Receipt</td>
+                <td id="date-of-receipt">25/08/2025</td>
+                <td>Date of Casting</td>
+                <td id="date-of-casting"><span class="highlight-text">11/08/2025</span></td>
+            </tr>
+            <tr>
+                <td>Date of Testing</td>
+                <td id="date-of-testing">08/09/2025</td>
+                <td>Type of Specimen</td>
+                <td id="type-of-specimen">Concrete Cube</td>
+            </tr>
+            <tr>
+                <td>Grade of Specimen</td>
+                <td id="grade-of-specimen"><span class="highlight-text">M-25</span></td>
+                <td>Condition of Specimen</td>
+                <td id="condition-of-specimen">Acceptable</td>
+            </tr>
+            <tr>
+                <td>Machine used for Testing</td>
+                <td id="machine-used" colspan="3">Fully automatic Digital Compression Testing Machine</td>
+            </tr>
+            <tr>
+                <td>Capacity Range</td>
+                <td id="capacity-range">2000KN</td>
+                <td>Calibration Due Date</td>
+                <td id="calibration-due-date">01/07/2026</td>
+            </tr>
+            <tr>
+                <td>Test Method</td>
+                <td id="test-method">IS 516 (Part1/Sec1):2021</td>
+                <td>Environmental condition</td>
+                <td id="environmental-condition">Not Applicable</td>
+            </tr>
+        </table>
+
+        <!-- Sample Description Table -->
+        <table class="sample-table">
+            <tr>
+                <td class="grade-header" colspan="2"><span class="grade-text">GRADE OF CONCRETE: M-25</span></td>
+                <td class="table-title" colspan="6">DESCRIPTION OF TEST SAMPLE</td>
+            </tr>
+            <tr>
+                <th>Sr. No. </th>
+                <th>ID Mark</th>
+                <th colspan="3">Dimensions (mm)<br>(L × B × H)</th>
+                <th>Area (mm²)</th>
+                <th>Weight (kg)</th>
+                <th>Max Load (kN)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td id="sample-1-id">------</td>
+                <td id="sample-1-length">150.4</td>
+                <td id="sample-1-breadth">150.7</td>
+                <td id="sample-1-height">150.1</td>
+                <td id="sample-1-area">22665.28</td>
+                <td id="sample-1-weight">9.1</td>
+                <td id="sample-1-load">265.4</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td id="sample-2-id">------</td>
+                <td id="sample-2-length">150.1</td>
+                <td id="sample-2-breadth">149.9</td>
+                <td id="sample-2-height">150.1</td>
+                <td id="sample-2-area">22499.99</td>
+                <td id="sample-2-weight">9.0</td>
+                <td id="sample-2-load">297.4</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td id="sample-3-id">------</td>
+                <td id="sample-3-length">150.8</td>
+                <td id="sample-3-breadth">150.1</td>
+                <td id="sample-3-height">150.3</td>
+                <td id="sample-3-area">22635.08</td>
+                <td id="sample-3-weight">9.0</td>
+                <td id="sample-3-load">321.7</td>
+            </tr>
+        </table>
+
+        <!-- Test Result Table -->
+        <div class="test-result-title">Test Result for Density and Compressive Strength of Concrete Cubes</div>
+        <table class="test-result-table">
+            <tr>
+                <th>Sr. No.</th>
+                <th>ID Mark</th>
+                <th>Density (kg/m³)</th>
+                <th>Compressive Strength (N/mm²)</th>
+                <th>Average Compressive Strength (N/mm²)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td id="result-1-id">C1</td>
+                <td id="result-1-density">2400</td>
+                <td id="result-1-strength">25.5</td>
+                <td rowspan="3" class="highlight-cell" id="average-strength"><span class="highlight-text">25.47</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td id="result-2-id">C2</td>
+                <td id="result-2-density">2410</td>
+                <td id="result-2-strength">26.1</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td id="result-3-id">C3</td>
+                <td id="result-3-density">2390</td>
+                <td id="result-3-strength">24.8</td>
+            </tr>
+        </table>
+
+        <!-- Terms & Conditions -->
+        <div class="terms-section">
+            <h4>Terms & Conditions –</h4>
+            <ol>
+                <li>Samples were not drawn by Vitrag Associates LLP lab.</li>
+                <li>The Test Reports & Results pertain to Sample/ Samples of material received by Vitrag Associates LLP.
+                </li>
+                <li>The Test Report cannot be reproduced without the written approval of CEO/QM of Vitrag Associates
+                    LLP.</li>
+                <li>Any change/ correction/ alteration to the Test Report shall be invalid.</li>
+                <li>The role Vitrag Associates LLP is restricted to testing of the material sample as received in the
+                    laboratory. Vitrag Associates LLP or any of its employees shall not be liable for any dispute/
+                    litigation arising between the customer & Third Party on account of test results. Vitrag Associates
+                    LLP shall not interact with any Third Party in this regard.</li>
+                <li>The CEO of Vitrag Associates LLP may make necessary changes to the terms & conditions without any
+                    prior notice.</li>
+            </ol>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <!-- Left side -->
+            <div class="reviewed-section">
+                <div class="title">Reviewed by -</div>
+                <div class="name">Lalita S. Dussa</div>
+                <div class="subtitle">(Quality Manager)</div>
+                <div class="details">B.Tech.(Civil)</div>
+            </div>
+
+            <!-- Middle stamp -->
+            <div class="stamp-section">
+                <img src="/stamp_clear.png" alt="Stamp" class="stamp">
+            </div>
+
+            <!-- Right side -->
+            <div class="authorized-section">
+                <div class="title">Authorized by -</div>
+                <div class="name">Mr. Prakarsh A Sangave</div>
+                <div class="subtitle">(Chief Executive Officer)</div>
+                <div class="qualification-1">M.E (Civil-Structures)</div>
+                <div class="qualification-2">M.Tech (Civil-Geotechnical), M.I.E, F.I.E.</div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <div class="footer-divider">X———X———X——— END OF REPORT ——X———X———X</div>
+            <div class="footer-content">
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
+                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                </div>
+                <div class="footer-right">
+                    Page 1 of 1 <br>
+                    Issue No. 03
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2 - A4 Size -->
+    <div class="page">
+        <!-- Header Section - 3 Column Flexbox -->
+        <div class="header">
+            <!-- Left Column - Company Logo -->
+            <div class="header-left">
+                <div class="logo-left">
+                    <img src="/logo.png" alt="Vitrag Associates Logo">
+                </div>
+            </div>
+
+            <!-- Center Column - Company Name and Report Title -->
+            <div class="header-center">
+                <div class="company-name">VITRAG ASSOCIATES LLP</div>
+                <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
+                <div class="header-divider-extended"></div>
+                <div class="report-title-header">ANNEXURE - I</div>
+            </div>
+
+            <!-- Right Column - Empty for pages 2 and 3 -->
+            <div class="header-right">
+                <!-- NABL logo removed for pages 2 and 3 -->
+            </div>
+        </div>
+
+        <!-- ANNEXURE - I Content -->
+        <div class="annexure-content">
+            <!-- Main Table -->
+            <table class="annexure-table">
+                <thead>
+                    <tr>
+                        <th>Pictorial View of Front side failure of cube specimen</th>
+                        <th>Digital reading of Load & Compressive Strength</th>
+                        <th>Pictorial View of Back side failure of Cube Specimen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><img src="/cube1_front.jpg" alt="Cube 1 Front" class="annexure-image"></td>
+                        <td><img src="/cube1_screen.jpg" alt="Cube 1 Screen" class="annexure-image"></td>
+                        <td><img src="/cube1_back.jpg" alt="Cube 1 Back" class="annexure-image"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/cube2_front.jpg" alt="Cube 2 Front" class="annexure-image"></td>
+                        <td><img src="/cube2_screen.jpg" alt="Cube 2 Screen" class="annexure-image"></td>
+                        <td><img src="/cube2_back.jpg" alt="Cube 2 Back" class="annexure-image"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="/cube3_front.jpg" alt="Cube 3 Front" class="annexure-image"></td>
+                        <td><img src="/cube3_screen.jpg" alt="Cube 3 Screen" class="annexure-image"></td>
+                        <td><img src="/cube3_back.jpg" alt="Cube 3 Back" class="annexure-image"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Caption -->
+            <div class="annexure-caption">
+                Fig 1 - Pictorial view of Failure Pattern of Concrete Cube with Digital Readings
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box">
+                <div class="formula-text">
+                    <div style="text-align: left; font-size: 16px;">
+                        <strong>Compressive Strength = </strong>
+                        <span class="math-fraction">
+                            <span class="math-numerator">P</span>
+                            <span class="math-denominator">LB</span>
+                        </span>
+                        <strong> = </strong>
+                        <span class="math-fraction">
+                            <span class="math-numerator">Peak Load (N)</span>
+                            <span class="math-denominator">Surface Area (mm²)</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Witnessed Section -->
+            <div class="test-witnessed">
+                TEST WITNESSED:
+            </div>
+        </div>
+
+        <!-- Footer for Page 2 -->
+        <div class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
+                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                </div>
+                <div class="footer-right">
+                    Page 2 of 3 <br>
+                    Issue No. 03
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 3 - A4 Size -->
+    <div class="page">
+        <!-- Header Section - 3 Column Flexbox -->
+        <div class="header">
+            <!-- Left Column - Company Logo -->
+            <div class="header-left">
+                <div class="logo-left">
+                    <img src="/logo.png" alt="Vitrag Associates Logo">
+                </div>
+            </div>
+
+            <!-- Center Column - Company Name and Report Title -->
+            <div class="header-center">
+                <div class="company-name">VITRAG ASSOCIATES LLP</div>
+                <div class="company-subtitle">(Construction Material Testing Laboratory)</div>
+                <div class="header-divider-extended"></div>
+                <div class="report-title-header">Observations</div>
+            </div>
+
+            <!-- Right Column - Empty for pages 2 and 3 -->
+            <div class="header-right">
+                <!-- NABL logo removed for pages 2 and 3 -->
+            </div>
+        </div>
+
+        <!-- Observations Content -->
+        <div class="observations-content">
+            <!-- Observations Table -->
+            <table class="observations-table">
+                <tbody>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">1</td>
+                        <td style="width: 70%;">Compressive Strength acquired after specified duration</td>
+                        <td style="width: 25%; text-align: center;">--</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">2</td>
+                        <td style="width: 70%;">Individual test results within ±15% of average strength</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">3</td>
+                        <td style="width: 70%;">Weight of cube</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">4</td>
+                        <td style="width: 70%;">Type of failure Pattern as per IS 516(Part-1/Sec-1): - 2021 Fig 1</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">5</td>
+                        <td style="width: 70%;">Bonding between Aggregates and cement paste.</td>
+                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align: center; font-weight: bold;">6</td>
+                        <td style="width: 70%;">Compressive Strength as per acceptance criteria as C1,16.1 of IS 456:2000 (Fck+4) From Table No.11</td>
+                        <td style="width: 25%; text-align: center;">--</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Bar Chart Section -->
+            <div class="chart-container">
+                
+                <div class="bar-chart">
+                    <!-- Blank space for graph - will be replaced with generated chart -->
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-style: italic;">
+                        Graph will be placed here
+                    </div>
+                </div>
+                <div class="chart-caption">Fig. 2 - Graphical Representation of Comparison of Compressive Strengths</div>
+            </div>
+        </div>
+
+        <!-- Signature Section for Page 3 -->
+        <div class="signature-section">
+            <!-- Left side -->
+            <div class="reviewed-section">
+                <div class="title">Reviewed by -</div>
+                <div class="name">Lalita S. Dussa</div>
+                <div class="subtitle">(Quality Manager)</div>
+                <div class="details">B.Tech.(Civil)</div>
+            </div>
+
+            <!-- Middle stamp -->
+            <div class="stamp-section">
+                <img src="/stamp_clear.png" alt="Stamp" class="stamp">
+            </div>
+
+            <!-- Right side -->
+            <div class="authorized-section">
+                <div class="title">Authorized by -</div>
+                <div class="name">Mr. Prakarsh A Sangave</div>
+                <div class="subtitle">(Chief Executive Officer)</div>
+                <div class="qualification-1">M.E (Civil-Structures)</div>
+                <div class="qualification-2">M.Tech (Civil-Geotechnical), M.I.E, F.I.E.</div>
+            </div>
+        </div>
+
+        <!-- Footer for Page 3 -->
+        <div class="footer">
+            <div class="footer-divider">X———X———X——— END OF ANNEXURE 1 ——X———X———X</div>
+            <div class="footer-content">
+                <div class="footer-left">
+                    VA/TR/I-3/24
+                </div>
+                <div class="footer-center">
+                    34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
+                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                </div>
+                <div class="footer-right">
+                    Page 3 of 3 <br>
+                    Issue No. 03
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download PDF Button -->
+    <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
+
+    <script>
+        // Function to populate form data from URL parameters
+        function populateFormData() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Customer Information
+            document.getElementById('customer-site-name').textContent = urlParams.get('customer_site_name') || 'Lords Developers Shivyogi Residency, shelgi solapur';
+            document.getElementById('date-of-report').textContent = urlParams.get('date_of_report') || '23/09/2025';
+            document.getElementById('reference-number').textContent = urlParams.get('reference_number') || 'VA/CC/2025/AUG-74';
+            document.getElementById('ulr-number').textContent = urlParams.get('ulr_number') || 'TC-1575625000001840F';
+            document.getElementById('location-structure').textContent = urlParams.get('location_structure') || 'column';
+            document.getElementById('job-code-number').textContent = urlParams.get('job_code_number') || 'T-2501690';
+            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '25/08/2025';
+            // Update highlighted fields with span wrapper
+            const ageElement = document.getElementById('age-of-specimen');
+            const ageValue = urlParams.get('age_of_specimen') || '28 Days';
+            const ageNumber = ageValue.split(' ')[0] || '28';
+            ageElement.innerHTML = `
+        <div class="age-cell-content">
+          <span class="highlight-text">${ageNumber}</span>
+          <div class="age-divider"></div>
+          <span>Days</span>
+        </div>
+      `;
+
+            const castingElement = document.getElementById('date-of-casting');
+            castingElement.innerHTML = `<span class="highlight-text">${urlParams.get('date_of_casting') || '11/08/2025'}</span>`;
+
+            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '08/09/2025';
+            document.getElementById('type-of-specimen').textContent = urlParams.get('type_of_specimen') || 'Concrete Cube';
+
+            const gradeElement = document.getElementById('grade-of-specimen');
+            gradeElement.innerHTML = `<span class="highlight-text">${urlParams.get('grade_of_specimen') || 'M-25'}</span>`;
+            document.getElementById('condition-of-specimen').textContent = urlParams.get('condition_of_specimen') || 'Acceptable';
+            document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '28.0';
+            document.getElementById('machine-used').textContent = urlParams.get('machine_used') || 'Fully automatic Digital Compression Testing Machine';
+            document.getElementById('capacity-range').textContent = urlParams.get('capacity_range') || '2000KN';
+            document.getElementById('calibration-due-date').textContent = urlParams.get('calibration_due_date') || '01/07/2026';
+            document.getElementById('test-method').textContent = urlParams.get('test_method') || 'IS 516 (Part1/Sec1):2021';
+            document.getElementById('environmental-condition').textContent = urlParams.get('environmental_condition') || 'Not Applicable';
+
+            // Sample Description
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`sample-${i}-id`).textContent = urlParams.get(`sample_${i}_id`) || `C${i}`;
+                document.getElementById(`sample-${i}-dimensions`).textContent = urlParams.get(`sample_${i}_dimensions`) || '150×150×150';
+                document.getElementById(`sample-${i}-area`).textContent = urlParams.get(`sample_${i}_area`) || '22500';
+                document.getElementById(`sample-${i}-weight`).textContent = urlParams.get(`sample_${i}_weight`) || (8.4 + i * 0.1).toFixed(1);
+                document.getElementById(`sample-${i}-load`).textContent = urlParams.get(`sample_${i}_load`) || (558 + i * 15).toFixed(2);
+            }
+
+            // Test Results
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`result-${i}-id`).textContent = urlParams.get(`sample_${i}_id`) || `C${i}`;
+                document.getElementById(`result-${i}-density`).textContent = urlParams.get(`result_${i}_density`) || (2390 + i * 10);
+                document.getElementById(`result-${i}-strength`).textContent = urlParams.get(`result_${i}_strength`) || (24.8 + i * 0.7).toFixed(1);
+            }
+
+            // Calculate and display average compressive strength
+            let sum = 0;
+            let count = 0;
+            for (let i = 1; i <= 3; i++) {
+                const value = parseFloat(urlParams.get(`result_${i}_strength`)) || (24.8 + i * 0.7);
+                if (value > 0) {
+                    sum += value;
+                    count++;
+                }
+            }
+            const average = count > 0 ? (sum / count).toFixed(2) : '25.47';
+            document.getElementById('average-strength').innerHTML = `<span class="highlight-text">${average}</span>`;
+        }
+
+        // Download PDF function
+        function downloadPDF() {
+            console.log('Download PDF clicked');
+
+            // Get data for filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerName = urlParams.get('customer_site_name') || 'Customer';
+            const dateOfTesting = urlParams.get('date_of_testing') || new Date().toISOString().split('T')[0];
+
+            // Create default filename
+            const defaultFilename = `Cube_Testing_Report_${customerName.replace(/\s+/g, '_')}_${dateOfTesting}.pdf`;
+
+            // Set document title
+            document.title = defaultFilename;
+
+            // Show instructions
+            alert('Print dialog will open. Please select "Save as PDF" and use the suggested filename: ' + defaultFilename);
+
+            // Open print dialog
+            window.print();
+        }
+
+        // Function to auto-resize text for overflowing content
+        function autoResizeText() {
+            const addressCell = document.getElementById('customer-site-name');
+            if (addressCell) {
+                const maxWidth = addressCell.offsetWidth;
+                const text = addressCell.textContent;
+
+                // Start with base font size
+                let fontSize = 14;
+                addressCell.style.fontSize = fontSize + 'px';
+
+                // Check if text overflows
+                while (addressCell.scrollWidth > maxWidth && fontSize > 8) {
+                    fontSize -= 0.5;
+                    addressCell.style.fontSize = fontSize + 'px';
+                }
+
+                // If still overflowing, enable word wrapping
+                if (addressCell.scrollWidth > maxWidth) {
+                    addressCell.style.wordBreak = 'break-all';
+                    addressCell.style.whiteSpace = 'normal';
+                }
+            }
+        }
+
+        // Populate form data when page loads
+        window.onload = function () {
+            populateFormData();
+
+            // Auto-resize text after a short delay to ensure content is loaded
+            setTimeout(autoResizeText, 100);
+        };
+    </script>
+</body>
+
+</html>

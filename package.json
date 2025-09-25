@@ -6,7 +6,7 @@
     "@fortawesome/fontawesome-free": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
-    "@lottiefiles/dotlottie-react": "^0.16.2",
+    "@lottiefiles/dotlottie-react": "^0.16.4",
     "@react-pdf/font": "^4.0.2",
     "@react-pdf/pdfkit": "^4.0.3",
     "@react-pdf/renderer": "^4.3.0",
