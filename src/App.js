@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -6,6 +6,9 @@ import './styles/custom.css';
 
 // Context
 import { DataProvider } from './contexts/DataContext';
+
+// API
+import { getCustomers } from './apis/customers';
 
 // Components
 import BaseLayout from './components/BaseLayout';
@@ -39,6 +42,82 @@ const ViewSampleWithKey = () => {
   return <ViewSample key={location.pathname + location.search} />;
 };
 
+// Component to display customers list
+const CustomersList = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        const data = await getCustomers();
+        setCustomers(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch customers');
+        console.error('Error fetching customers:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mt-4">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mt-4">
+      <h2>Customers List</h2>
+      {customers.length === 0 ? (
+        <div className="alert alert-info" role="alert">
+          No customers found.
+        </div>
+      ) : (
+        <div className="row">
+          {customers.map((customer) => (
+            <div key={customer.id} className="col-md-6 col-lg-4 mb-3">
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">
+                    {customer.first_name} {customer.last_name}
+                  </h5>
+                  <p className="card-text">
+                    <strong>Phone:</strong> {customer.phone || 'N/A'}<br />
+                    <strong>Email:</strong> {customer.email || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function App() {
   return (
     <DataProvider>
@@ -57,6 +136,7 @@ function App() {
                   <Route path="/test-request" element={<TestRequestForm />} />
                   <Route path="/samples" element={<Samples />} />
                   <Route path="/customers" element={<Customers />} />
+                  <Route path="/customers-list" element={<CustomersList />} />
                   <Route path="/other-services" element={<OtherServices />} />
                   <Route path="/other-services-dashboard" element={<OtherServicesDashboard />} />
                   <Route path="/test-records" element={<TestRecords />} />

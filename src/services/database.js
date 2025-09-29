@@ -1,5 +1,5 @@
 // Mock database service for development
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 class DatabaseService {
   async request(endpoint, options = {}) {
@@ -12,14 +12,27 @@ class DatabaseService {
       ...options,
     };
 
+    // Add timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(url, {
+        ...config,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return await response.json();
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Database request failed:', error);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - server is taking too long to respond');
+      }
       throw error;
     }
   }
@@ -27,7 +40,8 @@ class DatabaseService {
   // Test Requests
   async getTestRequests() {
     try {
-      return await this.request('/test-requests');
+      const response = await this.request(`/test-requests`);
+      return response.test_requests || response; // Handle both old and new format
     } catch (error) {
       console.error('Failed to fetch test requests:', error);
       return [];

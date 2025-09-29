@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Form, Table, Modal, InputGroup, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Form, Table, Modal, InputGroup, Alert, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSearch, 
@@ -10,8 +10,12 @@ import {
   faFileAlt,
   faEye
 } from '@fortawesome/free-solid-svg-icons';
+import { getCustomers, addCustomer, updateCustomer, deleteCustomer } from '../apis/customers';
 
 const Customers = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [phoneFilter, setPhoneFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
@@ -19,71 +23,54 @@ const Customers = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [customerForm, setCustomerForm] = useState({
-    customerName: '',
-    contactPerson: '',
+    first_name: '',
+    last_name: '',
+    name: '',
+    contact_person: '',
     phone: '',
     email: '',
+    address: '',
     city: '',
-    siteName: ''
+    site_name: ''
   });
 
-  // Mock data
-  const customersData = [
-    {
-      id: 1,
-      customerName: 'ABC Construction',
-      contactPerson: 'John Doe',
-      phone: '9876543210',
-      email: 'john@abcconstruction.com',
-      city: 'Mumbai',
-      siteName: 'Mumbai Project Site'
-    },
-    {
-      id: 2,
-      customerName: 'XYZ Builders',
-      contactPerson: 'Jane Smith',
-      phone: '9876543211',
-      email: 'jane@xyzbuilders.com',
-      city: 'Pune',
-      siteName: 'Pune Development'
-    },
-    {
-      id: 3,
-      customerName: 'DEF Engineers',
-      contactPerson: 'Mike Johnson',
-      phone: '9876543212',
-      email: 'mike@defengineers.com',
-      city: 'Delhi',
-      siteName: 'Delhi Complex'
-    },
-    {
-      id: 4,
-      customerName: 'GHI Contractors',
-      contactPerson: 'Sarah Wilson',
-      phone: '9876543213',
-      email: 'sarah@ghicontractors.com',
-      city: 'Bangalore',
-      siteName: 'Bangalore Site'
-    },
-    {
-      id: 5,
-      customerName: 'JKL Developers',
-      contactPerson: 'David Brown',
-      phone: '9876543214',
-      email: 'david@jkldevelopers.com',
-      city: 'Chennai',
-      siteName: 'Chennai Project'
+  // Fetch customers from API
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getCustomers();
+      setCustomers(data);
+    } catch (err) {
+      setError('Failed to fetch customers');
+      console.error('Error fetching customers:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredCustomers = customersData.filter(customer => {
-    const matchesSearch = 
-      customer.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.contactPerson.toLowerCase().includes(searchTerm.toLowerCase());
+  // Refresh data when component mounts
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const filteredCustomers = customers.filter(customer => {
+    const fullName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim();
+    const customerName = customer.name || '';
+    const contactPerson = customer.contact_person || '';
     
-    const matchesPhone = !phoneFilter || customer.phone.includes(phoneFilter);
-    const matchesCity = !cityFilter || customer.city.toLowerCase().includes(cityFilter.toLowerCase());
+    // Search logic: "starts with" for all text fields
+    const matchesSearch = 
+      (searchTerm === '' || 
+       fullName.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
+       customerName.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
+       contactPerson.toLowerCase().startsWith(searchTerm.toLowerCase()));
+    
+    const matchesPhone = !phoneFilter || (customer.phone || '').startsWith(phoneFilter);
+    const matchesCity = !cityFilter || (customer.city || '').toLowerCase().startsWith(cityFilter.toLowerCase());
     
     return matchesSearch && matchesPhone && matchesCity;
   });
@@ -96,18 +83,42 @@ const Customers = () => {
     }));
   };
 
-  const handleAddCustomer = () => {
-    // Handle add customer logic
-    console.log('Adding customer:', customerForm);
-    setShowAddModal(false);
-    setCustomerForm({
-      customerName: '',
-      contactPerson: '',
-      phone: '',
-      email: '',
-      city: '',
-      siteName: ''
-    });
+  const handleAddCustomer = async () => {
+    // Validate required fields
+    if (!customerForm.name || !customerForm.phone || !customerForm.city) {
+      setSubmitError('Please fill in all required fields (Customer Name, Phone, City).');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      await addCustomer(customerForm);
+      // Refresh the data after adding
+      await fetchCustomers();
+      setShowAddModal(false);
+      setCustomerForm({
+        first_name: '',
+        last_name: '',
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        site_name: ''
+      });
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        setSubmitError(error.response.data.error);
+      } else {
+        setSubmitError('Failed to add customer. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEditCustomer = (customer) => {
@@ -116,11 +127,45 @@ const Customers = () => {
     setShowEditModal(true);
   };
 
-  const handleUpdateCustomer = () => {
-    // Handle update customer logic
-    console.log('Updating customer:', customerForm);
-    setShowEditModal(false);
-    setSelectedCustomer(null);
+  const handleUpdateCustomer = async () => {
+    if (!selectedCustomer) return;
+    
+    // Validate required fields
+    if (!customerForm.name || !customerForm.phone || !customerForm.city) {
+      setSubmitError('Please fill in all required fields (Customer Name, Phone, City).');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      await updateCustomer(selectedCustomer.id, customerForm);
+      // Refresh the data after updating
+      await fetchCustomers();
+      setShowEditModal(false);
+      setSelectedCustomer(null);
+      setCustomerForm({
+        first_name: '',
+        last_name: '',
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        site_name: ''
+      });
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        setSubmitError(error.response.data.error);
+      } else {
+        setSubmitError('Failed to update customer. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteCustomer = (customer) => {
@@ -128,11 +173,28 @@ const Customers = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    // Handle delete customer logic
-    console.log('Deleting customer:', selectedCustomer);
-    setShowDeleteModal(false);
-    setSelectedCustomer(null);
+  const confirmDelete = async () => {
+    if (!selectedCustomer) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      await deleteCustomer(selectedCustomer.id);
+      // Refresh the data after deleting
+      await fetchCustomers();
+      setShowDeleteModal(false);
+      setSelectedCustomer(null);
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      if (error.response && error.response.data && error.response.data.error) {
+        setSubmitError(error.response.data.error);
+      } else {
+        setSubmitError('Failed to delete customer. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetFilters = () => {
@@ -143,6 +205,28 @@ const Customers = () => {
 
   return (
     <div>
+      <style>
+        {`
+          .custom-table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          
+          .custom-table-scroll::-webkit-scrollbar-track {
+            background: #1C2333;
+            border-radius: 4px;
+          }
+          
+          .custom-table-scroll::-webkit-scrollbar-thumb {
+            background: #3A4553;
+            border-radius: 4px;
+          }
+          
+          .custom-table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #4A5568;
+          }
+        `}
+      </style>
       {/* Header */}
       <div className="header-vitrag">
         <Container>
@@ -171,14 +255,23 @@ const Customers = () => {
 
       <Container>
         {/* Search Section */}
-        <Card className="card-vitrag mb-4">
-          <Card.Body>
+        <Card className="card-vitrag mb-4" style={{ 
+          backgroundColor: '#1C2333', 
+          border: '1px solid #3A4553',
+          borderRadius: '12px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
+        }}>
+          <Card.Body style={{ padding: '25px' }}>
             <Row className="align-items-end">
               <Col md={4} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Customer Name</Form.Label>
+                  <Form.Label style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '8px' }}>Customer Name</Form.Label>
                   <InputGroup>
-                    <InputGroup.Text>
+                    <InputGroup.Text style={{ 
+                      backgroundColor: '#2A3441', 
+                      borderColor: '#3A4553', 
+                      color: '#FFFFFF' 
+                    }}>
                       <FontAwesomeIcon icon={faSearch} />
                     </InputGroup.Text>
                     <Form.Control
@@ -186,32 +279,71 @@ const Customers = () => {
                       placeholder="Search by customer name..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="form-control-vitrag"
+                      style={{
+                        backgroundColor: '#2A3441',
+                        borderColor: '#3A4553',
+                        color: '#FFFFFF',
+                        borderRadius: '0 6px 6px 0'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#4A90E2';
+                        e.target.style.boxShadow = '0 0 0 0.2rem rgba(74, 144, 226, 0.25)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#3A4553';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                   </InputGroup>
                 </Form.Group>
               </Col>
               <Col md={3} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Phone Number</Form.Label>
+                  <Form.Label style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '8px' }}>Phone Number</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Search by phone..."
                     value={phoneFilter}
                     onChange={(e) => setPhoneFilter(e.target.value)}
-                    className="form-control-vitrag"
+                    style={{
+                      backgroundColor: '#2A3441',
+                      borderColor: '#3A4553',
+                      color: '#FFFFFF',
+                      borderRadius: '6px'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#4A90E2';
+                      e.target.style.boxShadow = '0 0 0 0.2rem rgba(74, 144, 226, 0.25)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#3A4553';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </Form.Group>
               </Col>
               <Col md={3} className="mb-3">
                 <Form.Group>
-                  <Form.Label>City</Form.Label>
+                  <Form.Label style={{ color: '#FFFFFF', fontWeight: '600', marginBottom: '8px' }}>City</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Search by city..."
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
-                    className="form-control-vitrag"
+                    style={{
+                      backgroundColor: '#2A3441',
+                      borderColor: '#3A4553',
+                      color: '#FFFFFF',
+                      borderRadius: '6px'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#4A90E2';
+                      e.target.style.boxShadow = '0 0 0 0.2rem rgba(74, 144, 226, 0.25)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#3A4553';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </Form.Group>
               </Col>
@@ -220,6 +352,25 @@ const Customers = () => {
                   variant="outline-secondary"
                   onClick={resetFilters}
                   className="w-100"
+                  style={{
+                    backgroundColor: 'transparent',
+                    borderColor: '#6C757D',
+                    color: '#6C757D',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    padding: '10px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#6C757D';
+                    e.target.style.color = '#FFFFFF';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#6C757D';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
                 >
                   Reset
                 </Button>
@@ -228,74 +379,350 @@ const Customers = () => {
           </Card.Body>
         </Card>
 
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="danger" className="mb-4">
+            <FontAwesomeIcon icon={faUsers} className="me-2" />
+            Error loading customers: {error}
+          </Alert>
+        )}
+
         {/* Customers Table */}
-        <Card className="card-vitrag">
+        <Card className="card-vitrag" style={{ 
+          backgroundColor: '#1C2333', 
+          border: '1px solid #3A4553',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          overflow: 'hidden'
+        }}>
           <Card.Body className="p-0">
-            <div className="table-responsive">
-              <Table className="table-vitrag mb-0">
-                <thead>
-                  <tr>
-                    <th>Sr. No.</th>
-                    <th>Customer Name</th>
-                    <th>Contact Person</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>City</th>
-                    <th>Site Name</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCustomers.map((customer, index) => (
-                    <tr key={customer.id}>
-                      <td>{index + 1}</td>
-                      <td>{customer.customerName}</td>
-                      <td>{customer.contactPerson}</td>
-                      <td>{customer.phone}</td>
-                      <td>{customer.email}</td>
-                      <td>{customer.city}</td>
-                      <td>{customer.siteName}</td>
-                      <td>
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            title="Edit"
-                            onClick={() => handleEditCustomer(customer)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </Button>
-                          <Button
-                            variant="outline-info"
-                            size="sm"
-                            title="View Tests"
-                          >
-                            <FontAwesomeIcon icon={faFileAlt} />
-                          </Button>
-                          <Button
-                            variant="outline-success"
-                            size="sm"
-                            title="New Test"
-                          >
-                            <FontAwesomeIcon icon={faPlus} />
-                          </Button>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            title="Delete"
-                            onClick={() => handleDeleteCustomer(customer)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </Button>
-                        </div>
-                      </td>
+            {loading ? (
+              <div className="text-center py-5">
+                <Spinner animation="border" variant="primary" className="mb-3" />
+                <h5>Loading customers...</h5>
+              </div>
+            ) : (
+              <div className="table-responsive custom-table-scroll" style={{ 
+                backgroundColor: '#1C2333', 
+                borderRadius: '8px', 
+                overflow: 'auto',
+                maxHeight: '70vh',
+                minHeight: '400px',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#3A4553 #1C2333'
+              }}>
+                <Table className="table-vitrag mb-0" style={{ 
+                  backgroundColor: '#1C2333', 
+                  marginBottom: 0,
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
+                  minWidth: '1200px'
+                }}>
+                  <thead style={{ backgroundColor: '#2A3441' }}>
+                    <tr>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Sr. No.</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>First Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Last Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Contact Person</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Phone</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Email</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Address</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>City</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Site Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredCustomers.map((customer, index) => (
+                      <tr key={customer.id} style={{ 
+                        backgroundColor: index % 2 === 0 ? '#1C2333' : '#232B3A',
+                        borderBottom: '1px solid #3A4553',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2A3441';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#1C2333' : '#232B3A';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          textAlign: 'center',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{index + 1}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.first_name || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.last_name || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.contact_person || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.phone || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.email || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.address || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.city || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          color: '#FFFFFF', 
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>{customer.site_name || 'N/A'}</td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          textAlign: 'center',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="d-flex gap-2 justify-content-center">
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              title="Edit"
+                              onClick={() => handleEditCustomer(customer)}
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: '#4A90E2',
+                                color: '#4A90E2',
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: '1px solid #4A90E2'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#4A90E2';
+                                e.target.style.color = '#FFFFFF';
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                                e.target.style.color = '#4A90E2';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </Button>
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              title="View Tests"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: '#17A2B8',
+                                color: '#17A2B8',
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: '1px solid #17A2B8'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#17A2B8';
+                                e.target.style.color = '#FFFFFF';
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                                e.target.style.color = '#17A2B8';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faFileAlt} />
+                            </Button>
+                            <Button
+                              variant="outline-success"
+                              size="sm"
+                              title="New Test"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: '#28A745',
+                                color: '#28A745',
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: '1px solid #28A745'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#28A745';
+                                e.target.style.color = '#FFFFFF';
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                                e.target.style.color = '#28A745';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faPlus} />
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              title="Delete"
+                              onClick={() => handleDeleteCustomer(customer)}
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: '#DC3545',
+                                color: '#DC3545',
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: '1px solid #DC3545'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#DC3545';
+                                e.target.style.color = '#FFFFFF';
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent';
+                                e.target.style.color = '#DC3545';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
             
-            {filteredCustomers.length === 0 && (
+            {!loading && filteredCustomers.length === 0 && (
               <div className="text-center py-5">
                 <FontAwesomeIcon icon={faUsers} size="3x" className="text-muted mb-3" />
                 <h5 className="text-muted">No customers found</h5>
@@ -314,7 +741,7 @@ const Customers = () => {
                   Total Customers: {filteredCustomers.length}
                 </h5>
                 <p className="text-muted mb-0">
-                  Showing {filteredCustomers.length} of {customersData.length} customers
+                  Showing {filteredCustomers.length} of {customers.length} customers
                 </p>
               </Card.Body>
             </Card>
@@ -335,8 +762,8 @@ const Customers = () => {
                   <Form.Label>Customer Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="customerName"
-                    value={customerForm.customerName}
+                    name="name"
+                    value={customerForm.name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter customer name"
@@ -348,8 +775,8 @@ const Customers = () => {
                   <Form.Label>Contact Person *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="contactPerson"
-                    value={customerForm.contactPerson}
+                    name="contact_person"
+                    value={customerForm.contact_person}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter contact person name"
@@ -400,8 +827,8 @@ const Customers = () => {
                   <Form.Label>Site Name</Form.Label>
                   <Form.Control
                     type="text"
-                    name="siteName"
-                    value={customerForm.siteName}
+                    name="site_name"
+                    value={customerForm.site_name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter site name"
@@ -412,11 +839,28 @@ const Customers = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+          {submitError && (
+            <Alert variant="danger" className="w-100 mb-3">
+              {submitError}
+            </Alert>
+          )}
+          <Button variant="secondary" onClick={() => setShowAddModal(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button variant="primary" className="btn-vitrag-primary" onClick={handleAddCustomer}>
-            Add Customer
+          <Button 
+            variant="primary" 
+            className="btn-vitrag-primary" 
+            onClick={handleAddCustomer}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Adding...
+              </>
+            ) : (
+              'Add Customer'
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -434,8 +878,8 @@ const Customers = () => {
                   <Form.Label>Customer Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="customerName"
-                    value={customerForm.customerName}
+                    name="name"
+                    value={customerForm.name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter customer name"
@@ -447,8 +891,8 @@ const Customers = () => {
                   <Form.Label>Contact Person *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="contactPerson"
-                    value={customerForm.contactPerson}
+                    name="contact_person"
+                    value={customerForm.contact_person}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter contact person name"
@@ -499,8 +943,8 @@ const Customers = () => {
                   <Form.Label>Site Name</Form.Label>
                   <Form.Control
                     type="text"
-                    name="siteName"
-                    value={customerForm.siteName}
+                    name="site_name"
+                    value={customerForm.site_name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter site name"
@@ -511,11 +955,28 @@ const Customers = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+          {submitError && (
+            <Alert variant="danger" className="w-100 mb-3">
+              {submitError}
+            </Alert>
+          )}
+          <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button variant="primary" className="btn-vitrag-primary" onClick={handleUpdateCustomer}>
-            Update Customer
+          <Button 
+            variant="primary" 
+            className="btn-vitrag-primary" 
+            onClick={handleUpdateCustomer}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Updating...
+              </>
+            ) : (
+              'Update Customer'
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -532,18 +993,34 @@ const Customers = () => {
           </Alert>
           {selectedCustomer && (
             <div>
-              <p><strong>Customer:</strong> {selectedCustomer.customerName}</p>
-              <p><strong>Contact Person:</strong> {selectedCustomer.contactPerson}</p>
+              <p><strong>Customer:</strong> {selectedCustomer.name}</p>
+              <p><strong>Contact Person:</strong> {selectedCustomer.contact_person}</p>
               <p><strong>Phone:</strong> {selectedCustomer.phone}</p>
             </div>
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          {submitError && (
+            <Alert variant="danger" className="w-100 mb-3">
+              {submitError}
+            </Alert>
+          )}
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            Delete Customer
+          <Button 
+            variant="danger" 
+            onClick={confirmDelete}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Deleting...
+              </>
+            ) : (
+              'Delete Customer'
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
