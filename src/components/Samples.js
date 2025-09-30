@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import { 
   faEdit, 
   faChartLine, 
@@ -37,29 +38,74 @@ const Samples = () => {
   const [toDate, setToDate] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filteredData, setFilteredData] = useState([]);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const recordsPerPage = 50;
+  
+  // Lazy loading state
+  const [loadingDetails, setLoadingDetails] = useState({});
+  const [loadedDetails, setLoadedDetails] = useState({});
 
-  // Fetch test requests from API - following Customers page pattern
-  const fetchTestRequests = async () => {
+  // Fetch test requests with pagination
+  const fetchTestRequests = async (page = 1) => {
     try {
       setApiLoading(true);
       setApiError(null);
-      console.log('🔍 Fetching test requests from API...');
+      console.log(`🔍 Fetching page ${page} (${recordsPerPage} records per page)...`);
       
-      // Fetch all data without pagination
-      const data = await databaseService.getTestRequests();
+      // Call API with pagination parameters
+      const response = await axios.get(`http://localhost:5000/api/test-requests?page=${page}&per_page=${recordsPerPage}`);
       
-      console.log('📊 API Response:', data);
-      console.log('📊 API Response type:', typeof data);
-      console.log('📊 API Response is array:', Array.isArray(data));
-      console.log('📊 Number of test requests received:', data?.length || 'undefined');
-      console.log('📊 First item:', data?.[0] || 'No first item');
-      setApiTestRequests(data || []);
+      console.log('📊 API Response:', response.data);
+      const testRequestsArray = response.data.test_requests || [];
+      const total = response.data.total || 0;
+      
+      console.log(`📊 Page ${page}: ${testRequestsArray.length} records, Total: ${total}`);
+      
+      setApiTestRequests(testRequestsArray);
+      setTotalRecords(total);
+      setTotalPages(Math.ceil(total / recordsPerPage));
+      setCurrentPage(page);
     } catch (err) {
       console.error('❌ Error fetching test requests:', err);
-      setApiError('Failed to fetch test requests');
+      setApiError('Failed to fetch test requests: ' + err.message);
       setApiTestRequests([]);
     } finally {
       setApiLoading(false);
+    }
+  };
+
+  // Lazy load detailed data for a specific test request
+  const loadTestRequestDetails = async (testRequestId) => {
+    try {
+      setLoadingDetails(prev => ({ ...prev, [testRequestId]: true }));
+      
+      const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+      
+      const detailsData = {
+        concrete_tests: response.data.concrete_tests,
+        materials: response.data.materials,
+        customer: response.data.customer,
+        test_request: response.data.test_request
+      };
+      
+      setLoadedDetails(prev => ({
+        ...prev,
+        [testRequestId]: detailsData
+      }));
+      
+      console.log('✅ Loaded details for test request', testRequestId, ':', detailsData);
+      
+      // Return the loaded data
+      return detailsData;
+    } catch (err) {
+      console.error('❌ Error loading test request details:', err);
+      return null;
+    } finally {
+      setLoadingDetails(prev => ({ ...prev, [testRequestId]: false }));
     }
   };
 
@@ -222,9 +268,17 @@ const Samples = () => {
 
   const getActionButtons = (item) => {
     const buttons = [];
+    const testRequestId = item.id;
+    const hasLoadedDetails = loadedDetails[testRequestId];
+    const isLoadingDetails = loadingDetails[testRequestId];
+
+    // Get concrete tests from loaded details or empty array
+    const concreteTests = hasLoadedDetails?.concrete_tests || item.concrete_tests || [];
+    const materials = hasLoadedDetails?.materials || item.materials || [];
 
     // Transform item data to match ViewSample expected structure
     const viewData = {
+      id: item.id,
       customerName: item.customer_name || 'N/A',
       contactPerson: 'Contact Person', // Default value
       phone: 'N/A',
@@ -233,33 +287,61 @@ const Samples = () => {
       siteAddress: 'N/A',
       testType: 'CC',
       receiptDate: item.receipt_date || 'N/A',
-      ulrNumber: item.concrete_tests?.[0]?.ulr_number || 'N/A',
-      referenceNumber: 'N/A',
+      ulrNumber: item.ulr_number || concreteTests?.[0]?.ulr_number || 'N/A',
+      referenceNumber: concreteTests?.[0]?.sample_code_number || 'N/A',
       jobNumber: item.job_number || 'N/A',
-      cubeTests: item.concrete_tests?.map((test, index) => ({
-        id: index + 1,
+      cubeTests: concreteTests?.map((test, index) => ({
+        id: test.id || (index + 1),
         idMark: test.idMark || 'N/A',
         locationNature: test.locationNature || 'N/A',
         grade: test.grade || 'N/A',
-        castingDate: test.casting_date || 'N/A',
-        testingDate: test.testing_date || 'N/A',
-        quantity: test.num_of_cubes || 0,
-        testMethod: test.method || 'IS 516 (Part1/Sec1):2021'
+        castingDate: test.castingDate || test.casting_date || 'N/A',
+        testingDate: test.testingDate || test.testing_date || 'N/A',
+        quantity: test.quantity || test.num_of_cubes || 0,
+        testMethod: test.testMethod || test.test_method || 'IS 516 (Part1/Sec1):2021'
       })) || []
     };
 
-    // View button - always present
+    // Load Details button - lazy loading
+    if (!hasLoadedDetails && !isLoadingDetails) {
+      buttons.push(
+        <button
+          key="load-details"
+          onClick={() => loadTestRequestDetails(testRequestId)}
+          className="btn btn-sm btn-outline-primary me-1"
+          title="Load Detailed Data"
+        >
+          <FontAwesomeIcon icon={faSyncAlt} />
+          <span className="d-none d-xl-inline ms-1">Load Details</span>
+        </button>
+      );
+    }
+
+    // Loading indicator
+    if (isLoadingDetails) {
+      buttons.push(
+        <button
+          key="loading"
+          className="btn btn-sm btn-outline-secondary me-1"
+          disabled
+        >
+          <FontAwesomeIcon icon={faSyncAlt} spin />
+          <span className="d-none d-xl-inline ms-1">Loading...</span>
+        </button>
+      );
+    }
+
+    // View button - navigate with URL parameter
     buttons.push(
-      <Link 
-        key="view" 
-        to="/view-sample" 
-        state={{ formData: viewData }}
-        className="btn btn-sm btn-outline-info me-1" 
+      <button
+        key="view"
+        onClick={() => navigate(`/view-sample/${testRequestId}`)}
+        className="btn btn-sm btn-outline-info me-1"
         title="View Details"
       >
         <FontAwesomeIcon icon={faEye} />
         <span className="d-none d-xl-inline ms-1">View</span>
-      </Link>
+      </button>
     );
 
     // Edit button - only if not completed
@@ -526,7 +608,7 @@ const Samples = () => {
                   </h3>
                   <h4 className="mt-1 h6 h-md-4">Sample Man</h4>
                   <p className="mb-0 small text-light">
-                    Showing {filteredData.length} of {testRequestsData.length} test requests
+                    Showing {filteredData.length} of {totalRecords} test requests (Page {currentPage} of {totalPages})
                   </p>
                 </div>
               </div>
@@ -735,11 +817,16 @@ const Samples = () => {
                       </tr>
                     </thead>
                     <tbody>
-                  {filteredData.map((item) => (
+                  {filteredData.map((item) => {
+                    const testRequestId = item.id;
+                    const hasLoadedDetails = loadedDetails[testRequestId];
+                    const concreteTests = hasLoadedDetails?.concrete_tests || item.concrete_tests || [];
+                    
+                    return (
                     <tr key={item.id}>
                       <td className="text-center">{formatDate(item.receipt_date)}</td>
                       <td className="text-center">
-                        {item.concrete_tests?.[0]?.ulr_number || 'N/A'}
+                        {concreteTests?.[0]?.ulr_number || 'N/A'}
                       </td>
                       <td className="text-center">
                         <Badge bg="warning" text="dark">{item.job_number}</Badge>
@@ -753,19 +840,19 @@ const Samples = () => {
                       </td>
                       <td className="text-center">{getSampleTypeBadge(item)}</td>
                       <td className="text-center">
-                        {item.concrete_tests?.length > 0 
-                          ? `${item.concrete_tests.reduce((sum, test) => sum + (test.num_of_cubes || 0), 0)} cubes`
+                        {concreteTests?.length > 0 
+                          ? `${concreteTests.reduce((sum, test) => sum + (test.num_of_cubes || 0), 0)} cubes`
                           : 'N/A'
                         }
                       </td>
                       <td className="text-start">
-                        {item.concrete_tests?.length > 0 ? 'Compression Test' : 'N/A'}
+                        {concreteTests?.length > 0 ? 'Compression Test' : 'N/A'}
                       </td>
                       <td className="text-center">
-                        {formatDate(item.concrete_tests?.[0]?.casting_date)}
+                        {formatDate(concreteTests?.[0]?.casting_date)}
                       </td>
                       <td className="text-center">
-                        {formatDate(item.concrete_tests?.[0]?.testing_date)}
+                        {formatDate(concreteTests?.[0]?.testing_date)}
                       </td>
                       <td className="text-center">
                         {formatDate(item.completion_date)}
@@ -777,10 +864,58 @@ const Samples = () => {
                           {getActionButtons(item)}
                         </div>
                       </td>
-                        </tr>
-                      ))}
+                    </tr>
+                    );
+                  })}
                     </tbody>
                   </Table>
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-4">
+                      <nav aria-label="Test requests pagination">
+                        <ul className="pagination">
+                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => fetchTestRequests(currentPage - 1)}
+                              disabled={currentPage === 1}
+                            >
+                              Previous
+                            </button>
+                          </li>
+                          
+                          {/* Page numbers */}
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            const startPage = Math.max(1, currentPage - 2);
+                            const pageNum = startPage + i;
+                            if (pageNum > totalPages) return null;
+                            
+                            return (
+                              <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
+                                <button 
+                                  className="page-link" 
+                                  onClick={() => fetchTestRequests(pageNum)}
+                                >
+                                  {pageNum}
+                                </button>
+                              </li>
+                            );
+                          })}
+                          
+                          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => fetchTestRequests(currentPage + 1)}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </button>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                  )}
                 </div>
           ) : (
             <Alert variant="info">

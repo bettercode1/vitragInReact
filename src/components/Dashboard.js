@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Tab, Tabs, Table, Form, Dropdown, Spinner, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faVial,
@@ -20,6 +21,7 @@ import { getDashboardData } from '../apis/dashboard';
 import ConcreteCubeFinalTest from './ConcreteCubeFinalTest';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [dashboardData, setDashboardData] = useState({
     stats: {
@@ -758,13 +760,26 @@ const Dashboard = () => {
                               <Button 
                                 size="sm" 
                                 variant="info"
+                                onClick={() => navigate(`/view-sample/${test.id}`)}
                                 style={{
                                   borderRadius: '8px',
                                   padding: '6px 12px',
                                   fontWeight: '500',
                                   backgroundColor: 'rgba(13, 202, 240, 0.1)',
                                   border: '1px solid #0dcaf0',
-                                  color: '#0dcaf0'
+                                  color: '#0dcaf0',
+                                  transition: 'all 0.3s ease',
+                                  cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1.05)';
+                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 202, 240, 0.5)';
+                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1)';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.1)';
                                 }}
                               >
                                 <FontAwesomeIcon icon={faEye} className="me-1" />
@@ -779,7 +794,19 @@ const Dashboard = () => {
                                   fontWeight: '500',
                                   backgroundColor: 'rgba(13, 202, 240, 0.1)',
                                   border: '1px solid #0dcaf0',
-                                  color: '#0dcaf0'
+                                  color: '#0dcaf0',
+                                  transition: 'all 0.3s ease',
+                                  cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1.05)';
+                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 202, 240, 0.5)';
+                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.2)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'scale(1)';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.1)';
                                 }}
                               >
                                 <FontAwesomeIcon icon={faEdit} className="me-1" />
@@ -795,7 +822,19 @@ const Dashboard = () => {
                                     fontWeight: '500',
                                     backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                     border: '1px solid #0d6efd',
-                                    color: '#0d6efd'
+                                    color: '#0d6efd',
+                                    transition: 'all 0.3s ease',
+                                    cursor: 'pointer'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 110, 253, 0.5)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
                                   }}
                                 >
                                   <FontAwesomeIcon icon={faCheckCircle} className="me-1" />

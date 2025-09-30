@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Table, Row, Col, Form, Alert } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Container, Card, Button, Table, Row, Col, Form, Alert, Badge, Modal } from 'react-bootstrap';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import databaseService from '../services/database';
+import axios from 'axios';
 
 const TestObservations = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { testRequestId } = useParams();
   
-  // Get test data from location state
+  // Get test data from location state or will fetch from API
   const { testData, testRequest, testIndex } = location.state || {};
+  
+  const [apiTestRequest, setApiTestRequest] = useState(null);
+  const [apiConcreteTests, setApiConcreteTests] = useState([]);
+  const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     sampleDescription: 'Concrete Cube Specimen',
-    cubeCondition: 'Good',
+    cubeCondition: 'Acceptable',
     curingCondition: '',
-    machineUsed: 'Universal Testing Machine',
+    machineUsed: 'CTM (2000KN)',
     testMethod: 'IS 516 (Part1/Sec1):2021',
     averageStrength: '',
     testedBy: '',
@@ -32,17 +38,41 @@ const TestObservations = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [saveProgress, setSaveProgress] = useState(0);
   const [progressInterval, setProgressInterval] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePhotoKey, setDeletePhotoKey] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // Fetch test request data if URL has testRequestId
+  useEffect(() => {
+    const fetchTestData = async () => {
+      if (testRequestId && !testData && !testRequest) {
+        setLoading(true);
+        try {
+          const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+          setApiTestRequest(response.data.test_request);
+          setApiConcreteTests(response.data.concrete_tests);
+          console.log('✅ Fetched test data for observations:', response.data);
+        } catch (error) {
+          console.error('Error fetching test data:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchTestData();
+  }, [testRequestId]);
 
   // Initialize test rows based on number of cubes
   useEffect(() => {
-    const numCubes = testData?.quantity || 3;
+    const numCubes = testData?.quantity || apiConcreteTests?.[0]?.quantity || apiConcreteTests?.length || 3;
     const actualCubes = Math.min(Math.max(numCubes, 1), 3);
     
     const initialRows = [];
     for (let i = 1; i <= actualCubes; i++) {
       initialRows.push({
         id: i,
-        cubeId: `C${i}`,
+        cubeId: '',
         length: '',
         breadth: '',
         height: '',
@@ -55,40 +85,41 @@ const TestObservations = () => {
       });
     }
     setTestRows(initialRows);
-  }, [testData]);
+  }, [testData, apiConcreteTests]);
 
+  // DISABLED - Don't load old localStorage data (causes dummy data issue)
   // Load saved data if available
-  useEffect(() => {
-    const loadSavedData = async () => {
-      try {
-        const testRequestId = testRequest?.id || testData?.id;
-        if (testRequestId) {
-          // Try to load from database first
-          const savedData = await databaseService.getTestObservations(testRequestId);
-          if (savedData) {
-            setFormData(prev => ({ ...prev, ...savedData.formData }));
-            setTestRows(savedData.testRows || []);
-            setCapturedImages(savedData.capturedImages || {});
-            return;
-          }
-        }
-        
-        // Fallback to localStorage
-        const storageKey = `test_observations_${testRequest?.id || testData?.id || 'temp'}`;
-        const savedData = localStorage.getItem(storageKey);
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          setFormData(prev => ({ ...prev, ...parsedData.formData }));
-          setTestRows(parsedData.testRows || []);
-          setCapturedImages(parsedData.capturedImages || {});
-        }
-      } catch (error) {
-        console.warn('Failed to load saved data:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const loadSavedData = async () => {
+  //     try {
+  //       const testRequestId = testRequest?.id || testData?.id;
+  //       if (testRequestId) {
+  //         // Try to load from database first
+  //         const savedData = await databaseService.getTestObservations(testRequestId);
+  //         if (savedData) {
+  //           setFormData(prev => ({ ...prev, ...savedData.formData }));
+  //           setTestRows(savedData.testRows || []);
+  //           setCapturedImages(savedData.capturedImages || {});
+  //           return;
+  //         }
+  //       }
+  //       
+  //       // Fallback to localStorage
+  //       const storageKey = `test_observations_${testRequest?.id || testData?.id || 'temp'}`;
+  //       const savedData = localStorage.getItem(storageKey);
+  //       if (savedData) {
+  //         const parsedData = JSON.parse(savedData);
+  //         setFormData(prev => ({ ...prev, ...savedData.formData }));
+  //         setTestRows(parsedData.testRows || []);
+  //         setCapturedImages(parsedData.capturedImages || {});
+  //       }
+  //     } catch (error) {
+  //       console.warn('Failed to load saved data:', error);
+  //     }
+  //   };
 
-    loadSavedData();
-  }, [testRequest?.id, testData?.id]);
+  //   loadSavedData();
+  // }, [testRequest?.id, testData?.id]);
 
   // Cleanup effect
   useEffect(() => {
@@ -110,9 +141,7 @@ const TestObservations = () => {
   const validateWeight = (weight) => {
     const weightNum = parseFloat(weight);
     if (isNaN(weightNum)) return 'Please enter a valid number';
-    if (weightNum < 8.3 || weightNum > 8.4) {
-      return 'Please enter a valid value, from 8.3 to 8.4';
-    }
+    // Weight can be any value - no restrictions
     return null;
   };
 
@@ -164,24 +193,7 @@ const TestObservations = () => {
     }));
   };
 
-  const addRow = () => {
-    if (testRows.length < 3) {
-      const newRow = {
-        id: testRows.length + 1,
-        cubeId: `C${testRows.length + 1}`,
-        length: '',
-        breadth: '',
-        height: '',
-        area: '',
-        weight: '',
-        density: '',
-        crushingLoad: '',
-        compressiveStrength: '',
-        failureType: ''
-      };
-      setTestRows(prev => [...prev, newRow]);
-    }
-  };
+  // Rows are automatically generated based on number of cubes from test request
 
   const removeRow = (rowIndex) => {
     if (testRows.length > 1) {
@@ -201,6 +213,82 @@ const TestObservations = () => {
       setSubmitMessage({ 
         type: 'danger', 
         text: 'Please fix validation errors before submitting.' 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate all required fields are filled
+    if (!formData.curingCondition || formData.curingCondition.trim() === '') {
+      setSubmitMessage({ 
+        type: 'danger', 
+        text: 'Please fill in all required fields (Curing Condition is required).' 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate all test rows have required data
+    const hasEmptyRows = testRows.some(row => 
+      !row.cubeId || 
+      !row.weight || 
+      !row.dimensionLength || 
+      !row.dimensionWidth || 
+      !row.dimensionHeight || 
+      !row.crushingLoad || 
+      !row.compressiveStrength
+    );
+    
+    if (hasEmptyRows) {
+      setSubmitMessage({ 
+        type: 'danger', 
+        text: 'Please fill in all test result fields for all cubes.' 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate all 3 images are captured for each cube
+    const totalCubes = testRows.length;
+    for (let i = 0; i < totalCubes; i++) {
+      const frontImage = capturedImages[`front_failure_${i + 1}`];
+      const digitalImage = capturedImages[`digital_reading_${i + 1}`];
+      const backImage = capturedImages[`back_failure_${i + 1}`];
+      
+      if (!frontImage || !digitalImage || !backImage) {
+        setSubmitMessage({ 
+          type: 'danger', 
+          text: `Please capture all 3 photos (Front, Digital, Back) for Cube/Core Specimen #${i + 1}.` 
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+    
+    // Validate average strength is calculated
+    if (!formData.averageStrength || formData.averageStrength === '') {
+      setSubmitMessage({ 
+        type: 'danger', 
+        text: 'Please calculate the average strength before saving.' 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate Tested By and Checked By are filled
+    if (!formData.testedBy || formData.testedBy.trim() === '') {
+      setSubmitMessage({ 
+        type: 'danger', 
+        text: 'Please enter "Tested By" name.' 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!formData.checkedBy || formData.checkedBy.trim() === '') {
+      setSubmitMessage({ 
+        type: 'danger', 
+        text: 'Please enter "Checked By" name.' 
       });
       setIsSubmitting(false);
       return;
@@ -237,9 +325,11 @@ const TestObservations = () => {
       try {
         // Try to save to database first
         setSaveProgress(50);
-        await databaseService.saveTestObservations(testRequest?.id || testData?.id, observationsData);
+        const requestId = testRequestId || testRequest?.id || testData?.id;
+        await axios.post(`http://localhost:5000/api/test-observations/${requestId}`, observationsData);
         setSaveProgress(80);
         setSubmitMessage({ type: 'success', text: 'Test observations saved successfully!' });
+        setShowSuccessModal(true);
       } catch (dbError) {
         console.warn('Database save failed, using localStorage fallback:', dbError);
         
@@ -250,22 +340,11 @@ const TestObservations = () => {
         setSaveProgress(80);
         
         setSubmitMessage({ type: 'success', text: 'Test observations saved locally!' });
+        setShowSuccessModal(true);
       }
       
       setSaveProgress(100);
       clearInterval(interval);
-      
-      // Navigate after a short delay to show success message
-      setTimeout(() => {
-        navigate('/strength-graph', { 
-          state: { 
-            formData: testRequest,
-            testData: testData,
-            testIndex: testIndex,
-            observationsData: observationsData
-          } 
-        });
-      }, 2000);
       
     } catch (error) {
       console.error('Error saving test observations:', error);
@@ -289,17 +368,43 @@ const TestObservations = () => {
     }
   };
 
-  const startCamera = async () => {
+  const [currentFacingMode, setCurrentFacingMode] = useState('environment');
+  
+  const startCamera = async (facingMode = 'environment') => {
     try {
       const video = document.getElementById('camera');
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
+        video: { facingMode: facingMode } 
       });
       video.srcObject = stream;
+      setCurrentFacingMode(facingMode);
     } catch (error) {
       console.error('Error accessing camera:', error);
       alert('Camera access denied. Please allow camera permissions.');
     }
+  };
+  
+  const switchCamera = () => {
+    const newMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    closeCamera();
+    setTimeout(() => startCamera(newMode), 100);
+  };
+  
+  const handleDeletePhoto = (photoKey) => {
+    setDeletePhotoKey(photoKey);
+    setShowDeleteConfirm(true);
+  };
+  
+  const confirmDeletePhoto = () => {
+    if (deletePhotoKey) {
+      setCapturedImages(prev => {
+        const updated = {...prev};
+        delete updated[deletePhotoKey];
+        return updated;
+      });
+    }
+    setShowDeleteConfirm(false);
+    setDeletePhotoKey(null);
   };
 
   const capturePhoto = () => {
@@ -408,8 +513,20 @@ const TestObservations = () => {
     return date.toLocaleDateString('en-GB');
   };
 
+  // Get test request info (from API or state)
+  const currentTestRequest = apiTestRequest || testRequest;
+  const currentConcreteTests = apiConcreteTests.length > 0 ? apiConcreteTests : (testData ? [testData] : []);
+  
+  console.log('🔍 TestObservations Data:');
+  console.log('  testRequestId:', testRequestId);
+  console.log('  apiTestRequest:', apiTestRequest);
+  console.log('  apiConcreteTests:', apiConcreteTests);
+  console.log('  currentTestRequest:', currentTestRequest);
+  console.log('  currentConcreteTests:', currentConcreteTests);
+  
   return (
     <Container className="py-4">
+      
       <style jsx>{`
         .test-results-professional {
           table-layout: fixed;
@@ -656,7 +773,7 @@ const TestObservations = () => {
                       <tbody>
                         <tr>
                           <td className="bg-secondary" width="25%">Reference Number</td>
-                          <td width="25%">{testData?.referenceNumber || testRequest?.referenceNumber || ""}</td>
+                          <td width="25%">{testRequest?.referenceNumber || currentConcreteTests?.[0]?.sample_code_number || 'N/A'}</td>
                           <td className="bg-secondary" width="25%">Sample Description</td>
                           <td width="25%">
                             <Form.Control
@@ -670,19 +787,19 @@ const TestObservations = () => {
                         </tr>
                         <tr>
                           <td className="bg-secondary">Quantity of Cubes</td>
-                          <td>{testData?.quantity || ""}</td>
+                          <td>{currentConcreteTests?.[0]?.quantity || testRows.length}</td>
                           <td className="bg-secondary">Date of Receipt</td>
-                          <td>{formatDate(testRequest?.receiptDate)}</td>
+                          <td>{formatDate(currentTestRequest?.receipt_date || testRequest?.receiptDate)}</td>
                         </tr>
                         <tr>
                           <td className="bg-secondary">Date of Casting</td>
-                          <td>{formatDate(testData?.castingDate)}</td>
+                          <td>{formatDate(currentConcreteTests?.[0]?.castingDate || testData?.castingDate)}</td>
                           <td className="bg-secondary">Date of Testing</td>
-                          <td>{formatDate(testData?.testingDate)}</td>
+                          <td>{formatDate(currentConcreteTests?.[0]?.testingDate || testData?.testingDate)}</td>
                         </tr>
                         <tr>
                           <td className="bg-secondary">Grade of Cube</td>
-                          <td>{testData?.grade || ""}</td>
+                          <td>{currentConcreteTests?.[0]?.grade || testData?.grade || ""}</td>
                           <td className="bg-secondary">Cube Condition</td>
                           <td>
                             <Form.Control
@@ -697,10 +814,14 @@ const TestObservations = () => {
                         <tr>
                           <td className="bg-secondary">Age of Cube</td>
                           <td>
-                            {testData?.castingDate && testData?.testingDate ? 
-                              Math.ceil((new Date(testData.testingDate) - new Date(testData.castingDate)) / (1000 * 60 * 60 * 24)) : 
-                              'N/A'
-                            } days
+                            {(() => {
+                              const casting = currentConcreteTests?.[0]?.castingDate || testData?.castingDate;
+                              const testing = currentConcreteTests?.[0]?.testingDate || testData?.testingDate;
+                              if (casting && testing) {
+                                return Math.ceil((new Date(testing) - new Date(casting)) / (1000 * 60 * 60 * 24)) + ' days';
+                              }
+                              return 'N/A days';
+                            })()}
                           </td>
                           <td className="bg-secondary">Curing Condition <span className="text-danger">*</span></td>
                           <td>
@@ -715,8 +836,8 @@ const TestObservations = () => {
                           </td>
                         </tr>
                         <tr>
-                          <td className="bg-secondary">Machine used for Testing</td>
-                          <td>
+                          <td className="bg-secondary" width="25%">Machine used for Testing</td>
+                          <td colSpan="3">
                             <Form.Control
                               name="machineUsed"
                               value={formData.machineUsed}
@@ -725,8 +846,10 @@ const TestObservations = () => {
                               className="bg-transparent text-white"
                             />
                           </td>
-                          <td className="bg-secondary">Test Method</td>
-                          <td>
+                        </tr>
+                        <tr>
+                          <td className="bg-secondary" width="25%">Test Method</td>
+                          <td colSpan="3">
                             <Form.Control
                               name="testMethod"
                               value={formData.testMethod}
@@ -761,7 +884,7 @@ const TestObservations = () => {
                           <th className="text-center">Density</th>
                           <th className="text-center">Maximum Load <span className="text-danger">*</span></th>
                           <th className="text-center">Compressive Strength <span className="text-danger">*</span></th>
-                          <th className="text-center">Type of Failure</th>
+                          <th className="text-center">Type of Failure <span className="text-muted">(Optional)</span></th>
                           <th className="text-center">Action</th>
                         </tr>
                       </thead>
@@ -826,8 +949,6 @@ const TestObservations = () => {
                                 onChange={(e) => handleRowChange(index, 'weight', e.target.value)}
                                 placeholder="Weight"
                                 step="0.001"
-                                min="8.3"
-                                max="8.4"
                                 className={`text-center ${validationErrors[`weight_${index}`] ? 'is-invalid' : ''}`}
                               />
                               {validationErrors[`weight_${index}`] && (
@@ -895,7 +1016,7 @@ const TestObservations = () => {
                       </tbody>
                       <tfoot>
                         <tr className="bg-secondary">
-                          <td colSpan="8" className="text-end fw-bold pe-3">
+                          <td colSpan="9" className="text-end fw-bold pe-3">
                             <div className="d-flex flex-column align-items-end">
                               <span>Average:</span>
                               <small className="text-warning">(Manual Input Required)</small>
@@ -921,14 +1042,6 @@ const TestObservations = () => {
                     </Table>
                   </div>
                   
-                  {/* Add Row Button */}
-                  {testRows.length < 3 && (
-                    <div className="mt-3">
-                      <Button type="button" variant="outline-primary" onClick={addRow}>
-                        <i className="fas fa-plus me-2"></i>Add Row
-                      </Button>
-                    </div>
-                  )}
                   
                   {/* Remarks Section */}
                   <Row className="my-4">
@@ -953,8 +1066,8 @@ const TestObservations = () => {
                     <Table bordered className="table-dark">
                       <tbody>
                         <tr>
-                          <td width="33%">Tested By:</td>
-                          <td width="33%">Checked By:</td>
+                          <td width="33%">Tested By: <span className="text-danger">*</span></td>
+                          <td width="33%">Checked By: <span className="text-danger">*</span></td>
                           <td width="33%">Verified By:</td>
                         </tr>
                         <tr>
@@ -965,6 +1078,7 @@ const TestObservations = () => {
                               onChange={handleInputChange}
                               placeholder="Name"
                               className="bg-transparent text-white"
+                              required
                             />
                           </td>
                           <td>
@@ -974,6 +1088,7 @@ const TestObservations = () => {
                               onChange={handleInputChange}
                               placeholder="Name"
                               className="bg-transparent text-white"
+                              required
                             />
                           </td>
                           <td>
@@ -1056,16 +1171,32 @@ const TestObservations = () => {
                             </div>
                             <div className="photo-container border border-secondary rounded-3 bg-dark" style={{ height: '200px', position: 'relative', overflow: 'hidden' }}>
                               {capturedImages[`front_failure_${cubeNum + 1}`] ? (
-                                <img 
-                                  src={capturedImages[`front_failure_${cubeNum + 1}`]} 
-                                  alt="Front Failure" 
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover', 
-                                    borderRadius: '8px'
-                                  }}
-                                />
+                                <>
+                                  <img 
+                                    src={capturedImages[`front_failure_${cubeNum + 1}`]} 
+                                    alt="Front Failure" 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'contain', 
+                                      borderRadius: '8px'
+                                    }}
+                                  />
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDeletePhoto(`front_failure_${cubeNum + 1}`)}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '5px',
+                                      right: '5px',
+                                      padding: '5px 10px',
+                                      zIndex: 10
+                                    }}
+                                  >
+                                    <i className="fas fa-times"></i>
+                                  </Button>
+                                </>
                               ) : (
                                 <div className="no-photo-placeholder text-center d-flex flex-column align-items-center justify-content-center" style={{ height: '100%' }}>
                                   <i className="fas fa-image fa-2x text-muted"></i>
@@ -1082,9 +1213,31 @@ const TestObservations = () => {
                                 >
                                   <i className="fas fa-camera me-2"></i>Capture
                                 </Button>
-                                <Button variant="outline-light">
+                                <Button 
+                                  variant="outline-light"
+                                  onClick={() => document.getElementById(`upload-front-${cubeNum + 1}`).click()}
+                                >
                                   <i className="fas fa-upload me-2"></i>Upload
                                 </Button>
+                                <input
+                                  type="file"
+                                  id={`upload-front-${cubeNum + 1}`}
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        setCapturedImages(prev => ({
+                                          ...prev,
+                                          [`front_failure_${cubeNum + 1}`]: event.target.result
+                                        }));
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
                               </div>
                             </div>
                           </Col>
@@ -1096,16 +1249,32 @@ const TestObservations = () => {
                             </div>
                             <div className="photo-container border border-secondary rounded-3 bg-dark" style={{ height: '200px', position: 'relative', overflow: 'hidden' }}>
                               {capturedImages[`digital_reading_${cubeNum + 1}`] ? (
-                                <img 
-                                  src={capturedImages[`digital_reading_${cubeNum + 1}`]} 
-                                  alt="Digital Reading" 
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover', 
-                                    borderRadius: '8px'
-                                  }}
-                                />
+                                <>
+                                  <img 
+                                    src={capturedImages[`digital_reading_${cubeNum + 1}`]} 
+                                    alt="Digital Reading" 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'contain', 
+                                      borderRadius: '8px'
+                                    }}
+                                  />
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDeletePhoto(`digital_reading_${cubeNum + 1}`)}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '5px',
+                                      right: '5px',
+                                      padding: '5px 10px',
+                                      zIndex: 10
+                                    }}
+                                  >
+                                    <i className="fas fa-times"></i>
+                                  </Button>
+                                </>
                               ) : (
                                 <div className="no-photo-placeholder text-center d-flex flex-column align-items-center justify-content-center" style={{ height: '100%' }}>
                                   <i className="fas fa-image fa-2x text-muted"></i>
@@ -1122,9 +1291,31 @@ const TestObservations = () => {
                                 >
                                   <i className="fas fa-camera me-2"></i>Capture
                                 </Button>
-                                <Button variant="outline-light">
+                                <Button 
+                                  variant="outline-light"
+                                  onClick={() => document.getElementById(`upload-digital-${cubeNum + 1}`).click()}
+                                >
                                   <i className="fas fa-upload me-2"></i>Upload
                                 </Button>
+                                <input
+                                  type="file"
+                                  id={`upload-digital-${cubeNum + 1}`}
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        setCapturedImages(prev => ({
+                                          ...prev,
+                                          [`digital_reading_${cubeNum + 1}`]: event.target.result
+                                        }));
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
                               </div>
                             </div>
                           </Col>
@@ -1136,16 +1327,32 @@ const TestObservations = () => {
                             </div>
                             <div className="photo-container border border-secondary rounded-3 bg-dark" style={{ height: '200px', position: 'relative', overflow: 'hidden' }}>
                               {capturedImages[`back_failure_${cubeNum + 1}`] ? (
-                                <img 
-                                  src={capturedImages[`back_failure_${cubeNum + 1}`]} 
-                                  alt="Back Failure" 
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover', 
-                                    borderRadius: '8px'
-                                  }}
-                                />
+                                <>
+                                  <img 
+                                    src={capturedImages[`back_failure_${cubeNum + 1}`]} 
+                                    alt="Back Failure" 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'contain', 
+                                      borderRadius: '8px'
+                                    }}
+                                  />
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDeletePhoto(`back_failure_${cubeNum + 1}`)}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '5px',
+                                      right: '5px',
+                                      padding: '5px 10px',
+                                      zIndex: 10
+                                    }}
+                                  >
+                                    <i className="fas fa-times"></i>
+                                  </Button>
+                                </>
                               ) : (
                                 <div className="no-photo-placeholder text-center d-flex flex-column align-items-center justify-content-center" style={{ height: '100%' }}>
                                   <i className="fas fa-image fa-2x text-muted"></i>
@@ -1162,9 +1369,31 @@ const TestObservations = () => {
                                 >
                                   <i className="fas fa-camera me-2"></i>Capture
                                 </Button>
-                                <Button variant="outline-light">
+                                <Button 
+                                  variant="outline-light"
+                                  onClick={() => document.getElementById(`upload-back-${cubeNum + 1}`).click()}
+                                >
                                   <i className="fas fa-upload me-2"></i>Upload
                                 </Button>
+                                <input
+                                  type="file"
+                                  id={`upload-back-${cubeNum + 1}`}
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        setCapturedImages(prev => ({
+                                          ...prev,
+                                          [`back_failure_${cubeNum + 1}`]: event.target.result
+                                        }));
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
                               </div>
                             </div>
                           </Col>
@@ -1218,6 +1447,72 @@ const TestObservations = () => {
         </Col>
       </Row>
 
+      {/* Success Modal */}
+      <Modal 
+        show={showSuccessModal} 
+        backdrop="static" 
+        keyboard={false} 
+        centered
+      >
+        <Modal.Header style={{ backgroundColor: '#198754', borderBottom: 'none' }}>
+          <Modal.Title style={{ color: '#fff' }}>
+            <i className="fas fa-check-circle me-2"></i>Success!
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '40px' }}>
+          <i className="fas fa-check-circle fa-4x mb-3" style={{ color: '#198754' }}></i>
+          <h4>Test Observations Saved Successfully!</h4>
+          <p className="text-muted mt-3">Your data has been saved to the database.</p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#2c2c2c', borderTop: '1px solid #444' }}>
+          <Button 
+            variant="success" 
+            onClick={() => {
+              setShowSuccessModal(false);
+              navigate('/strength-graph', { 
+                state: { 
+                  formData: testRequest,
+                  testData: testData,
+                  testIndex: testIndex,
+                  observationsData: {
+                    formData: {
+                      ...formData,
+                      testRows: testRows
+                    },
+                    testRows: testRows,
+                    capturedImages: capturedImages,
+                    testRequestId: testRequest?.id || testData?.id,
+                    timestamp: new Date().toISOString()
+                  }
+                } 
+              });
+            }}
+          >
+            Continue to Graph <i className="fas fa-arrow-right ms-2"></i>
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)} centered>
+        <Modal.Header closeButton style={{ backgroundColor: '#2c2c2c', borderBottom: '1px solid #444' }}>
+          <Modal.Title style={{ color: '#fff' }}>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '30px' }}>
+          <i className="fas fa-exclamation-triangle fa-3x mb-3" style={{ color: '#ffc107' }}></i>
+          <h5>Are you sure you want to delete this photo?</h5>
+          <p className="text-muted mt-2">This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#2c2c2c', borderTop: '1px solid #444' }}>
+          <Button variant="outline-light" onClick={() => setShowDeleteConfirm(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeletePhoto}>
+            <i className="fas fa-trash me-2"></i>Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Camera Modal */}
       <div 
         id="cameraModal" 
@@ -1252,6 +1547,9 @@ const TestObservations = () => {
           ></video>
           <canvas id="canvas" style={{ display: 'none' }}></canvas>
           <div className="mt-3 d-flex gap-2 justify-content-center">
+            <Button variant="info" onClick={switchCamera}>
+              <i className="fas fa-sync-alt me-2"></i>Switch Camera
+            </Button>
             <Button variant="primary" onClick={capturePhoto}>
               <i className="fas fa-camera me-2"></i>Capture
             </Button>

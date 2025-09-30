@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import axios from 'axios';
 import './SignIn.css';
 
 const SignIn = () => {
@@ -11,6 +12,8 @@ const SignIn = () => {
     userType: 'quality-manager'
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -21,12 +24,30 @@ const SignIn = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle sign in logic here
-    console.log('Sign in data:', formData);
-    // For now, just navigate to dashboard
-    navigate('/dashboard');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await axios.post('http://localhost:5000/api/login', {
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
+      
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,6 +90,13 @@ const SignIn = () => {
               {/* Login Form */}
               <Card className="login-card">
                 <Card.Body className="p-4">
+                  {error && (
+                    <Alert variant="danger" className="mb-3">
+                      <i className="fas fa-exclamation-circle me-2"></i>
+                      {error}
+                    </Alert>
+                  )}
+                  
                   <Form onSubmit={handleSubmit}>
                     {/* User Type Selection */}
                     <div className="user-type-selection mb-4">
@@ -138,8 +166,16 @@ const SignIn = () => {
                     <Button
                       type="submit"
                       className="signin-button w-100"
+                      disabled={isLoading}
                     >
-                      Sign In
+                      {isLoading ? (
+                        <>
+                          <Spinner animation="border" size="sm" className="me-2" />
+                          Signing In...
+                        </>
+                      ) : (
+                        'Sign In'
+                      )}
                     </Button>
                   </Form>
                 </Card.Body>

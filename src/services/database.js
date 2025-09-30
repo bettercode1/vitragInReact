@@ -41,7 +41,11 @@ class DatabaseService {
   async getTestRequests() {
     try {
       const response = await this.request(`/test-requests`);
-      return response.test_requests || response; // Handle both old and new format
+      console.log('🔍 Database Service - Raw response:', response);
+      console.log('🔍 Database Service - response.test_requests:', response.test_requests?.length || 'undefined');
+      const result = response.test_requests || response;
+      console.log('🔍 Database Service - Final result:', result?.length || 'undefined');
+      return result; // Handle both old and new format
     } catch (error) {
       console.error('Failed to fetch test requests:', error);
       return [];

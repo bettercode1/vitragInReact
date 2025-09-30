@@ -142,7 +142,8 @@ function App() {
                   <Route path="/test-records" element={<TestRecords />} />
                   <Route path="/cube-testing-services" element={<CubeTestingServices />} />
                   <Route path="/view-sample" element={<ViewSampleWithKey />} />
-                  <Route path="/test-observations" element={<TestObservations />} />
+                  <Route path="/view-sample/:testRequestId" element={<ViewSampleWithKey />} />
+                  <Route path="/test-observations/:testRequestId" element={<TestObservations />} />
                   <Route path="/strength-graph" element={<StrengthGraph />} />
                   <Route path="/test-report-preview" element={<TestReportPreview />} />
                   <Route path="/pdf-view" element={<PDFView />} />

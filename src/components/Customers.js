@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, Table, Modal, InputGroup, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, Table, Modal, InputGroup, Alert, Spinner, Toast, ToastContainer } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSearch, 
@@ -8,7 +8,8 @@ import {
   faTrash, 
   faUsers,
   faFileAlt,
-  faEye
+  faEye,
+  faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { getCustomers, addCustomer, updateCustomer, deleteCustomer } from '../apis/customers';
 
@@ -24,7 +25,11 @@ const Customers = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [addError, setAddError] = useState(null);
+  const [editError, setEditError] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [customerForm, setCustomerForm] = useState({
     first_name: '',
     last_name: '',
@@ -73,6 +78,11 @@ const Customers = () => {
     const matchesCity = !cityFilter || (customer.city || '').toLowerCase().startsWith(cityFilter.toLowerCase());
     
     return matchesSearch && matchesPhone && matchesCity;
+  }).sort((a, b) => {
+    // Sort alphabetically by customer name (name field)
+    const nameA = (a.name || '').toLowerCase();
+    const nameB = (b.name || '').toLowerCase();
+    return nameA.localeCompare(nameB);
   });
 
   const handleInputChange = (e) => {
@@ -85,19 +95,26 @@ const Customers = () => {
 
   const handleAddCustomer = async () => {
     // Validate required fields
-    if (!customerForm.name || !customerForm.phone || !customerForm.city) {
-      setSubmitError('Please fill in all required fields (Customer Name, Phone, City).');
+    if (!customerForm.first_name || !customerForm.last_name || !customerForm.contact_person || !customerForm.phone || !customerForm.address || !customerForm.city || !customerForm.site_name) {
+      setAddError('Please fill in all required fields.');
       return;
     }
     
     setIsSubmitting(true);
-    setSubmitError(null);
+    setAddError(null);
     
     try {
-      await addCustomer(customerForm);
+      // Auto-generate name from first_name + last_name
+      const formDataWithName = {
+        ...customerForm,
+        name: `${customerForm.first_name} ${customerForm.last_name}`.trim()
+      };
+      
+      await addCustomer(formDataWithName);
       // Refresh the data after adding
       await fetchCustomers();
       setShowAddModal(false);
+      setAddError(null);
       setCustomerForm({
         first_name: '',
         last_name: '',
@@ -109,12 +126,15 @@ const Customers = () => {
         city: '',
         site_name: ''
       });
+      // Show success toast
+      setSuccessMessage('Customer added successfully!');
+      setShowSuccessToast(true);
     } catch (error) {
       console.error('Error adding customer:', error);
       if (error.response && error.response.data && error.response.data.error) {
-        setSubmitError(error.response.data.error);
+        setAddError(error.response.data.error);
       } else {
-        setSubmitError('Failed to add customer. Please try again.');
+        setAddError('Failed to add customer. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -131,20 +151,27 @@ const Customers = () => {
     if (!selectedCustomer) return;
     
     // Validate required fields
-    if (!customerForm.name || !customerForm.phone || !customerForm.city) {
-      setSubmitError('Please fill in all required fields (Customer Name, Phone, City).');
+    if (!customerForm.first_name || !customerForm.last_name || !customerForm.contact_person || !customerForm.phone || !customerForm.address || !customerForm.city || !customerForm.site_name) {
+      setEditError('Please fill in all required fields.');
       return;
     }
     
     setIsSubmitting(true);
-    setSubmitError(null);
+    setEditError(null);
     
     try {
-      await updateCustomer(selectedCustomer.id, customerForm);
+      // Auto-generate name from first_name + last_name
+      const formDataWithName = {
+        ...customerForm,
+        name: `${customerForm.first_name} ${customerForm.last_name}`.trim()
+      };
+      
+      await updateCustomer(selectedCustomer.id, formDataWithName);
       // Refresh the data after updating
       await fetchCustomers();
       setShowEditModal(false);
       setSelectedCustomer(null);
+      setEditError(null);
       setCustomerForm({
         first_name: '',
         last_name: '',
@@ -156,12 +183,15 @@ const Customers = () => {
         city: '',
         site_name: ''
       });
+      // Show success toast
+      setSuccessMessage('Customer updated successfully!');
+      setShowSuccessToast(true);
     } catch (error) {
       console.error('Error updating customer:', error);
       if (error.response && error.response.data && error.response.data.error) {
-        setSubmitError(error.response.data.error);
+        setEditError(error.response.data.error);
       } else {
-        setSubmitError('Failed to update customer. Please try again.');
+        setEditError('Failed to update customer. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -177,7 +207,7 @@ const Customers = () => {
     if (!selectedCustomer) return;
     
     setIsSubmitting(true);
-    setSubmitError(null);
+    setDeleteError(null);
     
     try {
       await deleteCustomer(selectedCustomer.id);
@@ -185,13 +215,24 @@ const Customers = () => {
       await fetchCustomers();
       setShowDeleteModal(false);
       setSelectedCustomer(null);
+      setDeleteError(null);
+      // Show success toast
+      setSuccessMessage('Customer deleted successfully!');
+      setShowSuccessToast(true);
     } catch (error) {
       console.error('Error deleting customer:', error);
+      let errorMessage = 'Failed to delete customer. Please try again.';
+      
       if (error.response && error.response.data && error.response.data.error) {
-        setSubmitError(error.response.data.error);
-      } else {
-        setSubmitError('Failed to delete customer. Please try again.');
+        errorMessage = error.response.data.error;
       }
+      
+      // If customer has test requests, show specific message
+      if (errorMessage.includes('associated test requests')) {
+        errorMessage = 'Cannot delete this customer because they have associated test requests. Please delete all test requests first.';
+      }
+      
+      setDeleteError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -224,6 +265,30 @@ const Customers = () => {
           
           .custom-table-scroll::-webkit-scrollbar-thumb:hover {
             background: #4A5568;
+          }
+
+          @keyframes skeleton-pulse {
+            0% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.4;
+            }
+            100% {
+              opacity: 1;
+            }
+          }
+
+          /* Red asterisk for required fields */
+          .form-label:after {
+            content: '';
+          }
+          
+          .form-label:has(+ .form-control[required]):after,
+          .form-label:has(+ textarea[required]):after {
+            content: ' *';
+            color: #DC3545;
+            font-weight: bold;
           }
         `}
       </style>
@@ -397,9 +462,278 @@ const Customers = () => {
         }}>
           <Card.Body className="p-0">
             {loading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" variant="primary" className="mb-3" />
-                <h5>Loading customers...</h5>
+              <div className="table-responsive custom-table-scroll" style={{ 
+                backgroundColor: '#1C2333', 
+                borderRadius: '8px', 
+                overflow: 'auto',
+                maxHeight: '70vh',
+                minHeight: '400px',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#3A4553 #1C2333'
+              }}>
+                <Table className="table-vitrag mb-0" style={{ 
+                  backgroundColor: '#1C2333', 
+                  marginBottom: 0,
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
+                  minWidth: '1200px'
+                }}>
+                  <thead style={{ backgroundColor: '#2A3441' }}>
+                    <tr>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Sr. No.</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>First Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Last Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Contact Person</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Phone</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Email</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Address</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>City</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        borderRight: '1px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Site Name</th>
+                      <th style={{ 
+                        padding: '20px 15px', 
+                        color: '#FFFFFF', 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        borderBottom: '2px solid #3A4553',
+                        backgroundColor: '#2A3441'
+                      }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(5)].map((_, index) => (
+                      <tr key={index} style={{ 
+                        backgroundColor: index % 2 === 0 ? '#1C2333' : '#232B3A',
+                        borderBottom: '1px solid #3A4553'
+                      }}>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '30px',
+                            margin: '0 auto'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '80px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '80px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '100px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '120px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '150px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '120px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '80px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderRight: '1px solid #3A4553',
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="skeleton-line" style={{
+                            height: '20px',
+                            backgroundColor: '#3A4553',
+                            borderRadius: '4px',
+                            animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                            width: '100px'
+                          }}></div>
+                        </td>
+                        <td style={{ 
+                          padding: '25px 15px', 
+                          borderBottom: '1px solid #3A4553'
+                        }}>
+                          <div className="d-flex gap-2 justify-content-center">
+                            <div className="skeleton-line" style={{
+                              height: '32px',
+                              backgroundColor: '#3A4553',
+                              borderRadius: '6px',
+                              animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                              width: '32px'
+                            }}></div>
+                            <div className="skeleton-line" style={{
+                              height: '32px',
+                              backgroundColor: '#3A4553',
+                              borderRadius: '6px',
+                              animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                              width: '32px'
+                            }}></div>
+                            <div className="skeleton-line" style={{
+                              height: '32px',
+                              backgroundColor: '#3A4553',
+                              borderRadius: '6px',
+                              animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                              width: '32px'
+                            }}></div>
+                            <div className="skeleton-line" style={{
+                              height: '32px',
+                              backgroundColor: '#3A4553',
+                              borderRadius: '6px',
+                              animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+                              width: '32px'
+                            }}></div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               </div>
             ) : (
               <div className="table-responsive custom-table-scroll" style={{ 
@@ -757,22 +1091,37 @@ const Customers = () => {
         <Modal.Body className="modal-content-vitrag">
           <Form>
             <Row>
-              <Col md={6} className="mb-3">
+              <Col md={4} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Customer Name *</Form.Label>
+                  <Form.Label>First Name</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={customerForm.name}
+                    name="first_name"
+                    value={customerForm.first_name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
-                    placeholder="Enter customer name"
+                    placeholder="Enter first name"
+                    required
                   />
                 </Form.Group>
               </Col>
-              <Col md={6} className="mb-3">
+              <Col md={4} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Contact Person *</Form.Label>
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="last_name"
+                    value={customerForm.last_name}
+                    onChange={handleInputChange}
+                    className="form-control-vitrag"
+                    placeholder="Enter last name"
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={4} className="mb-3">
+                <Form.Group>
+                  <Form.Label>Contact Person</Form.Label>
                   <Form.Control
                     type="text"
                     name="contact_person"
@@ -780,19 +1129,22 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter contact person name"
+                    required
                   />
                 </Form.Group>
               </Col>
               <Col md={6} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Phone *</Form.Label>
+                  <Form.Label>Phone/Mobile</Form.Label>
                   <Form.Control
                     type="tel"
                     name="phone"
                     value={customerForm.phone}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
-                    placeholder="Enter phone number"
+                    placeholder="Enter 10-digit number"
+                    maxLength="10"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -809,9 +1161,24 @@ const Customers = () => {
                   />
                 </Form.Group>
               </Col>
+              <Col md={12} className="mb-3">
+                <Form.Group>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    name="address"
+                    value={customerForm.address}
+                    onChange={handleInputChange}
+                    className="form-control-vitrag"
+                    placeholder="Enter address"
+                    required
+                  />
+                </Form.Group>
+              </Col>
               <Col md={6} className="mb-3">
                 <Form.Group>
-                  <Form.Label>City *</Form.Label>
+                  <Form.Label>City</Form.Label>
                   <Form.Control
                     type="text"
                     name="city"
@@ -819,6 +1186,7 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter city"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -832,6 +1200,7 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter site name"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -839,9 +1208,9 @@ const Customers = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          {submitError && (
+          {addError && (
             <Alert variant="danger" className="w-100 mb-3">
-              {submitError}
+              {addError}
             </Alert>
           )}
           <Button variant="secondary" onClick={() => setShowAddModal(false)} disabled={isSubmitting}>
@@ -873,22 +1242,37 @@ const Customers = () => {
         <Modal.Body className="modal-content-vitrag">
           <Form>
             <Row>
-              <Col md={6} className="mb-3">
+              <Col md={4} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Customer Name *</Form.Label>
+                  <Form.Label>First Name</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={customerForm.name}
+                    name="first_name"
+                    value={customerForm.first_name}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
-                    placeholder="Enter customer name"
+                    placeholder="Enter first name"
+                    required
                   />
                 </Form.Group>
               </Col>
-              <Col md={6} className="mb-3">
+              <Col md={4} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Contact Person *</Form.Label>
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="last_name"
+                    value={customerForm.last_name}
+                    onChange={handleInputChange}
+                    className="form-control-vitrag"
+                    placeholder="Enter last name"
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={4} className="mb-3">
+                <Form.Group>
+                  <Form.Label>Contact Person</Form.Label>
                   <Form.Control
                     type="text"
                     name="contact_person"
@@ -896,19 +1280,22 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter contact person name"
+                    required
                   />
                 </Form.Group>
               </Col>
               <Col md={6} className="mb-3">
                 <Form.Group>
-                  <Form.Label>Phone *</Form.Label>
+                  <Form.Label>Phone/Mobile</Form.Label>
                   <Form.Control
                     type="tel"
                     name="phone"
                     value={customerForm.phone}
                     onChange={handleInputChange}
                     className="form-control-vitrag"
-                    placeholder="Enter phone number"
+                    placeholder="Enter 10-digit number"
+                    maxLength="10"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -925,9 +1312,24 @@ const Customers = () => {
                   />
                 </Form.Group>
               </Col>
+              <Col md={12} className="mb-3">
+                <Form.Group>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    name="address"
+                    value={customerForm.address}
+                    onChange={handleInputChange}
+                    className="form-control-vitrag"
+                    placeholder="Enter address"
+                    required
+                  />
+                </Form.Group>
+              </Col>
               <Col md={6} className="mb-3">
                 <Form.Group>
-                  <Form.Label>City *</Form.Label>
+                  <Form.Label>City</Form.Label>
                   <Form.Control
                     type="text"
                     name="city"
@@ -935,6 +1337,7 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter city"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -948,6 +1351,7 @@ const Customers = () => {
                     onChange={handleInputChange}
                     className="form-control-vitrag"
                     placeholder="Enter site name"
+                    required
                   />
                 </Form.Group>
               </Col>
@@ -955,9 +1359,9 @@ const Customers = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          {submitError && (
+          {editError && (
             <Alert variant="danger" className="w-100 mb-3">
-              {submitError}
+              {editError}
             </Alert>
           )}
           <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={isSubmitting}>
@@ -1000,9 +1404,9 @@ const Customers = () => {
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer-vitrag">
-          {submitError && (
+          {deleteError && (
             <Alert variant="danger" className="w-100 mb-3">
-              {submitError}
+              {deleteError}
             </Alert>
           )}
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isSubmitting}>
@@ -1024,6 +1428,40 @@ const Customers = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Success Toast Notification - Centered and Enlarged */}
+      <ToastContainer 
+        position="top-center" 
+        className="p-3" 
+        style={{ 
+          zIndex: 9999,
+          position: 'fixed',
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)'
+        }}
+      >
+        <Toast 
+          show={showSuccessToast} 
+          onClose={() => setShowSuccessToast(false)} 
+          delay={3000} 
+          autohide
+          bg="success"
+          style={{
+            minWidth: '400px',
+            fontSize: '1.1rem',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+          }}
+        >
+          <Toast.Header style={{ padding: '15px 20px' }}>
+            <FontAwesomeIcon icon={faCheckCircle} className="me-2" style={{ color: '#28A745', fontSize: '1.5rem' }} />
+            <strong className="me-auto" style={{ fontSize: '1.2rem' }}>Success</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white" style={{ padding: '20px', fontSize: '1.1rem' }}>
+            {successMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };
