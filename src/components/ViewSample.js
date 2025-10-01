@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Card, Button, Badge, Table, Row, Col, Alert } from 'react-bootstrap';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faList } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const ViewSample = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { testRequestId } = useParams();
   const [testRequest, setTestRequest] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [observationsCompleted, setObservationsCompleted] = useState(false);
   
   // Debug: Log the received data
   console.log('ViewSample - location.state:', location.state);
@@ -16,34 +20,74 @@ const ViewSample = () => {
   console.log('ViewSample - search:', location.search);
   
   useEffect(() => {
-    // Update testRequest when location changes
-    const newTestRequest = location.state?.formData || {
-      customerName: 'Lords Developers',
-      contactPerson: 'John Smith',
-      phone: '+91 9876543210',
-      email: 'john@lordsdevelopers.com',
-      siteName: 'Shivyogi Residency',
-      siteAddress: 'Shelgi, Solapur, Maharashtra',
-      testType: 'CC',
-      receiptDate: '2024-01-15',
-      ulrNumber: 'TC-1575625000001840F',
-      referenceNumber: 'REF-2024-001',
-      jobNumber: 'T-2501690',
-      cubeTests: [{
-        id: 1,
-        idMark: 'CC-001',
-        locationNature: 'Column - Ground Floor',
-        grade: 'M25',
-        castingDate: '2024-01-10',
-        testingDate: '2024-02-07',
-        quantity: 3,
-        testMethod: 'IS 516 (Part1/Sec1):2021'
-      }]
+    const fetchTestRequestData = async () => {
+      // If testRequestId is in URL, fetch from API
+      if (testRequestId) {
+        setLoading(true);
+        try {
+          const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+          const data = response.data;
+          
+          // Build testRequest object from API data
+          console.log('🔍 RAW API DATA - concrete_tests:', data.concrete_tests);
+          console.log('🔍 First concrete test sample_code_number:', data.concrete_tests?.[0]?.sample_code_number);
+          
+          const newTestRequest = {
+            id: parseInt(testRequestId),
+            customerName: data.customer?.name || 'N/A',
+            contactPerson: data.customer?.contact_person || 'N/A',
+            phone: data.customer?.phone || 'N/A',
+            email: data.customer?.email || 'N/A',
+            siteName: data.test_request?.site_name || 'N/A',
+            siteAddress: data.customer?.address || 'N/A',
+            testType: data.test_request?.test_type || 'CC',
+            receiptDate: data.test_request?.receipt_date || 'N/A',
+            ulrNumber: data.test_request?.ulr_number || 'N/A',
+            referenceNumber: data.concrete_tests?.[0]?.sample_code_number || 'N/A',
+            jobNumber: data.test_request?.job_number || 'N/A',
+            cubeTests: data.concrete_tests?.map((ct, index) => {
+              console.log(`🔍 Mapping concrete test ${index}:`, {
+                id: ct.id,
+                sample_code_number: ct.sample_code_number
+              });
+              return {
+                id: ct.id || (index + 1),
+                idMark: ct.idMark,
+                locationNature: ct.locationNature,
+                grade: ct.grade,
+                castingDate: ct.castingDate,
+                testingDate: ct.testingDate,
+                quantity: ct.quantity,
+                testMethod: ct.testMethod,
+                sample_code_number: ct.sample_code_number
+              };
+            }) || []
+          };
+          
+          console.log('✅ BUILT testRequest.referenceNumber:', newTestRequest.referenceNumber);
+          console.log('✅ BUILT testRequest.cubeTests[0]?.sample_code_number:', newTestRequest.cubeTests?.[0]?.sample_code_number);
+          
+          setTestRequest(newTestRequest);
+          
+          // Check if observations are completed (if any concrete test has results)
+          const hasObservations = data.concrete_tests?.some(ct => ct.has_results || ct.observations_completed);
+          setObservationsCompleted(hasObservations);
+        } catch (error) {
+          console.error('Error fetching test request:', error);
+          setTestRequest(null);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Fallback to location.state
+        const newTestRequest = location.state?.formData;
+        setTestRequest(newTestRequest);
+        console.log('ViewSample - Using location.state:', newTestRequest);
+      }
     };
     
-    setTestRequest(newTestRequest);
-    console.log('ViewSample - Updated testRequest:', newTestRequest);
-  }, [location.state, location.pathname]);
+    fetchTestRequestData();
+  }, [testRequestId, location.state, location.pathname]);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -51,15 +95,48 @@ const ViewSample = () => {
     return date.toLocaleDateString('en-GB');
   };
 
-  // Show loading state if testRequest is not loaded yet
-  if (!testRequest) {
+  // Show skeleton loading state if testRequest is not loaded yet
+  if (loading || !testRequest) {
     return (
       <Container className="mt-4">
-        <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <style>
+          {`
+            @keyframes skeleton-pulse {
+              0% { opacity: 1; }
+              50% { opacity: 0.4; }
+              100% { opacity: 1; }
+            }
+            .skeleton {
+              background: linear-gradient(90deg, #2d3748 25%, #3a4553 50%, #2d3748 75%);
+              background-size: 200% 100%;
+              animation: skeleton-pulse 1.5s ease-in-out infinite;
+              border-radius: 4px;
+            }
+          `}
+        </style>
+        <Row className="mb-4">
+          <Col>
+            <Card className="shadow">
+              <Card.Header style={{ backgroundColor: '#FFA500', padding: '20px' }}>
+                <div className="skeleton" style={{ height: '60px', width: '100%' }}></div>
+              </Card.Header>
+              <Card.Body>
+                <Row className="mb-4">
+                  <Col md={6}>
+                    <div className="skeleton mb-2" style={{ height: '30px', width: '60%' }}></div>
+                    <div className="skeleton mb-2" style={{ height: '150px', width: '100%' }}></div>
+                  </Col>
+                  <Col md={6}>
+                    <div className="skeleton mb-2" style={{ height: '30px', width: '60%' }}></div>
+                    <div className="skeleton mb-2" style={{ height: '150px', width: '100%' }}></div>
+                  </Col>
+                </Row>
+                <div className="skeleton mb-2" style={{ height: '30px', width: '50%' }}></div>
+                <div className="skeleton" style={{ height: '200px', width: '100%' }}></div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </Container>
     );
   }
@@ -70,7 +147,7 @@ const ViewSample = () => {
       <Row className="mb-4">
         <Col>
           <Card className="shadow">
-            <Card.Header className="bg-primary text-white">
+            <Card.Header className="text-white" style={{ backgroundColor: '#FFA500' }}>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
                   <img 
@@ -147,16 +224,120 @@ const ViewSample = () => {
             </div>
           </div>
           <div className="d-flex flex-wrap gap-2">
-            <Button variant="light" size="sm" className="px-3 py-2">
+            <Button 
+              variant="light" 
+              size="sm" 
+              className="px-3 py-2"
+              onClick={() => {
+                // Navigate to edit test request form with current data
+                navigate('/test-request-form', {
+                  state: {
+                    editMode: true,
+                    testRequestData: testRequest
+                  }
+                });
+              }}
+              style={{
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <i className="fas fa-edit"></i> Edit
             </Button>
-            <Button variant="warning" size="sm" className="px-3 py-2">
-              <i className="fas fa-camera"></i> Capture Images & Observations
+            <Button 
+              variant={observationsCompleted ? "info" : "warning"} 
+              size="sm" 
+              className="px-3 py-2"
+              onClick={() => {
+                const reqId = testRequestId || testRequest?.id;
+                console.log('🔍 testRequestId from URL:', testRequestId);
+                console.log('🔍 testRequest.id:', testRequest?.id);
+                console.log('🔍 testRequest object:', testRequest);
+                console.log('🔍 Final reqId:', reqId);
+                
+                if (!reqId) {
+                  alert('Error: Test Request ID is missing!');
+                  return;
+                }
+                
+                navigate(`/test-observations/${reqId}`, {
+                  state: {
+                    testRequest: { ...testRequest, id: reqId },
+                    testData: testRequest.cubeTests?.[0],
+                    testIndex: 0,
+                    editMode: observationsCompleted
+                  }
+                });
+              }}
+              style={{
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = observationsCompleted 
+                  ? '0 4px 12px rgba(23, 162, 184, 0.5)' 
+                  : '0 4px 12px rgba(255, 193, 7, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              {observationsCompleted ? (
+                <>
+                  <i className="fas fa-edit"></i> Edit Observations
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-camera"></i> Capture Images & Observations
+                </>
+              )}
             </Button>
-            <Button variant="warning" size="sm" className="px-3 py-2">
+            <Button 
+              variant="warning" 
+              size="sm" 
+              className="px-3 py-2"
+              style={{
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <i className="fas fa-chart-bar"></i> Generate Graph
             </Button>
-            <Button variant="success" size="sm" className="px-3 py-2">
+            <Button 
+              variant="success" 
+              size="sm" 
+              className="px-3 py-2"
+              style={{
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <i className="fas fa-file-pdf"></i> Preview PDF
             </Button>
           </div>
@@ -215,71 +396,56 @@ const ViewSample = () => {
           
           {testRequest.cubeTests && testRequest.cubeTests.length > 0 && (
             <>
-              <h4 className="mb-3">Testing Requirement (Concrete Cube/Core)</h4>
-              <div className="table-responsive mb-4">
-                <Table bordered className="concrete-tests-table">
-                  <thead className="table-secondary">
+              <h4 className="mb-3 mt-4">Testing Requirement (Concrete Cube/Core)</h4>
+              <div className="table-responsive mb-4" style={{ overflowX: 'auto' }}>
+                <Table bordered hover className="concrete-tests-table" style={{ minWidth: '1400px' }}>
+                  <thead style={{ backgroundColor: '#FFC107', color: '#000' }}>
                     <tr>
-                      <th>Sr No</th>
-                      <th>ID Mark</th>
-                      <th>Location/Nature/Work</th>
-                      <th>Grade</th>
-                      <th>Casting Date</th>
-                      <th>Testing Date</th>
-                      <th>Age in days</th>
-                      <th>No of cubes/Cores</th>
-                      <th>Test Method/Specification</th>
-                      <th>Reference Number</th>
-                      <th>ULR Number</th>
-                      <th>Job Number</th>
-                      <th>Actions</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Casting Date</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Testing Date</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Age in days</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>No of cubes/Cores</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', backgroundColor: '#FFC107' }}>Test Method/Specification</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Reference Number</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>ULR Number</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Job Number</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {testRequest.cubeTests.map((test, index) => (
-                      <tr key={test.id}>
-                        <td>{index + 1}</td>
-                        <td>{test.idMark}</td>
-                        <td>{test.locationNature}</td>
-                        <td>{test.grade}</td>
-                        <td>{formatDate(test.castingDate)}</td>
-                        <td>{formatDate(test.testingDate)}</td>
-                        <td>
+                      <tr key={test.id} style={{ backgroundColor: index % 2 === 0 ? '#2d3748' : '#1a202c' }}>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{formatDate(test.castingDate)}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{formatDate(test.testingDate)}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>
                           {test.castingDate && test.testingDate ? 
                             Math.ceil((new Date(test.testingDate) - new Date(test.castingDate)) / (1000 * 60 * 60 * 24)) : 
-                            'N/A'
+                            'None'
                           }
                         </td>
-                        <td>{test.quantity}</td>
-                        <td>{test.testMethod}</td>
-                        <td>{testRequest.referenceNumber}</td>
-                        <td>{testRequest.ulrNumber}</td>
-                        <td>{testRequest.jobNumber}</td>
-                        <td>
-                          <div className="d-flex flex-wrap gap-1">
-                             <Button 
-                               variant="warning" 
-                               size="sm"
-                               onClick={() => navigate('/test-observations', { 
-                                 state: { 
-                                   testData: test,
-                                   testRequest: testRequest,
-                                   testIndex: index
-                                 } 
-                               })}
-                             >
-                               <i className="fas fa-plus"></i> Enter Observations
-                             </Button>
-                            <Button variant="success" size="sm" className="me-1">
-                              <i className="fas fa-file-pdf"></i> Preview and Print PDF
-                            </Button>
-                            <Button variant="warning" size="sm" className="me-1">
-                              <i className="fas fa-envelope"></i> Email
-                            </Button>
-                            <Button variant="success" size="sm">
-                              <i className="fab fa-whatsapp"></i> WhatsApp
-                            </Button>
-                          </div>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{test.quantity}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{test.testMethod}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{test.sample_code_number || testRequest.referenceNumber || 'None'}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{testRequest.ulrNumber || 'None'}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{testRequest.jobNumber}</td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <Button 
+                            variant="warning" 
+                            size="sm"
+                            style={{ whiteSpace: 'nowrap', fontSize: '13px' }}
+                            onClick={() => {
+                              const reqId = testRequestId || testRequest?.id;
+                              navigate(`/test-observations/${reqId}`, {
+                                state: {
+                                  testRequest: testRequest,
+                                  testData: test,
+                                  testIndex: index
+                                }
+                              });
+                            }}
+                          >
+                            <i className="fas fa-plus"></i> Enter Observations
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -289,52 +455,7 @@ const ViewSample = () => {
             </>
           )}
           
-          <h4 className="mb-3">Testing Requirements Confirmation</h4>
-          <Row className="mb-4">
-            <Col md={12}>
-              <ul className="list-group">
-                <li className="list-group-item">
-                  <input type="checkbox" className="form-check-input me-2" disabled checked />
-                  Method of testing capability and resources acceptable
-                </li>
-                <li className="list-group-item">
-                  <input type="checkbox" className="form-check-input me-2" disabled checked />
-                  Testing services requested may please be carried out
-                </li>
-                <li className="list-group-item">
-                  <input type="checkbox" className="form-check-input me-2" disabled checked />
-                  Terms and conditions of Testing acceptable as per review remarks
-                </li>
-                <li className="list-group-item">
-                  <input type="checkbox" className="form-check-input me-2" disabled checked />
-                  Statement of conformity or specifications on the test report
-                </li>
-              </ul>
-            </Col>
-          </Row>
           
-          <Row className="mb-4">
-            <Col md={6}>
-              <div className="mb-2">
-                <h5 className="fw-bold">LABORATORY REPRESENTATIVE</h5>
-              </div>
-              <p><strong>Name:</strong> Dr. Rajesh Kumar</p>
-              <p><strong>Signature:</strong></p>
-              <div className="border p-3 mb-2 bg-light" style={{ minHeight: '100px' }}>
-                <p className="mt-3 text-dark text-center">Digital signature will be provided</p>
-              </div>
-            </Col>
-            <Col md={6}>
-              <div className="mb-2">
-                <h5 className="fw-bold">CUSTOMER'S REPRESENTATIVE</h5>
-              </div>
-              <p><strong>Name:</strong> {testRequest.contactPerson}</p>
-              <p><strong>Signature:</strong></p>
-              <div className="border p-3 mb-2 bg-light" style={{ minHeight: '100px' }}>
-                <p className="mt-3 text-dark text-center">Digital signature will be provided</p>
-              </div>
-            </Col>
-          </Row>
           
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
             <Button variant="secondary" className="me-md-2" onClick={() => navigate('/samples')}>
