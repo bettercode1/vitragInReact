@@ -331,21 +331,38 @@ const Samples = () => {
       );
     }
 
-    // View button - navigate with URL parameter
-    buttons.push(
-      <button
-        key="view"
-        onClick={() => navigate(`/view-sample/${testRequestId}`)}
-        className="btn btn-sm btn-outline-info me-1"
-        title="View Details"
-      >
-        <FontAwesomeIcon icon={faEye} />
-        <span className="d-none d-xl-inline ms-1">View</span>
-      </button>
-    );
+    // View button - different behavior based on status
+    if (item.status === 'graph_generated') {
+      // For graph_generated status, View button goes to test-report-preview
+      buttons.push(
+        <Link 
+          key="view" 
+          to={`/test-report-preview`} 
+          state={{ testData: item }}
+          className="btn btn-sm btn-outline-info me-1" 
+          title="View Test Report"
+        >
+          <FontAwesomeIcon icon={faEye} />
+          <span className="d-none d-xl-inline ms-1">View</span>
+        </Link>
+      );
+    } else {
+      // For all other statuses, View button goes to view-sample
+      buttons.push(
+        <button
+          key="view"
+          onClick={() => navigate(`/view-sample/${testRequestId}`)}
+          className="btn btn-sm btn-outline-info me-1"
+          title="View Details"
+        >
+          <FontAwesomeIcon icon={faEye} />
+          <span className="d-none d-xl-inline ms-1">View</span>
+        </button>
+      );
+    }
 
-    // Edit button - only if not completed
-    if (item.status !== 'completed' && item.status !== 'test_completed') {
+    // Edit button - only if not completed and not graph_generated
+    if (item.status !== 'completed' && item.status !== 'test_completed' && item.status !== 'graph_generated') {
       buttons.push(
         <Link 
           key="edit" 
@@ -387,20 +404,8 @@ const Samples = () => {
           <span className="d-none d-xl-inline ms-1">Generate Graph</span>
         </Link>
       );
-    } else if (item.status === 'graph_generated') {
-      buttons.push(
-        <Link 
-          key="finalize" 
-          to={`/test-report-preview`} 
-          state={{ testData: item }}
-          className="btn btn-sm btn-warning me-1" 
-          title="Finalize Test"
-        >
-          <FontAwesomeIcon icon={faClipboardCheck} />
-          <span className="d-none d-xl-inline ms-1">Finalize Test</span>
-        </Link>
-      );
     }
+    // Note: graph_generated status now only shows View button (handled above)
 
     return buttons;
   };

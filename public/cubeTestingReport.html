@@ -166,9 +166,9 @@
 
         .annexure-image {
             width: 100%;
-            height: 110px;
-            object-fit: cover;
-            border: 1px solid #ccc;
+            height: 180px;
+            object-fit: contain;
+            background-color: #f5f5f5;
         }
 
         .annexure-caption {
@@ -309,7 +309,7 @@
         .bar-chart {
             width: 85%;
             justify-self: center;
-            height: 350px;
+            height: 300px;
             border: 1px solid #000000;
             margin: 20px auto;
             position: relative;
@@ -1116,12 +1116,21 @@
                 if (locationEl) locationEl.textContent = urlParams.get('location_structure') || '';
                 
                 const machineEl = document.getElementById('machine-used');
-                if (machineEl) machineEl.textContent = urlParams.get('machine_used') || 'CTM (2000KN)';
+                if (machineEl) {
+                    machineEl.textContent = 'Fully automatic Digital Compression Testing Machine';
+                    console.log('✅✅✅ IMMEDIATE: Machine set to Fully automatic Digital Compression Testing Machine');
+                }
                 
-                // Update test sample table
+                // Update BOTH test sample table AND result table
+                console.log('🔄 Updating BOTH tables for 3 cubes...');
                 for (let i = 1; i <= 3; i++) {
+                    // Sample table (dimensions, weight, load)
                     const idEl = document.getElementById(`sample-${i}-id`);
-                    if (idEl) idEl.textContent = urlParams.get(`block_id_${i}`) || '------';
+                    const blockId = urlParams.get(`block_id_${i}`) || '------';
+                    if (idEl) {
+                        idEl.textContent = blockId;
+                        console.log(`✅ sample-${i}-id:`, blockId);
+                    }
                     
                     const lengthEl = document.getElementById(`sample-${i}-length`);
                     if (lengthEl) lengthEl.textContent = urlParams.get(`length_${i}`) || '';
@@ -1141,28 +1150,34 @@
                     const loadEl = document.getElementById(`sample-${i}-load`);
                     if (loadEl) loadEl.textContent = urlParams.get(`load_max_${i}`) || '';
                     
+                    // Result table (density, compressive strength)
+                    const resultIdEl = document.getElementById(`result-${i}-id`);
+                    if (resultIdEl) {
+                        resultIdEl.textContent = blockId;
+                        console.log(`✅ result-${i}-id:`, blockId);
+                    }
+                    
                     const densityEl = document.getElementById(`result-${i}-density`);
-                    if (densityEl) densityEl.textContent = urlParams.get(`density_${i}`) || '';
+                    const densityVal = urlParams.get(`density_${i}`) || '';
+                    if (densityEl) {
+                        densityEl.textContent = densityVal;
+                        console.log(`✅ result-${i}-density:`, densityVal);
+                    }
                     
                     const strengthEl = document.getElementById(`result-${i}-strength`);
-                    if (strengthEl) strengthEl.textContent = urlParams.get(`compressive_strength_${i}`) || '';
-                }
-                
-                // Calculate and update average strength
-                let sumStrength = 0;
-                let countStrength = 0;
-                for (let i = 1; i <= 3; i++) {
-                    const val = parseFloat(urlParams.get(`compressive_strength_${i}`));
-                    if (!isNaN(val) && val > 0) {
-                        sumStrength += val;
-                        countStrength++;
+                    const strengthVal = urlParams.get(`compressive_strength_${i}`) || '';
+                    if (strengthEl) {
+                        strengthEl.textContent = strengthVal;
+                        console.log(`✅ result-${i}-strength:`, strengthVal);
                     }
                 }
-                const avgStrength = countStrength > 0 ? (sumStrength / countStrength).toFixed(2) : '0.00';
+                
+                // Use SAVED average strength from database (NOT calculated!)
+                const avgStrengthFromDB = urlParams.get('average_strength') || '0.00';
                 const avgEl = document.getElementById('average-strength');
                 if (avgEl) {
-                    avgEl.innerHTML = `<span class="highlight-text">${avgStrength}</span>`;
-                    console.log('✅ Average strength updated:', avgStrength);
+                    avgEl.innerHTML = `<span class="highlight-text">${avgStrengthFromDB}</span>`;
+                    console.log('✅ Average strength FROM DATABASE:', avgStrengthFromDB);
                 }
                 
                 // ===== UPDATE STRENGTH GRAPH (PAGE 4) - WITH RETRY =====
@@ -1227,12 +1242,12 @@
                     }
                     
                     // ===== UPDATE 6 OBSERVATIONS (PAGE 4) =====
-                    const obs1 = urlParams.get('obs_strength_duration') || 'Satisfactory';
-                    const obs2 = urlParams.get('obs_test_results') || 'Satisfactory';
-                    const obs3 = urlParams.get('obs_weight') || 'Satisfactory';
-                    const obs4 = urlParams.get('obs_failure_pattern') || 'Satisfactory';
-                    const obs5 = urlParams.get('obs_bonding') || 'Satisfactory';
-                    const obs6 = urlParams.get('obs_strength_criteria') || 'Satisfactory';
+                    const obs1 = urlParams.get('obs_strength_duration') || '--';
+                    const obs2 = urlParams.get('obs_test_results') || '--';
+                    const obs3 = urlParams.get('obs_weight') || '--';
+                    const obs4 = urlParams.get('obs_failure_pattern') || '--';
+                    const obs5 = urlParams.get('obs_bonding') || '--';
+                    const obs6 = urlParams.get('obs_strength_criteria') || '--';
                     
                     const obsEls = [
                         document.getElementById('obs-strength-duration'),
@@ -1251,6 +1266,53 @@
                         }
                     });
                     
+                    // ===== HIDE EMPTY ROWS BASED ON QUANTITY =====
+                    const quantity = parseInt(urlParams.get('quantity_of_blocks')) || 3;
+                    console.log('📊 Number of cubes:', quantity);
+                    
+                    // Hide cube rows that don't have data (in ALL tables)
+                    if (quantity < 3) {
+                        // Hide images row 3
+                        const cube3Row = document.getElementById('cube3-row');
+                        if (cube3Row) cube3Row.style.display = 'none';
+                        
+                        // Hide result row 3
+                        const result3Row = document.getElementById('result-row-3');
+                        if (result3Row) result3Row.style.display = 'none';
+                        
+                        // Hide sample row 3
+                        const sample3Row = document.getElementById('sample-row-3');
+                        if (sample3Row) sample3Row.style.display = 'none';
+                    }
+                    if (quantity < 2) {
+                        // Hide images row 2
+                        const cube2Row = document.getElementById('cube2-row');
+                        if (cube2Row) cube2Row.style.display = 'none';
+                        
+                        // Hide result row 2
+                        const result2Row = document.getElementById('result-row-2');
+                        if (result2Row) result2Row.style.display = 'none';
+                        
+                        // Hide sample row 2
+                        const sample2Row = document.getElementById('sample-row-2');
+                        if (sample2Row) sample2Row.style.display = 'none';
+                    }
+                    
+                    // Update rowspan on average cell
+                    const avgCell = document.getElementById('average-strength');
+                    if (avgCell) {
+                        avgCell.setAttribute('rowspan', quantity);
+                    }
+                    
+                    console.log(`✅ Hiding rows for quantity=${quantity}`);
+                    
+                    // Update grade header
+                    const gradeHeader = document.getElementById('grade-header');
+                    if (gradeHeader) {
+                        const grade = urlParams.get('grade_of_specimen') || 'M-25';
+                        gradeHeader.textContent = `GRADE OF CONCRETE: ${grade}`;
+                    }
+                    
                     // ===== UPDATE IMAGES (PAGE 3) FROM sessionStorage =====
                     const testRequestId = urlParams.get('test_request_id') || '248';
                     const imagesJson = sessionStorage.getItem('testImages_' + testRequestId);
@@ -1260,8 +1322,8 @@
                             const images = JSON.parse(imagesJson);
                             console.log('📸 Loaded images from sessionStorage:', Object.keys(images));
                             
-                            // Update cube images
-                            for (let i = 1; i <= 3; i++) {
+                            // Update cube images only for quantity
+                            for (let i = 1; i <= quantity; i++) {
                                 const frontImg = images[`front_failure_${i}`];
                                 const screenImg = images[`digital_reading_${i}`];
                                 const backImg = images[`back_failure_${i}`];
@@ -1440,9 +1502,9 @@
                 </tr>
                 <tr>
                     <td><strong>Sample Test Code Number</strong></td>
-                    <td id="sample-test-code">AAC-2024-001</td>
+                    <td id="sample-test-code"></td>
                     <td><strong>Sample Description</strong></td>
-                    <td id="sample-description">AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.</td>
+                    <td id="sample-description"></td>
                 </tr>
                 <tr>
                     <td><strong>Quantity of Cubes</strong></td>
@@ -1458,13 +1520,13 @@
                 </tr>
                 <tr>
                     <td><strong>Grade of Cube</strong></td>
-                    <td id="grade-of-blocks">Grade 3.5</td>
+                    <td id="grade-of-blocks"></td>
                     <td><strong>Cube Condition</strong></td>
                     <td id="blocks-condition"></td>
                 </tr>
                 <tr>
                     <td><strong>Age of Cube</strong></td>
-                    <td id="manufacture-of-blocks">ABC Construction Ltd.</td>
+                    <td id="manufacture-of-blocks"></td>
                     <td><strong>Curing Condition</strong></td>
                     <td id="curing-condition"></td>
                 </tr>
@@ -1472,7 +1534,7 @@
                     <td><strong>Machine used for Testing</strong></td>
                     <td id="machine-used-for-testing"></td>
                     <td><strong>Test Method</strong></td>
-                    <td id="test-method">IS 6441 (Part-5): 1972</td>
+                    <td id="test-method"></td>
                 </tr>
             </table>
         </div>
@@ -1709,7 +1771,7 @@
         <!-- Sample Description Table -->
         <table class="sample-table">
             <tr>
-                <td class="grade-header" colspan="2"><span class="grade-text">GRADE OF CONCRETE: M-25</span></td>
+                <td class="grade-header" colspan="2"><span class="grade-text" id="grade-header">GRADE OF CONCRETE: M-25</span></td>
                 <td class="table-title" colspan="6">DESCRIPTION OF TEST SAMPLE</td>
             </tr>
             <tr>
@@ -1720,7 +1782,7 @@
                 <th>Weight (kg)</th>
                 <th>Max Load (kN)</th>
             </tr>
-            <tr>
+            <tr id="sample-row-1">
                 <td>1</td>
                 <td id="sample-1-id">------</td>
                 <td id="sample-1-length">150.4</td>
@@ -1730,7 +1792,7 @@
                 <td id="sample-1-weight">9.1</td>
                 <td id="sample-1-load">265.4</td>
             </tr>
-            <tr>
+            <tr id="sample-row-2">
                 <td>2</td>
                 <td id="sample-2-id">------</td>
                 <td id="sample-2-length">150.1</td>
@@ -1740,7 +1802,7 @@
                 <td id="sample-2-weight">9.0</td>
                 <td id="sample-2-load">297.4</td>
             </tr>
-            <tr>
+            <tr id="sample-row-3">
                 <td>3</td>
                 <td id="sample-3-id">------</td>
                 <td id="sample-3-length">150.8</td>
@@ -1762,20 +1824,20 @@
                 <th>Compressive Strength (N/mm²)</th>
                 <th>Average Compressive Strength (N/mm²)</th>
             </tr>
-            <tr>
+            <tr id="result-row-1">
                 <td>1</td>
                 <td id="result-1-id">C1</td>
                 <td id="result-1-density">2400</td>
                 <td id="result-1-strength">25.5</td>
                 <td rowspan="3" class="highlight-cell" id="average-strength"><span class="highlight-text">25.47</span></td>
             </tr>
-            <tr>
+            <tr id="result-row-2">
                 <td>2</td>
                 <td id="result-2-id">C2</td>
                 <td id="result-2-density">2410</td>
                 <td id="result-2-strength">26.1</td>
             </tr>
-            <tr>
+            <tr id="result-row-3">
                 <td>3</td>
                 <td id="result-3-id">C3</td>
                 <td id="result-3-density">2390</td>
@@ -1888,15 +1950,15 @@
                         <td><img id="cube1-screen-img" src="/cube1_screen.jpg" alt="Cube 1 Screen" class="annexure-image"></td>
                         <td><img id="cube1-back-img" src="/cube1_back.jpg" alt="Cube 1 Back" class="annexure-image"></td>
                     </tr>
-                    <tr>
+                    <tr id="cube2-row">
                         <td><img id="cube2-front-img" src="/cube2_front.jpg" alt="Cube 2 Front" class="annexure-image"></td>
                         <td><img id="cube2-screen-img" src="/cube2_screen.jpg" alt="Cube 2 Screen" class="annexure-image"></td>
                         <td><img id="cube2-back-img" src="/cube2_back.jpg" alt="Cube 2 Back" class="annexure-image"></td>
                     </tr>
-                    <tr>
-                        <td><img src="/cube3_front.jpg" alt="Cube 3 Front" class="annexure-image"></td>
-                        <td><img src="/cube3_screen.jpg" alt="Cube 3 Screen" class="annexure-image"></td>
-                        <td><img src="/cube3_back.jpg" alt="Cube 3 Back" class="annexure-image"></td>
+                    <tr id="cube3-row">
+                        <td><img id="cube3-front-img" src="/cube3_front.jpg" alt="Cube 3 Front" class="annexure-image"></td>
+                        <td><img id="cube3-screen-img" src="/cube3_screen.jpg" alt="Cube 3 Screen" class="annexure-image"></td>
+                        <td><img id="cube3-back-img" src="/cube3_back.jpg" alt="Cube 3 Back" class="annexure-image"></td>
                     </tr>
                 </tbody>
             </table>
@@ -1986,22 +2048,22 @@
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">2</td>
                         <td style="width: 70%;">Individual test results within ±15% of average strength</td>
-                        <td id="obs-test-results" style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-test-results" style="width: 25%; text-align: center;">--</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">3</td>
                         <td style="width: 70%;">Weight of cube</td>
-                        <td id="obs-weight" style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-weight" style="width: 25%; text-align: center;">--</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">4</td>
                         <td style="width: 70%;">Type of failure Pattern as per IS 516(Part-1/Sec-1): - 2021 Fig 1</td>
-                        <td id="obs-failure-pattern" style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-failure-pattern" style="width: 25%; text-align: center;">--</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">5</td>
                         <td style="width: 70%;">Bonding between Aggregates and cement paste.</td>
-                        <td id="obs-bonding" style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-bonding" style="width: 25%; text-align: center;">--</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">6</td>
@@ -2016,18 +2078,14 @@
                 <div class="bar-chart" id="strength-graph-container">
                     <!-- Pure CSS/JS Strength Graph -->
                     <div style="font-family: 'Times New Roman', Times, serif; padding: 10px; position: relative; width: 100%; height: 100%;">
-                        <!-- Graph Title -->
-                        <div style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 10px;">
-                            Graphical presentation of compressive strength
-                        </div>
                         <!-- DEBUG INFO -->
                         <div id="debug-info" style="font-size: 8pt; color: red; text-align: center; margin-bottom: 5px;"></div>
                         
                         <!-- Chart Container -->
                         <div style="position: relative; width: calc(100% - 30px); height: 230px; margin: 0 auto;">
                             <!-- Y-axis -->
-                            <div style="position: absolute; left: 50px; top: 10px; height: 200px; border-left: 2px solid #000;">
-                                <!-- Y-axis labels - 0 to 45 with gap of 5 -->
+                            <div style="position: absolute; left: 70px; top: 10px; height: 200px; border-left: 2px solid #000;">
+                                <!-- Y-axis labels - Static -->
                                 <div style="position: absolute; right: 10px; top: 0%; transform: translateY(-50%); font-size: 7pt; color: #000;">45</div>
                                 <div style="position: absolute; right: 10px; top: 11.1%; transform: translateY(-50%); font-size: 7pt; color: #000;">40</div>
                                 <div style="position: absolute; right: 10px; top: 22.2%; transform: translateY(-50%); font-size: 7pt; color: #000;">35</div>
@@ -2040,66 +2098,33 @@
                                 <div style="position: absolute; right: 10px; top: 100%; transform: translateY(-50%); font-size: 7pt; color: #000;">0</div>
                                 
                                 <!-- Grid lines -->
-                                <div style="position: absolute; left: 0; top: 11.1%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 22.2%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 33.3%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 44.4%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 55.6%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 66.7%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 77.8%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 88.9%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
-                                <div style="position: absolute; left: 0; top: 100%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 11.1%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 22.2%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 33.3%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 44.4%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 55.6%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 66.7%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 77.8%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 88.9%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 100%; width: calc(100% - 80px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
                             </div>
                             
                             <!-- X-axis line -->
-                            <div style="position: absolute; left: 50px; top: 210px; width: calc(100% - 60px); max-width: 600px; border-bottom: 2px solid #000;"></div>
+                            <div style="position: absolute; left: 70px; top: 210px; width: calc(100% - 80px); max-width: 600px; border-bottom: 2px solid #000;"></div>
                             
                             <!-- Bars Container -->
-                            <div id="bars-container" style="position: absolute; left: 55px; bottom: -25px; width: calc(100% - 65px); max-width: 595px; height: 200px; display: flex; justify-content: space-around; align-items: flex-end;">
-                                <!-- Test bars - will be replaced by JavaScript -->
-                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
-                                        <div style="width: 50px; height: 73px; background-color: #4682B4;"></div>
-                                        <div style="width: 50px; height: 82px; background-color: #FFA500;"></div>
-                                    </div>
-                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
-                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                                        <span>16.5</span>
-                                        <span>18.50</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
-                                        <div style="width: 50px; height: 100px; background-color: #4682B4;"></div>
-                                        <div style="width: 50px; height: 107px; background-color: #FFA500;"></div>
-                                    </div>
-                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
-                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                                        <span>22.5</span>
-                                        <span>24.10</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
-                                        <div style="width: 50px; height: 133px; background-color: #4682B4;"></div>
-                                        <div style="width: 50px; height: 140px; background-color: #FFA500;"></div>
-                                    </div>
-                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
-                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                                        <span>30.0</span>
-                                        <span>31.50</span>
-                                    </div>
-                                </div>
+                            <div id="bars-container" style="position: absolute; left: 75px; bottom: -25px; width: calc(100% - 85px); max-width: 595px; height: 200px; display: flex; justify-content: space-around; align-items: flex-end;">
+                                <!-- Bars will be populated by JavaScript -->
                             </div>
                         </div>
                         
                         <!-- Y-axis label -->
-                        <div style="position: absolute; left: 8px; top: 52%; transform: rotate(-90deg); transform-origin: center; font-size: 8pt; color: #000;">
+                        <div style="position: absolute; left: 8px; top: 120px; transform: rotate(-90deg); transform-origin: center; font-size: 11pt; color: #000; letter-spacing: 1px; font-weight: 500;">
                             Strength N/mm2
                         </div>
                         
                         <!-- Legend - Left Side -->
-                        <div style="position: absolute; left: 5px; bottom: 55px; font-size: 7pt; line-height: 1.5; color: #000;">
+                        <div style="position: absolute; left: 5px; bottom: 25px; font-size: 7pt; line-height: 1.5; color: #000;">
                             <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
                                 <div style="width: 15px; height: 10px; background-color: #4682B4;"></div>
                                 <span>Required strength N/mm2</span>
@@ -2512,9 +2537,11 @@
             const machineUsed = urlParams.get('machine_used') || '';
                 const machineEl = document.getElementById('machine-used');
                 if (machineEl) {
-                    const machineText = urlParams.get('machine_used') || 'Fully automatic Digital Compression Testing Machine';
-                    machineEl.textContent = machineText;
-                    console.log('✅ Machine updated to:', machineText);
+                    machineEl.textContent = 'Fully automatic Digital Compression Testing Machine';
+                    machineEl.style.fontWeight = 'normal';
+                    console.log('✅ Machine FORCED to: Fully automatic Digital Compression Testing Machine');
+                } else {
+                    console.error('❌ machine-used element NOT FOUND!');
                 }
             
             // Update Capacity Range
@@ -2614,21 +2641,24 @@
             
             // Find the bars container
             const barsContainer = document.getElementById('bars-container');
+            
             if (!barsContainer) {
                 console.warn('Bars container not found!');
                 return;
             }
             
-            // Maximum value for scaling (45 N/mm²)
-            const maxHeight = 200; // pixels
-            const maxStrength = 45; // N/mm²
+            // Maximum strength for scaling (static Y-axis goes 0-45)
+            const maxStrength = 45;
+            
+            // Maximum height for bars in pixels
+            const maxHeight = 200;
             
             // Calculate bar heights (proportional to strength values)
             const calculateHeight = (value) => {
                 return (value / maxStrength) * maxHeight;
             };
             
-            // Create bars HTML
+            // Create bars HTML with proper alignment
             barsContainer.innerHTML = `
                 <!-- 7 Days -->
                 <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
@@ -2637,9 +2667,9 @@
                         <div style="width: 50px; height: ${calculateHeight(actual_7)}px; background-color: #FFA500;"></div>
                     </div>
                     <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
-                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                        <span>${required_7.toFixed(1)}</span>
-                        <span>${actual_7.toFixed(2)}</span>
+                    <div style="margin-top: 20px; font-size: 7pt; color: #000; display: flex; gap: 15px; line-height: 1.3;">
+                        <span style="text-align: center; min-width: 35px;">${required_7.toFixed(1)}</span>
+                        <span style="text-align: center; min-width: 35px;">${actual_7.toFixed(2)}</span>
                     </div>
                 </div>
                 
@@ -2650,9 +2680,9 @@
                         <div style="width: 50px; height: ${calculateHeight(actual_14)}px; background-color: #FFA500;"></div>
                     </div>
                     <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
-                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                        <span>${required_14.toFixed(1)}</span>
-                        <span>${actual_14.toFixed(2)}</span>
+                    <div style="margin-top: 20px; font-size: 7pt; color: #000; display: flex; gap: 15px; line-height: 1.3;">
+                        <span style="text-align: center; min-width: 35px;">${required_14.toFixed(1)}</span>
+                        <span style="text-align: center; min-width: 35px;">${actual_14.toFixed(2)}</span>
                     </div>
                 </div>
                 
@@ -2663,14 +2693,14 @@
                         <div style="width: 50px; height: ${calculateHeight(actual_28)}px; background-color: #FFA500;"></div>
                     </div>
                     <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
-                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
-                        <span>${required_28.toFixed(1)}</span>
-                        <span>${actual_28.toFixed(2)}</span>
+                    <div style="margin-top: 20px; font-size: 7pt; color: #000; display: flex; gap: 15px; line-height: 1.3;">
+                        <span style="text-align: center; min-width: 35px;">${required_28.toFixed(1)}</span>
+                        <span style="text-align: center; min-width: 35px;">${actual_28.toFixed(2)}</span>
                     </div>
                 </div>
             `;
             
-            console.log('✅ Strength graph populated!');
+            console.log('✅ Strength graph populated with dynamic scale!');
         }
         
         // Function to populate Observations (Page 4) - The 6 observation points

@@ -782,7 +782,15 @@ const Dashboard = () => {
                               <Button 
                                 size="sm" 
                                 variant="info"
-                                onClick={() => navigate(`/view-sample/${test.id}`)}
+                                onClick={() => {
+                                  if (test.status === 'graph_generated') {
+                                    navigate('/test-report-preview', { 
+                                      state: { testData: dashboardData.recentTests.find(t => t.id === test.id) }
+                                    });
+                                  } else {
+                                    navigate(`/view-sample/${test.id}`);
+                                  }
+                                }}
                                 style={{
                                   borderRadius: '8px',
                                   padding: '6px 12px',
@@ -807,33 +815,38 @@ const Dashboard = () => {
                                 <FontAwesomeIcon icon={faEye} className="me-1" />
                                 View
                               </Button>
-                              <Button 
-                                size="sm" 
-                                variant="info"
-                                style={{
-                                  borderRadius: '8px',
-                                  padding: '6px 12px',
-                                  fontWeight: '500',
-                                  backgroundColor: 'rgba(13, 202, 240, 0.1)',
-                                  border: '1px solid #0dcaf0',
-                                  color: '#0dcaf0',
-                                  transition: 'all 0.3s ease',
-                                  cursor: 'pointer'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1.05)';
-                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 202, 240, 0.5)';
-                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.2)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1)';
-                                  e.currentTarget.style.boxShadow = 'none';
-                                  e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.1)';
-                                }}
-                              >
-                                <FontAwesomeIcon icon={faEdit} className="me-1" />
-                                Edit
-                              </Button>
+                              {test.status !== 'completed' && test.status !== 'test_completed' && test.status !== 'graph_generated' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="info"
+                                  onClick={() => navigate('/test-request', { 
+                                    state: { editData: dashboardData.recentTests.find(t => t.id === test.id) }
+                                  })}
+                                  style={{
+                                    borderRadius: '8px',
+                                    padding: '6px 12px',
+                                    fontWeight: '500',
+                                    backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                                    border: '1px solid #0dcaf0',
+                                    color: '#0dcaf0',
+                                    transition: 'all 0.3s ease',
+                                    cursor: 'pointer'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 202, 240, 0.5)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                    e.currentTarget.style.backgroundColor = 'rgba(13, 202, 240, 0.1)';
+                                  }}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} className="me-1" />
+                                  Edit
+                                </Button>
+                              )}
                               {test.status === 'sample-received' && (
                                 <Button 
                                   size="sm" 

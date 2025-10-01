@@ -365,11 +365,16 @@ const TestReportPreview = () => {
       params.append(`failure_type_${i}`, result.failureType || '-');
     });
     
+    // Average strength from backend or calculated
+    const avgStrength = cubeTest.averageStrength || testData.averageStrength || '';
+    params.append('average_strength', avgStrength);
+    console.log('📊 Average Strength being sent:', avgStrength);
+    
     // Remarks - from TestObservations
-    params.append('remarks', testData.testRemarks || testData.remarks || '');
+    params.append('remarks', cubeTest.testRemarks || testData.testRemarks || testData.remarks || '');
     
     // Verification/Authorization - from TestObservations
-    params.append('tested_by_name', testData.testedBy || 'John Doe');
+    params.append('tested_by_name', cubeTest.testedBy || testData.testedBy || 'John Doe');
     params.append('tested_by_date', testData.testedDate || new Date().toLocaleDateString('en-GB'));
     params.append('checked_by_name', testData.checkedBy || 'Jane Smith');
     params.append('checked_by_date', testData.checkedDate || new Date().toLocaleDateString('en-GB'));
