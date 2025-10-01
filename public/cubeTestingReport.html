@@ -1180,6 +1180,145 @@
                     console.log('✅ Average strength FROM DATABASE:', avgStrengthFromDB);
                 }
                 
+                // ===== UPDATE OBSERVATION SHEET (PAGE 1) - NEW CODE =====
+                console.log('📋 Populating observation sheet (Page 1)...');
+                
+                // Auto-detect quantity from number of block_id parameters if not explicitly provided
+                let quantity = parseInt(urlParams.get('quantity_of_blocks'));
+                if (!quantity || isNaN(quantity)) {
+                    // Count how many block_id_* parameters are present
+                    quantity = 0;
+                    for (let i = 1; i <= 6; i++) {
+                        if (urlParams.get(`block_id_${i}`)) {
+                            quantity++;
+                        }
+                    }
+                    console.log('📊 Auto-detected quantity from block_id parameters:', quantity);
+                }
+                if (!quantity) quantity = 3; // Default fallback
+                console.log('📊 Number of cubes for observation sheet:', quantity);
+                
+                // Define row mapping based on quantity:
+                // 1 cube: row 1
+                // 2 cubes: rows 1, 3
+                // 3 cubes: rows 1, 3, 5
+                // 4 cubes: rows 1, 2, 3, 4
+                // 5 cubes: rows 1, 2, 3, 4, 5
+                // 6 cubes: rows 1, 2, 3, 4, 5, 6
+                
+                // Map data index to row index
+                let rowMapping;
+                if (quantity === 1) {
+                    rowMapping = [1];
+                } else if (quantity === 2) {
+                    rowMapping = [1, 3];
+                } else if (quantity === 3) {
+                    rowMapping = [1, 3, 5];
+                } else if (quantity === 4) {
+                    rowMapping = [1, 2, 3, 4];
+                } else if (quantity === 5) {
+                    rowMapping = [1, 2, 3, 4, 5];
+                } else {
+                    rowMapping = [1, 2, 3, 4, 5, 6];
+                }
+                
+                // Populate data for each cube
+                for (let dataIndex = 0; dataIndex < quantity; dataIndex++) {
+                    const rowIndex = rowMapping[dataIndex];
+                    const i = dataIndex + 1; // URL params are 1-indexed
+                    
+                    // Get data from URL params
+                    const blockId = urlParams.get(`block_id_${i}`) || '';
+                    const length = urlParams.get(`length_${i}`) || '';
+                    const breadth = urlParams.get(`breadth_${i}`) || '';
+                    const height = urlParams.get(`height_${i}`) || '';
+                    const area = urlParams.get(`area_${i}`) || '';
+                    const weight = urlParams.get(`weight_${i}`) || '';
+                    const loadMax = urlParams.get(`load_max_${i}`) || '';
+                    const compStrength = urlParams.get(`compressive_strength_${i}`) || '';
+                    const failureType = urlParams.get(`failure_type_${i}`) || '';
+                    
+                    // Calculate size (format: length x breadth x height)
+                    let size = '';
+                    if (length && breadth && height) {
+                        size = `${length}x${breadth}x${height}`;
+                    }
+                    
+                    // Calculate density (kg/m³)
+                    // Formula: density = (weight * 1000) / (length * breadth * height)
+                    let density = '';
+                    if (weight && length && breadth && height) {
+                        const weightKg = parseFloat(weight);
+                        const lengthMm = parseFloat(length);
+                        const breadthMm = parseFloat(breadth);
+                        const heightMm = parseFloat(height);
+                        
+                        // Volume in cubic meters = (L * B * H) / 1000000000
+                        const volumeM3 = (lengthMm * breadthMm * heightMm) / 1000000000;
+                        const densityValue = weightKg / volumeM3;
+                        density = densityValue.toFixed(0); // Round to nearest integer
+                        console.log(`📊 Density calculation for cube ${i}:`, {weightKg, volumeM3, densityValue, density});
+                    }
+                    
+                    // Populate serial number
+                    const srNoEl = document.getElementById(`sr-no-${rowIndex}`);
+                    if (srNoEl && blockId) {
+                        srNoEl.textContent = dataIndex + 1;
+                        console.log(`✅ sr-no-${rowIndex}:`, dataIndex + 1);
+                    }
+                    
+                    // Populate observation sheet fields (Page 1)
+                    const blockIdEl = document.getElementById(`block-id-${rowIndex}`);
+                    if (blockIdEl) {
+                        blockIdEl.textContent = blockId;
+                        console.log(`✅ block-id-${rowIndex}:`, blockId);
+                    }
+                    
+                    const sizeEl = document.getElementById(`size-${rowIndex}`);
+                    if (sizeEl) {
+                        sizeEl.textContent = size;
+                        console.log(`✅ size-${rowIndex}:`, size);
+                    }
+                    
+                    const areaEl = document.getElementById(`area-${rowIndex}`);
+                    if (areaEl) {
+                        areaEl.textContent = area;
+                        console.log(`✅ area-${rowIndex}:`, area);
+                    }
+                    
+                    const weightEl = document.getElementById(`weight-${rowIndex}`);
+                    if (weightEl) {
+                        weightEl.textContent = weight;
+                        console.log(`✅ weight-${rowIndex}:`, weight);
+                    }
+                    
+                    const loadMaxEl = document.getElementById(`load-max-${rowIndex}`);
+                    if (loadMaxEl) {
+                        loadMaxEl.textContent = loadMax;
+                        console.log(`✅ load-max-${rowIndex}:`, loadMax);
+                    }
+                    
+                    const densityEl = document.getElementById(`density-${rowIndex}`);
+                    if (densityEl) {
+                        densityEl.textContent = density;
+                        console.log(`✅ density-${rowIndex}:`, density);
+                    }
+                    
+                    const compStrengthEl = document.getElementById(`compressive-strength-${rowIndex}`);
+                    if (compStrengthEl) {
+                        compStrengthEl.textContent = compStrength;
+                        console.log(`✅ compressive-strength-${rowIndex}:`, compStrength);
+                    }
+                    
+                    const failureTypeEl = document.getElementById(`failure-type-${rowIndex}`);
+                    if (failureTypeEl) {
+                        failureTypeEl.textContent = failureType;
+                        console.log(`✅ failure-type-${rowIndex}:`, failureType);
+                    }
+                }
+                console.log('✅ Observation sheet populated with row mapping:', rowMapping);
+                // ===== END OBSERVATION SHEET POPULATION =====
+                
                 // ===== UPDATE STRENGTH GRAPH (PAGE 4) - WITH RETRY =====
                 setTimeout(() => {
                     const r7 = parseFloat(urlParams.get('required_7')) || 16;
@@ -1568,7 +1707,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-1"></td>
                         <td id="block-id-1"></td>
                         <td id="size-1"></td>
                         <td id="area-1"></td>
@@ -1579,7 +1718,7 @@
                         <td id="failure-type-1"></td>
                     </tr>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-2"></td>
                         <td id="block-id-2"></td>
                         <td id="size-2"></td>
                         <td id="area-2"></td>
@@ -1590,7 +1729,7 @@
                         <td id="failure-type-2"></td>
                     </tr>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-3"></td>
                         <td id="block-id-3"></td>
                         <td id="size-3"></td>
                         <td id="area-3"></td>
@@ -1601,7 +1740,7 @@
                         <td id="failure-type-3"></td>
                     </tr>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-4"></td>
                         <td id="block-id-4"></td>
                         <td id="size-4"></td>
                         <td id="area-4"></td>
@@ -1612,7 +1751,7 @@
                         <td id="failure-type-4"></td>
                     </tr>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-5"></td>
                         <td id="block-id-5"></td>
                         <td id="size-5"></td>
                         <td id="area-5"></td>
@@ -1623,7 +1762,7 @@
                         <td id="failure-type-5"></td>
                     </tr>
                     <tr>
-                        <td></td>
+                        <td id="sr-no-6"></td>
                         <td id="block-id-6"></td>
                         <td id="size-6"></td>
                         <td id="area-6"></td>
@@ -1653,9 +1792,9 @@
                 <tbody>
                     <!-- Signature Table - Title Row -->
                     <tr class="signature-row-title">
-                        <td class="signature-cell-title">Tested By: <span id="tested-by-name" class="signature-name">John Doe</span></td>
-                        <td class="signature-cell-title">Checked By: <span id="checked-by-name" class="signature-name">Jane Smith</span></td>
-                        <td class="signature-cell-title">Verified By: <span id="verified-by-name" class="signature-name">Prakarsh A Sangave</span></td>
+                        <td class="signature-cell-title">Tested By: <span id="tested-by-name" class="signature-name"></span></td>
+                        <td class="signature-cell-title">Checked By: <span id="checked-by-name" class="signature-name"></span></td>
+                        <td class="signature-cell-title">Verified By: <span id="verified-by-name" class="signature-name"></span></td>
                     </tr>
                     <!-- Signature Table - Date Row -->
                     <tr class="signature-row-date">
@@ -2251,18 +2390,47 @@
             }
 
             // General Information (Observation Report - Page 1)
-            document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.';
+            document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'Concrete Cube Specimen';
             document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '';
-            document.getElementById('sample-test-code').textContent = urlParams.get('sample_test_code') || 'AAC-2024-001';
+            document.getElementById('sample-test-code').textContent = urlParams.get('job_code_number') || '';
             document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '';
-            document.getElementById('quantity-of-blocks').textContent = urlParams.get('quantity_of_blocks') || '';
+            
+            // Auto-detect quantity from block_id parameters
+            let quantityValue = urlParams.get('quantity_of_blocks');
+            if (!quantityValue) {
+                let count = 0;
+                for (let i = 1; i <= 6; i++) {
+                    if (urlParams.get(`block_id_${i}`)) count++;
+                }
+                quantityValue = count > 0 ? count : '';
+            }
+            document.getElementById('quantity-of-blocks').textContent = quantityValue;
+            
             document.getElementById('date-of-casting').textContent = urlParams.get('date_of_casting') || '';
-            document.getElementById('grade-of-blocks').textContent = urlParams.get('grade_of_blocks') || 'Grade 3.5';
-            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || '';
-            document.getElementById('manufacture-of-blocks').textContent = urlParams.get('manufacture_of_blocks') || 'ABC Construction Ltd.';
+            
+            const gradeValue = urlParams.get('grade_of_blocks') || 'M25';
+            document.getElementById('grade-of-blocks').textContent = gradeValue;
+            console.log('✅ Grade of Blocks:', gradeValue);
+            
+            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || 'Acceptable';
+            
+            // Calculate age if both dates are provided
+            const castingDate = urlParams.get('date_of_casting');
+            const testingDate = urlParams.get('date_of_testing');
+            let ageValue = urlParams.get('manufacture_of_blocks') || urlParams.get('age_of_cube') || '';
+            if (!ageValue && castingDate && testingDate) {
+                const casting = new Date(castingDate);
+                const testing = new Date(testingDate);
+                const diffTime = Math.abs(testing - casting);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                ageValue = diffDays + ' Days';
+            }
+            document.getElementById('manufacture-of-blocks').textContent = ageValue;
+            
             document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '';
-            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || '';
-            document.getElementById('environmental-conditions').textContent = urlParams.get('environmental_conditions') || 'Laboratory Conditions';
+            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || 'CTM (2000KN)';
+            document.getElementById('test-method').textContent = urlParams.get('test_method') || 'IS 516 (Part1/Sec1):2021';
+            document.getElementById('environmental-conditions').textContent = urlParams.get('environmental_conditions') || '';
             
             // Test Results (Observation Report - Page 1)
             for (let i = 1; i <= 6; i++) {
@@ -2311,12 +2479,56 @@
             console.log('Calculated averages - Compressive:', compressiveAverage, 'Density:', densityAverage, 'Load:', loadAverage, 'from', count, 'values');
             
             // Verification (Observation Report - Page 1)
-            document.getElementById('tested-by-name').textContent = urlParams.get('tested_by_name') || 'John Doe';
-            document.getElementById('tested-by-date').textContent = urlParams.get('tested_by_date') || '';
-            document.getElementById('checked-by-name').textContent = urlParams.get('checked_by_name') || 'Jane Smith';
-            document.getElementById('checked-by-date').textContent = urlParams.get('checked_by_date') || '';
-            document.getElementById('verified-by-name').textContent = urlParams.get('verified_by_name') || 'Prakarsh A Sangave';
-            document.getElementById('verified-by-date').textContent = urlParams.get('verified_by_date') || '';
+            // Only show user input data, leave empty if not provided
+            const testedByName = urlParams.get('tested_by_name');
+            const checkedByName = urlParams.get('checked_by_name');
+            const verifiedByName = urlParams.get('verified_by_name');
+            const testedByDate = urlParams.get('tested_by_date');
+            const checkedByDate = urlParams.get('checked_by_date');
+            const verifiedByDate = urlParams.get('verified_by_date');
+            
+            console.log('👤 Signature Data:', {
+                testedBy: testedByName,
+                checkedBy: checkedByName,
+                verifiedBy: verifiedByName,
+                dates: { testedByDate, checkedByDate, verifiedByDate }
+            });
+            
+            // Update tested by (only if user provided data)
+            if (testedByName && testedByName.trim() !== '') {
+                document.getElementById('tested-by-name').textContent = testedByName;
+            } else {
+                document.getElementById('tested-by-name').textContent = ''; // Empty if not provided
+            }
+            if (testedByDate && testedByDate.trim() !== '') {
+                document.getElementById('tested-by-date').textContent = testedByDate;
+            } else {
+                document.getElementById('tested-by-date').textContent = '';
+            }
+            
+            // Update checked by (only if user provided data)
+            if (checkedByName && checkedByName.trim() !== '') {
+                document.getElementById('checked-by-name').textContent = checkedByName;
+            } else {
+                document.getElementById('checked-by-name').textContent = ''; // Empty if not provided
+            }
+            if (checkedByDate && checkedByDate.trim() !== '') {
+                document.getElementById('checked-by-date').textContent = checkedByDate;
+            } else {
+                document.getElementById('checked-by-date').textContent = '';
+            }
+            
+            // Update verified by (only if user provided data)
+            if (verifiedByName && verifiedByName.trim() !== '') {
+                document.getElementById('verified-by-name').textContent = verifiedByName;
+            } else {
+                document.getElementById('verified-by-name').textContent = ''; // Empty if not provided
+            }
+            if (verifiedByDate && verifiedByDate.trim() !== '') {
+                document.getElementById('verified-by-date').textContent = verifiedByDate;
+            } else {
+                document.getElementById('verified-by-date').textContent = '';
+            }
             
             // Remarks (Observation Report - Page 1)
             document.getElementById('remarks-content').textContent = urlParams.get('remarks') || '';

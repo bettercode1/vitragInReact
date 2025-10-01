@@ -271,10 +271,12 @@ const TestReportPreview = () => {
     params.append('reference_number', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
     params.append('date_of_testing', cubeTest.testingDate || '');
     params.append('date_of_casting', cubeTest.castingDate || '');
+    params.append('grade_of_blocks', cubeTest.grade || testData.grade || 'M25'); // Grade of cube
     params.append('sample_description', testData.sampleDescription || 'Concrete Cube Specimen');
     params.append('blocks_condition', testData.cubeCondition || 'Acceptable');
     params.append('curing_condition', testData.curingCondition || '');
     params.append('machine_used_for_testing', testData.machineUsed || 'CTM (2000KN)');
+    params.append('test_method', cubeTest.testMethod || testData.testMethod || 'IS 516 (Part1/Sec1):2021'); // Test method
     
     // Test results
     const testResults = cubeTest.testResults || [];
@@ -290,9 +292,32 @@ const TestReportPreview = () => {
       params.append(`compressive_strength_${i}`, result.compressiveStrength || '');
     });
     
-    params.append('tested_by_name', testData.testedBy || '');
-    params.append('checked_by_name', testData.checkedBy || '');
-    params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name);
+    // Get tested/checked/verified by from cubeTest (user input from TestObservations)
+    console.log('🔍 FULL cubeTest object:', cubeTest);
+    console.log('🔍 cubeTest.testedBy:', cubeTest.testedBy);
+    console.log('🔍 cubeTest.checkedBy:', cubeTest.checkedBy);
+    console.log('🔍 cubeTest.verifiedBy:', cubeTest.verifiedBy);
+    
+    params.append('tested_by_name', cubeTest.testedBy || '');
+    params.append('checked_by_name', cubeTest.checkedBy || '');
+    params.append('verified_by_name', cubeTest.verifiedBy || '');
+    
+    // Add dates (use testing date as default for all signatures)
+    const signatureDate = cubeTest.testingDate || new Date().toLocaleDateString('en-GB');
+    params.append('tested_by_date', signatureDate);
+    params.append('checked_by_date', signatureDate);
+    params.append('verified_by_date', signatureDate);
+    
+    // Add remarks
+    params.append('remarks', cubeTest.testRemarks || '');
+    
+    console.log('📋 Observation Sheet URL Params:', {
+      tested_by_name: cubeTest.testedBy,
+      checked_by_name: cubeTest.checkedBy,
+      verified_by_name: cubeTest.verifiedBy,
+      remarks: cubeTest.testRemarks,
+      signatureDate: signatureDate
+    });
     
     window.open(`/cubeTestingReport.html?${params.toString()}`, '_blank');
   };
