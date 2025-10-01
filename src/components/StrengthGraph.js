@@ -39,7 +39,7 @@ const StrengthGraph = () => {
       
       try {
         console.log('🔄 Fetching saved strength graph data for test:', testRequestId);
-        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests/${testRequestId}/details`);
         const data = response.data;
         
         const firstTest = data.concrete_tests?.[0];
@@ -101,14 +101,14 @@ const StrengthGraph = () => {
     
     try {
       console.log('📤 Sending data to backend:', strengthData);
-      console.log('📍 URL:', `http://localhost:5000/api/strength-graph/${testRequestId}`);
+      console.log('📍 URL:', `https://testinglab.vitragassollp.com/api/strength-graph/${testRequestId}`);
       console.log('📍 testRequestId type:', typeof testRequestId);
       console.log('📍 testRequestId value:', testRequestId);
       
       // First, test backend connectivity
       console.log('🔍 Testing backend connectivity...');
       try {
-        await axios.get('http://localhost:5000/');
+        await axios.get('https://testinglab.vitragassollp.com/');
         console.log('✅ Backend is reachable');
       } catch (connectError) {
         console.error('❌ Backend connectivity test failed:', connectError);
@@ -119,7 +119,7 @@ const StrengthGraph = () => {
       console.log('💾 Sending POST request...');
       const response = await axios({
         method: 'POST',
-        url: `http://localhost:5000/api/strength-graph/${testRequestId}`,
+        url: `https://testinglab.vitragassollp.com/api/strength-graph/${testRequestId}`,
         data: strengthData,
         headers: {
           'Content-Type': 'application/json'
@@ -147,7 +147,7 @@ const StrengthGraph = () => {
         errorMsg += `Server error: ${error.response.data?.error || error.response.statusText}`;
       } else if (error.request) {
         // Request made but no response
-        errorMsg += 'Backend server is not responding. Please make sure Flask is running on http://localhost:5000';
+        errorMsg += 'Backend server is not responding. Please make sure Flask is running on https://testinglab.vitragassollp.com';
       } else {
         // Something else
         errorMsg += error.message;

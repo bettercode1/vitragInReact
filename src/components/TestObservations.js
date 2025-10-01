@@ -56,7 +56,7 @@ const TestObservations = () => {
       if (testRequestId && !testData && !testRequest) {
         setLoading(true);
         try {
-          const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+          const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests/${testRequestId}/details`);
           setApiTestRequest(response.data.test_request);
           setApiConcreteTests(response.data.concrete_tests);
           console.log('✅ Fetched test data for observations:', response.data);
@@ -80,7 +80,7 @@ const TestObservations = () => {
         setLoading(true);
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/test-observations/${testRequestId}`,
+            `https://testinglab.vitragassollp.com/api/test-observations/${testRequestId}`,
             {
               headers: {
                 'Content-Type': 'application/json',
@@ -429,7 +429,7 @@ const TestObservations = () => {
       try {
         // Try to save to database first
         setSaveProgress(50);
-        await axios.post(`http://localhost:5000/api/test-observations/${testRequestId}`, observationsData);
+        await axios.post(`https://testinglab.vitragassollp.com/api/test-observations/${testRequestId}`, observationsData);
         setSaveProgress(80);
         setSubmitMessage({ type: 'success', text: 'Test observations saved successfully!' });
         setShowSuccessModal(true);

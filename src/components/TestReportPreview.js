@@ -55,7 +55,7 @@ const TestReportPreview = () => {
       
       try {
         console.log('🔍 Fetching test data for ID:', testRequestId);
-        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests/${testRequestId}/details`);
         const data = response.data;
         
         console.log('✅ Fetched data:', data);

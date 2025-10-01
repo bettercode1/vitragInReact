@@ -57,7 +57,7 @@ const Samples = () => {
       console.log(`🔍 Fetching page ${page} (${recordsPerPage} records per page)...`);
       
       // Call API with pagination parameters
-      const response = await axios.get(`http://localhost:5000/api/test-requests?page=${page}&per_page=${recordsPerPage}`);
+      const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests?page=${page}&per_page=${recordsPerPage}`);
       
       console.log('📊 API Response:', response.data);
       const testRequestsArray = response.data.test_requests || [];
@@ -83,7 +83,7 @@ const Samples = () => {
     try {
       setLoadingDetails(prev => ({ ...prev, [testRequestId]: true }));
       
-      const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+      const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests/${testRequestId}/details`);
       
       const detailsData = {
         concrete_tests: response.data.concrete_tests,
@@ -583,7 +583,7 @@ const Samples = () => {
         <Alert variant="danger">
           <Alert.Heading>Backend Connection Error</Alert.Heading>
           <p><strong>Error:</strong> {apiError}</p>
-          <p><strong>Solution:</strong> Make sure the backend server is running at http://localhost:5000</p>
+          <p><strong>Solution:</strong> Make sure the backend server is running at https://testinglab.vitragassollp.com</p>
           <Button variant="outline-danger" onClick={fetchTestRequests} className="mt-2">
             <FontAwesomeIcon icon={faSyncAlt} className="me-2" />
             Retry Connection

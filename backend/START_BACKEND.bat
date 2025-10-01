@@ -6,7 +6,7 @@ echo.
 cd /d "%~dp0"
 echo Current directory: %CD%
 echo.
-echo Starting Flask on http://localhost:5000...
+echo Starting Flask on https://testinglab.vitragassollp.com...
 echo.
 python app.py
 pause

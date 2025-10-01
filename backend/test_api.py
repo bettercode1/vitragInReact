@@ -2,7 +2,7 @@ import requests
 import json
 
 # Test the API endpoint
-url = "http://localhost:5000/api/test-requests"
+url = "https://testinglab.vitragassollp.com/api/test-requests"
 data = {
     "customer_name": "Jasprit Bumrah",
     "test_type": "CC",

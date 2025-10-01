@@ -5,7 +5,7 @@ import json
 # Test the API endpoint directly
 try:
     print("🔍 Testing API endpoint...")
-    response = requests.get('http://localhost:5000/api/test-requests')
+    response = requests.get('https://testinglab.vitragassollp.com/api/test-requests')
     print(f"Status Code: {response.status_code}")
     
     if response.status_code == 200:
@@ -20,6 +20,6 @@ try:
         print(f"❌ API Error: {response.text}")
         
 except requests.exceptions.ConnectionError:
-    print("❌ Cannot connect to backend server. Make sure it's running on http://localhost:5000")
+    print("❌ Cannot connect to backend server. Make sure it's running on https://testinglab.vitragassollp.com")
 except Exception as e:
     print(f"❌ Error: {e}")

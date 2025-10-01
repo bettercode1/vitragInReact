@@ -27,7 +27,7 @@ const ViewSample = () => {
       if (testRequestId) {
         setLoading(true);
         try {
-          const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+          const response = await axios.get(`https://testinglab.vitragassollp.com/api/test-requests/${testRequestId}/details`);
           const data = response.data;
           
           // Build testRequest object from API data

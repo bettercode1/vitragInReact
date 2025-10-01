@@ -118,5 +118,5 @@ if __name__ == '__main__':
     print("🚀 Starting Vitrag Associates Testing Lab Backend...")
     print("✅ Database connection: WORKING")
     print("✅ Flask app: READY")
-    print("🌐 Server will be available at: http://localhost:5000")
+    print("🌐 Server will be available at: https://testinglab.vitragassollp.com")
     app.run(host='0.0.0.0', port=5000, debug=False)

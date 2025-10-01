@@ -2,7 +2,7 @@ import requests
 
 def test_all_tests():
     try:
-        response = requests.get('http://localhost:5000/api/dashboard/recent-tests')
+        response = requests.get('https://testinglab.vitragassollp.com/api/dashboard/recent-tests')
         if response.status_code == 200:
             data = response.json()
             print(f"✅ SUCCESS: API returned {len(data)} tests")
