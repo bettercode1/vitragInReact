@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Form, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table, Form, Badge, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,85 +12,227 @@ import {
   faCog,
   faFlask
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const TestReportPreview = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get test data from location state or use sample data
-  const testData = location.state?.testData || {
-    id: 1,
-    jobNumber: 'T-2501690',
-    customerName: 'Lords Developers Shivyogi Residency',
-    siteName: 'shivyogi residency',
-    receiptDate: '25-08-2025',
-    status: 'completed',
-    cubeTests: [{
-      id: 1,
-      idMark: 'C1',
-      locationNature: 'Column - Ground Floor',
-      grade: 'M25',
-      castingDate: '11-08-2025',
-      testingDate: '08-09-2025',
-      ageInDays: 28,
-      quantity: 3,
-      testMethod: 'IS 516 (Part1/Sec1):2021',
-      sampleCodeNumber: 'SC-2024-001',
-      ulrNumber: 'ULR-2024-001',
-      machineUsed: 'CTM (2000KN)',
-      cubeCondition: 'Acceptable',
-      curingCondition: 'Water Curing',
-      testResults: [
-        {
-          srNo: 1,
-          idMark: 'C1',
-          dimensionLength: 150,
-          dimensionWidth: 150,
-          dimensionHeight: 150,
-          area: 22500,
-          weight: 8.5,
-          crushingLoad: 562.5,
-          density: 2400,
-          compressiveStrength: 25.0
-        },
-        {
-          srNo: 2,
-          idMark: 'C2',
-          dimensionLength: 150,
-          dimensionWidth: 150,
-          dimensionHeight: 150,
-          area: 22500,
-          weight: 8.4,
-          crushingLoad: 555.0,
-          density: 2373,
-          compressiveStrength: 24.7
-        },
-        {
-          srNo: 3,
-          idMark: 'C3',
-          dimensionLength: 150,
-          dimensionWidth: 150,
-          dimensionHeight: 150,
-          area: 22500,
-          weight: 8.6,
-          crushingLoad: 570.0,
-          density: 2427,
-          compressiveStrength: 25.3
-        }
-      ],
-      averageStrength: 25.0
-    }]
-  };
-
+  // ALL useState hooks MUST be at the top, before any returns!
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [testData, setTestData] = useState(null);
   const [reviewerInfo, setReviewerInfo] = useState({
     id: 1,
     name: 'Lalita S. Dussa',
     designation: 'Quality Manager',
     graduation: 'B.Tech.(Civil)'
   });
-
   const [selectedReviewer, setSelectedReviewer] = useState('1');
-
+  
+  // Get test request ID from location state - CHECK MULTIPLE SOURCES
+  const testRequestId = location.state?.testRequestId || location.state?.testData?.id || location.state?.id;
+  
+  // Debug logging
+  console.log('🔍 TestReportPreview - Full Location State:', location.state);
+  console.log('🔍 TestReportPreview - testRequestId (final):', testRequestId);
+  console.log('🔍 TestReportPreview - location.state?.testRequestId:', location.state?.testRequestId);
+  console.log('🔍 TestReportPreview - location.state?.testData?.id:', location.state?.testData?.id);
+  console.log('🔍 TestReportPreview - location.state?.id:', location.state?.id);
+  
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchTestData = async () => {
+      if (!testRequestId) {
+        console.error('❌ NO TEST REQUEST ID!');
+        console.error('   location.state:', location.state);
+        console.error('   location.state?.testData:', location.state?.testData);
+        console.error('   location.state?.id:', location.state?.id);
+        setError('No test request ID provided. Please navigate from a test sample.');
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        console.log('🔍 Fetching test data for ID:', testRequestId);
+        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const data = response.data;
+        
+        console.log('✅ Fetched data:', data);
+        
+        // Get the first concrete test
+        const firstTest = data.concrete_tests?.[0] || {};
+        
+        // Parse JSON fields
+        let strengthData = {};
+        let observationsData = {};
+        
+        console.log('🔍 Raw JSON from DB:');
+        console.log('  test_results_json:', firstTest.test_results_json);
+        console.log('  observations_json:', firstTest.observations_json);
+        
+        try {
+          if (firstTest.test_results_json) {
+            strengthData = JSON.parse(firstTest.test_results_json);
+            console.log('✅ Parsed strengthData:', strengthData);
+          } else {
+            console.warn('⚠️ No test_results_json found!');
+          }
+          
+          if (firstTest.observations_json) {
+            observationsData = JSON.parse(firstTest.observations_json);
+            console.log('✅ Parsed observationsData:', observationsData);
+          } else {
+            console.warn('⚠️ No observations_json found!');
+          }
+        } catch (parseError) {
+          console.error('❌ Error parsing JSON fields:', parseError);
+        }
+        
+        // Calculate age in days
+        const calculateAge = (castingDate, testingDate) => {
+          if (!castingDate || !testingDate) return 'N/A';
+          const casting = new Date(castingDate);
+          const testing = new Date(testingDate);
+          const diffTime = Math.abs(testing - casting);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays;
+        };
+        
+        // Transform backend data to match component's expected format
+        const transformedData = {
+          id: data.test_request.id,
+          jobNumber: data.test_request.job_number || 'N/A',
+          customerName: data.customer.name || 'N/A',
+          siteName: data.test_request.site_name || 'N/A',
+          siteAddress: data.customer.address || 'N/A',
+          receiptDate: data.test_request.receipt_date || 'N/A',
+          status: data.test_request.status || 'pending',
+          ulrNumber: data.test_request.ulr_number || firstTest.ulr_number || data.test_request.ulr_number || 'N/A',
+          referenceNumber: firstTest.sample_code_number || data.test_request.sample_code_number || 'N/A',
+          cubeTests: data.concrete_tests.map((ct, index) => {
+            // Build test results array from the single concrete test data
+            const testResults = [];
+            
+            // If we have test data, create entries based on quantity
+            const quantity = ct.quantity || ct.num_of_cubes || 3;
+            
+            for (let i = 0; i < quantity; i++) {
+              const area = ct.dimension_length && ct.dimension_width 
+                ? (ct.dimension_length * ct.dimension_width).toFixed(2)
+                : 22500; // Default 150x150
+              
+              const density = ct.weight && ct.dimension_length && ct.dimension_width && ct.dimension_height
+                ? ((ct.weight * 1000000) / (ct.dimension_length * ct.dimension_width * ct.dimension_height)).toFixed(0)
+                : 'N/A';
+              
+              testResults.push({
+                srNo: i + 1,
+                idMark: `${ct.idMark || 'C'}${i + 1}`,
+                dimensionLength: ct.dimension_length || 150,
+                dimensionWidth: ct.dimension_width || 150,
+                dimensionHeight: ct.dimension_height || 150,
+                area: area,
+                weight: ct.weight || 'N/A',
+                crushingLoad: ct.crushing_load || 'N/A',
+                density: density,
+                compressiveStrength: ct.compressive_strength || 'N/A'
+              });
+            }
+            
+            return {
+              id: ct.id,
+              idMark: ct.idMark || 'N/A',
+              locationNature: ct.locationNature || 'N/A',
+              grade: ct.grade || 'N/A',
+              castingDate: ct.castingDate || 'N/A',
+              testingDate: ct.testingDate || 'N/A',
+              ageInDays: ct.age_in_days || calculateAge(ct.castingDate, ct.testingDate),
+              quantity: quantity,
+              testMethod: ct.testMethod || 'IS 516 (Part1/Sec1):2021',
+              sampleCodeNumber: ct.sample_code_number || 'N/A',
+              ulrNumber: ct.ulr_number || 'N/A',
+              machineUsed: ct.machine_used || 'CTM (2000KN)',
+              cubeCondition: ct.cube_condition || 'Acceptable',
+              curingCondition: ct.curing_condition || 'Water Curing',
+              sampleDescription: ct.sample_description || 'Concrete Cube Specimen',
+              testedBy: ct.tested_by || 'N/A',
+              checkedBy: ct.checked_by || 'N/A',
+              verifiedBy: ct.verified_by || 'Mr. P A Sanghave',
+              averageStrength: ct.average_strength || ct.compressive_strength || 0,
+              testResults: testResults,
+              // Add individual measurements
+              weight: ct.weight || 'N/A',
+              dimensionLength: ct.dimension_length || 150,
+              dimensionWidth: ct.dimension_width || 150,
+              dimensionHeight: ct.dimension_height || 150,
+              crushingLoad: ct.crushing_load || 'N/A',
+              compressiveStrength: ct.compressive_strength || 'N/A',
+              failureType: ct.failure_type || 'N/A',
+              testRemarks: ct.test_remarks || ''
+            };
+          }),
+          strengthData: strengthData,
+          observationsData: observationsData
+        };
+        
+        console.log('✅ Transformed data:', transformedData);
+        setTestData(transformedData);
+        setLoading(false);
+        
+      } catch (err) {
+        console.error('❌ Error fetching test data:', err);
+        setError(err.message || 'Failed to fetch test data');
+        setLoading(false);
+      }
+    };
+    
+    fetchTestData();
+  }, [testRequestId]);
+  
+  // Show loading state
+  if (loading) {
+    return (
+      <Container className="mt-5">
+        <Card style={{ backgroundColor: '#1C2333', border: '2px solid #FFA500' }}>
+          <Card.Body className="text-center p-5">
+            <Spinner animation="border" variant="warning" style={{ width: '4rem', height: '4rem' }} />
+            <h2 className="mt-4 text-white">Loading Test Report...</h2>
+            <p className="text-muted mt-2">Please wait while we fetch your test data from the database</p>
+            <div className="mt-4">
+              <div className="progress" style={{ height: '4px', backgroundColor: '#333' }}>
+                <div className="progress-bar bg-warning" role="progressbar" style={{ width: '100%', animation: 'progress 2s ease-in-out infinite' }}></div>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+        <style>{`
+          @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+          }
+        `}</style>
+      </Container>
+    );
+  }
+  
+  // Show error state
+  if (error || !testData) {
+    return (
+      <Container className="mt-5">
+        <Alert variant="danger">
+          <Alert.Heading>Error Loading Test Report</Alert.Heading>
+          <p>{error || 'Test data not found'}</p>
+          <Button variant="outline-danger" onClick={() => navigate(-1)}>
+            <FontAwesomeIcon icon={faArrowLeft} /> Go Back
+          </Button>
+        </Alert>
+      </Container>
+    );
+  }
+  
+  // Reviewers list
   const reviewers = [
     { id: 1, name: 'Lalita S. Dussa', designation: 'Quality Manager', graduation: 'B.Tech.(Civil)' },
     { id: 2, name: 'Harsha Prakarsha Sangave', designation: 'Quality Manager', graduation: 'M.E(Civil-Structures)' },
@@ -114,11 +256,56 @@ const TestReportPreview = () => {
   };
 
 
+  // Function to view OBSERVATION SHEET (Page 1 only)
+  const handleViewObservationSheet = () => {
+    // Navigate to observation sheet page
+    const params = new URLSearchParams();
+    const cubeTest = testData.cubeTests ? testData.cubeTests[0] : testData;
+    
+    // Pass only observation-related data
+    params.append('page_type', 'observation'); // Flag to show only page 1
+    params.append('customer_name', testData.customerName || '');
+    params.append('site_name', testData.siteName || '');
+    params.append('job_code_number', testData.jobNumber || '');
+    params.append('ulr_number', cubeTest.ulrNumber || testData.ulrNumber || '');
+    params.append('reference_number', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    params.append('date_of_testing', cubeTest.testingDate || '');
+    params.append('date_of_casting', cubeTest.castingDate || '');
+    params.append('sample_description', testData.sampleDescription || 'Concrete Cube Specimen');
+    params.append('blocks_condition', testData.cubeCondition || 'Acceptable');
+    params.append('curing_condition', testData.curingCondition || '');
+    params.append('machine_used_for_testing', testData.machineUsed || 'CTM (2000KN)');
+    
+    // Test results
+    const testResults = cubeTest.testResults || [];
+    testResults.forEach((result, index) => {
+      const i = index + 1;
+      params.append(`block_id_${i}`, result.idMark || `C${i}`);
+      params.append(`length_${i}`, result.dimensionLength || '');
+      params.append(`breadth_${i}`, result.dimensionWidth || '');
+      params.append(`height_${i}`, result.dimensionHeight || '');
+      params.append(`area_${i}`, result.area || '');
+      params.append(`weight_${i}`, result.weight || '');
+      params.append(`load_max_${i}`, result.crushingLoad || '');
+      params.append(`compressive_strength_${i}`, result.compressiveStrength || '');
+    });
+    
+    params.append('tested_by_name', testData.testedBy || '');
+    params.append('checked_by_name', testData.checkedBy || '');
+    params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name);
+    
+    window.open(`/cubeTestingReport.html?${params.toString()}`, '_blank');
+  };
+  
+  // Function to view FULL REPORT (Pages 2-4)
   const handleViewPDF = () => {
     // Build URL parameters from testData
     const params = new URLSearchParams();
     
     console.log('Full testData:', testData); // Debug log
+    
+    params.append('page_type', 'full'); // Flag to show full report
+    params.append('test_request_id', testData.id); // For sessionStorage image retrieval
     
     // Get cube test data - handle both old and new data structure
     const cubeTest = testData.cubeTests ? testData.cubeTests[0] : testData;
@@ -128,8 +315,8 @@ const TestReportPreview = () => {
     params.append('site_name', testData.siteName || '');
     params.append('site_address', testData.siteAddress || '');
     params.append('job_code_number', testData.jobNumber || '');
-    params.append('ulr_number', cubeTest.ulrNumber || testData.ulrNumber || '');
-    params.append('reference_number', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    params.append('ulr_number', testData.ulrNumber || cubeTest.ulrNumber || 'N/A');
+    params.append('reference_number', testData.referenceNumber || cubeTest.sampleCodeNumber || 'N/A');
     
     // Dates
     params.append('date_of_report', new Date().toISOString().split('T')[0]);
@@ -138,19 +325,27 @@ const TestReportPreview = () => {
     params.append('date_of_casting', cubeTest.castingDate || testData.castingDate || '');
     params.append('date_of_testing', cubeTest.testingDate || testData.testingDate || '');
     
-    // Test Information (Page 1 - from TestObservations)
+    // Test Information (Page 1 & Page 2 - from TestObservations)
     params.append('sample_test_code', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
-    params.append('sample_description', testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
-    params.append('material_description', testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('sample_description', cubeTest.sampleDescription || testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('material_description', cubeTest.sampleDescription || testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
     params.append('quantity_of_blocks', cubeTest.quantity || testData.quantity || '');
     params.append('grade_of_blocks', cubeTest.grade || testData.grade || '');
-    params.append('blocks_condition', testData.cubeCondition || cubeTest.cubeCondition || 'Acceptable');
-    params.append('condition_of_sample', testData.cubeCondition || cubeTest.cubeCondition || 'Acceptable');
+    params.append('grade_of_specimen', cubeTest.grade || testData.grade || '');
+    params.append('blocks_condition', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
+    params.append('condition_of_specimen', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
+    params.append('condition_of_sample', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
     params.append('manufacture_of_blocks', `${cubeTest.ageInDays || testData.ageInDays || ''} Days`);
-    params.append('curing_condition', testData.curingCondition || cubeTest.curingCondition || '');
-    params.append('machine_used_for_testing', testData.machineUsed || cubeTest.machineUsed || '');
+    params.append('age_of_specimen', `${cubeTest.ageInDays || testData.ageInDays || ''}`);
+    params.append('curing_condition', cubeTest.curingCondition || testData.curingCondition || '');
+    params.append('machine_used', cubeTest.machineUsed || testData.machineUsed || 'Fully automatic Digital Compression Testing Machine');
+    params.append('machine_used_for_testing', cubeTest.machineUsed || testData.machineUsed || 'Fully automatic Digital Compression Testing Machine');
     params.append('location_of_testing', 'Permanent');
-    params.append('environmental_conditions', 'Laboratory Conditions');
+    params.append('location_structure', cubeTest.locationNature || testData.locationNature || '');
+    params.append('type_of_specimen', cubeTest.sampleDescription || 'Concrete Cube');
+    params.append('environmental_conditions', 'Not Applicable');
+    params.append('capacity_range', '2000KN');
+    params.append('calibration_due_date', '01/10/2026');
     
     // Test Results - from TestObservations rows data
     const testResults = cubeTest.testResults || testData.testResults || testData.rows || [];
@@ -182,14 +377,27 @@ const TestReportPreview = () => {
     params.append('verified_by_date', testData.verifiedDate || new Date().toLocaleDateString('en-GB'));
     
     // Strength Graph Data - from StrengthGraph
-    console.log('testData.strengthData:', testData.strengthData);
+    console.log('🔍 FULL testData object:', testData);
+    console.log('🔍 testData.strengthData:', testData.strengthData);
+    console.log('🔍 testData.observationsData:', testData.observationsData);
+    console.log('🔍 cubeTest:', cubeTest);
+    
     if (testData.strengthData) {
-      params.append('required_7', testData.strengthData.required_7 || '15.0');
-      params.append('actual_7', testData.strengthData.actual_7 || '0');
-      params.append('required_14', testData.strengthData.required_14 || '22.5');
-      params.append('actual_14', testData.strengthData.actual_14 || '0');
-      params.append('required_28', testData.strengthData.required_28 || '30.0');
-      params.append('actual_28', testData.strengthData.actual_28 || '0');
+      const r7 = testData.strengthData.required_7 || '15.0';
+      const a7 = testData.strengthData.actual_7 || '0';
+      const r14 = testData.strengthData.required_14 || '22.5';
+      const a14 = testData.strengthData.actual_14 || '0';
+      const r28 = testData.strengthData.required_28 || '30.0';
+      const a28 = testData.strengthData.actual_28 || '0';
+      
+      console.log('📊 STRENGTH VALUES BEING SENT:', {r7, a7, r14, a14, r28, a28});
+      
+      params.append('required_7', r7);
+      params.append('actual_7', a7);
+      params.append('required_14', r14);
+      params.append('actual_14', a14);
+      params.append('required_28', r28);
+      params.append('actual_28', a28);
       console.log('Strength params:', {
         required_7: testData.strengthData.required_7,
         actual_7: testData.strengthData.actual_7,
@@ -202,9 +410,33 @@ const TestReportPreview = () => {
       console.warn('No strengthData found in testData!');
     }
     
+    // Observations Data (6 observation points) - from StrengthGraph
+    console.log('testData.observationsData:', testData.observationsData);
+    if (testData.observationsData) {
+      params.append('obs_strength_duration', testData.observationsData.obs_strength_duration || '');
+      params.append('obs_test_results', testData.observationsData.obs_test_results || '');
+      params.append('obs_weight', testData.observationsData.obs_weight || '');
+      params.append('obs_failure_pattern', testData.observationsData.obs_failure_pattern || '');
+      params.append('obs_bonding', testData.observationsData.obs_bonding || '');
+      params.append('obs_strength_criteria', testData.observationsData.obs_strength_criteria || '');
+    }
+    
+    // Store images in sessionStorage for PDF access
+    if (testData.capturedImages || testData.cubeTests?.[0]?.capturedImages) {
+      const images = testData.capturedImages || testData.cubeTests?.[0]?.capturedImages || {};
+      console.log('📸 Storing images in sessionStorage:', Object.keys(images));
+      sessionStorage.setItem('testImages_' + testData.id, JSON.stringify(images));
+    } else {
+      console.warn('⚠️ No capturedImages found in testData');
+    }
+    
+    // Add cache buster to force browser to reload the HTML
+    params.append('_t', Date.now());
+    
     // Navigate to the existing HTML PDF file with parameters
     const reportUrl = `/cubeTestingReport.html?${params.toString()}`;
-    console.log('Opening report with URL:', reportUrl); // Debug log
+    console.log('🚀 Opening report with URL:', reportUrl);
+    console.log('🚀 URL length:', reportUrl.length);
     window.open(reportUrl, '_blank');
   };
 
@@ -321,7 +553,7 @@ const TestReportPreview = () => {
                       padding: '15px',
                       border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}>
-                      {testData.cubeTests[0]?.ulrNumber || 'N/A'}
+                      {testData.ulrNumber || testData.cubeTests[0]?.ulrNumber || 'N/A'}
                     </td>
                   </tr>
                   <tr>
@@ -1092,7 +1324,21 @@ const TestReportPreview = () => {
               </Button>
               
               <Button
-                variant="primary"
+                variant="info"
+                className="me-2"
+                onClick={handleViewObservationSheet}
+                style={{
+                  backgroundColor: '#17a2b8',
+                  borderColor: '#17a2b8',
+                  color: '#ffffff'
+                }}
+              >
+                <FontAwesomeIcon icon={faFlask} className="me-1" />
+                View Observation Sheet
+              </Button>
+              
+              <Button
+                variant="warning"
                 className="me-2"
                 onClick={handleViewPDF}
                 style={{
@@ -1102,7 +1348,7 @@ const TestReportPreview = () => {
                 }}
               >
                 <FontAwesomeIcon icon={faFilePdf} className="me-1" />
-                View as PDF
+                View Full Report
               </Button>
             </div>
           </Card.Body>

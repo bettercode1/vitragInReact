@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Table, Row, Col, Form } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Card, Button, Table, Row, Col, Form, Modal } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const StrengthGraph = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get data from location state
-  const { formData, testData, testIndex, observationsData } = location.state || {};
+  // Get data from location state including testRequestId
+  const { formData, testData, testIndex, observationsData, testRequestId } = location.state || {};
+  
+  // Log received data for debugging
+  console.log('🔍 StrengthGraph - Received Data:');
+  console.log('  testRequestId:', testRequestId);
+  console.log('  formData:', formData);
+  console.log('  testData:', testData);
+  console.log('  observationsData:', observationsData);
   
   const [strengthData, setStrengthData] = useState({
     required_7: '',
@@ -25,30 +31,54 @@ const StrengthGraph = () => {
     obs_bonding: '',
     obs_strength_criteria: ''
   });
+  
+  // Fetch saved strength graph data when component mounts
+  React.useEffect(() => {
+    const fetchSavedData = async () => {
+      if (!testRequestId) return;
+      
+      try {
+        console.log('🔄 Fetching saved strength graph data for test:', testRequestId);
+        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const data = response.data;
+        
+        const firstTest = data.concrete_tests?.[0];
+        if (firstTest?.test_results_json) {
+          const savedStrength = JSON.parse(firstTest.test_results_json);
+          const savedObs = firstTest.observations_json ? JSON.parse(firstTest.observations_json) : {};
+          
+          console.log('✅ Found saved data:', savedStrength, savedObs);
+          
+          setStrengthData({
+            required_7: savedStrength.required_7 || '',
+            actual_7: savedStrength.actual_7 || '',
+            required_14: savedStrength.required_14 || '',
+            actual_14: savedStrength.actual_14 || '',
+            required_28: savedStrength.required_28 || '',
+            actual_28: savedStrength.actual_28 || '',
+            obs_strength_duration: savedObs.obs_strength_duration || '',
+            obs_test_results: savedObs.obs_test_results || '',
+            obs_weight: savedObs.obs_weight || '',
+            obs_failure_pattern: savedObs.obs_failure_pattern || '',
+            obs_bonding: savedObs.obs_bonding || '',
+            obs_strength_criteria: savedObs.obs_strength_criteria || ''
+          });
+          
+          console.log('✅ Strength data pre-filled!');
+        }
+      } catch (error) {
+        console.log('No saved data found (this is OK for new tests)');
+      }
+    };
+    
+    fetchSavedData();
+  }, [testRequestId]);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
-
-  // Load data from observations when component mounts
-  useEffect(() => {
-    if (observationsData?.testRows && observationsData.testRows.length > 0) {
-      const testRows = observationsData.testRows;
-      const avgStrength = observationsData.formData?.averageStrength || '';
-      
-      // Set default values based on observations
-      setStrengthData(prev => ({
-        ...prev,
-        required_7: '15.0',
-        required_14: '22.5',
-        required_28: '30.0',
-        actual_7: testRows[0]?.compressiveStrength || '',
-        actual_14: testRows[1]?.compressiveStrength || '',
-        actual_28: avgStrength || testRows[2]?.compressiveStrength || ''
-      }));
-    }
-  }, [observationsData]);
-
-
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,32 +88,77 @@ const StrengthGraph = () => {
     }));
   };
 
+  const generateGraph = async () => {
+    // Only validate test request ID - everything else is optional
+    if (!testRequestId) {
+      setErrorMessage('Error: Test Request ID is missing. Cannot save graph data.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
+      return;
+    }
 
-  const fillRandomData = () => {
-    setStrengthData({
-      required_7: '15.0',
-      actual_7: '18.5',
-      required_14: '22.5',
-      actual_14: '25.2',
-      required_28: '30.0',
-      actual_28: '32.8',
-      obs_strength_duration: 'Satisfactory',
-      obs_test_results: 'Satisfactory',
-      obs_weight: 'Satisfactory',
-      obs_failure_pattern: 'Satisfactory',
-      obs_bonding: 'Satisfactory',
-      obs_strength_criteria: 'Satisfactory'
-    });
-  };
-
-  const generateGraph = () => {
     setIsGenerating(true);
     
-    // Simulate graph generation
-    setTimeout(() => {
+    try {
+      console.log('📤 Sending data to backend:', strengthData);
+      console.log('📍 URL:', `http://localhost:5000/api/strength-graph/${testRequestId}`);
+      console.log('📍 testRequestId type:', typeof testRequestId);
+      console.log('📍 testRequestId value:', testRequestId);
+      
+      // First, test backend connectivity
+      console.log('🔍 Testing backend connectivity...');
+      try {
+        await axios.get('http://localhost:5000/');
+        console.log('✅ Backend is reachable');
+      } catch (connectError) {
+        console.error('❌ Backend connectivity test failed:', connectError);
+        throw new Error('Cannot connect to backend server. Make sure Flask is running on port 5000.');
+      }
+      
+      // Save to database
+      console.log('💾 Sending POST request...');
+      const response = await axios({
+        method: 'POST',
+        url: `http://localhost:5000/api/strength-graph/${testRequestId}`,
+        data: strengthData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('✅ Strength graph data saved:', response.data);
+      
+      // Show success and display graph
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setShowGraph(true);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('❌ Full error object:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error message:', error.message);
+      
+      let errorMsg = 'Failed to save strength graph data. ';
+      
+      if (error.response) {
+        // Backend returned an error
+        errorMsg += `Server error: ${error.response.data?.error || error.response.statusText}`;
+      } else if (error.request) {
+        // Request made but no response
+        errorMsg += 'Backend server is not responding. Please make sure Flask is running on http://localhost:5000';
+      } else {
+        // Something else
+        errorMsg += error.message;
+      }
+      
+      setErrorMessage(errorMsg);
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 5000); // Show for 5 seconds
+    } finally {
       setIsGenerating(false);
-      setShowGraph(true);
-    }, 1000);
+    }
   };
 
   // Prepare chart data
@@ -236,8 +311,11 @@ const StrengthGraph = () => {
             <div>
               <h3 className="mb-0">Concrete Cube Strength Graph</h3>
               <div className="mt-2">
-                <span className="badge fs-6 p-2" style={{ backgroundColor: '#FFA500' }}>
-                  Reference Number: {testData?.referenceNumber || 'N/A'}
+                <span className="badge fs-6 p-2 me-2" style={{ backgroundColor: '#FFA500' }}>
+                  Reference Number: {testData?.referenceNumber || formData?.referenceNumber || 'N/A'}
+                </span>
+                <span className="badge fs-6 p-2" style={{ backgroundColor: '#6c757d' }}>
+                  Test Request ID: {testRequestId || 'N/A'}
                 </span>
               </div>
             </div>
@@ -474,15 +552,7 @@ const StrengthGraph = () => {
                 
                 <div className="text-center mt-3">
                   <Button 
-                    variant="info" 
-                    className="me-2"
-                    onClick={fillRandomData}
-                  >
-                    <i className="fas fa-magic me-2"></i> Fill Random Data
-                  </Button>
-                  <Button 
                     variant="success" 
-                    className="me-2"
                     size="lg"
                     onClick={generateGraph}
                     disabled={isGenerating}
@@ -641,26 +711,30 @@ const StrengthGraph = () => {
                         variant="success" 
                         size="lg" 
                         className="px-5 py-3"
-                        onClick={() => navigate('/test-report-preview', { 
-                          state: { 
-                            testData: { 
-                              ...formData, 
-                              ...testData, 
-                              ...observationsData,
-                              strengthData,
-                              // Ensure rows data is passed
-                              rows: observationsData?.testRows || observationsData?.rows || [],
-                              testRemarks: observationsData?.formData?.testRemarks || observationsData?.testRemarks || '',
-                              testedBy: observationsData?.formData?.testedBy || observationsData?.testedBy || '',
-                              checkedBy: observationsData?.formData?.checkedBy || observationsData?.checkedBy || '',
-                              verifiedBy: observationsData?.formData?.verifiedBy || observationsData?.verifiedBy || '',
-                              sampleDescription: observationsData?.formData?.sampleDescription || observationsData?.sampleDescription || '',
-                              cubeCondition: observationsData?.formData?.cubeCondition || observationsData?.cubeCondition || '',
-                              curingCondition: observationsData?.formData?.curingCondition || observationsData?.curingCondition || '',
-                              machineUsed: observationsData?.formData?.machineUsed || observationsData?.machineUsed || '',
+                        onClick={() => {
+                          console.log('🚀 Complete Test button clicked!');
+                          console.log('🚀 testRequestId:', testRequestId);
+                          console.log('🚀 observationsData:', observationsData);
+                          
+                          // Store images in sessionStorage for PDF access
+                          const capturedImages = observationsData?.capturedImages || {};
+                          console.log('📸 Captured Images:', Object.keys(capturedImages));
+                          sessionStorage.setItem('testImages_' + testRequestId, JSON.stringify(capturedImages));
+                          
+                          navigate('/test-report-preview', { 
+                            state: { 
+                              testRequestId: testRequestId,
+                              testData: { 
+                                id: testRequestId,
+                                ...formData, 
+                                ...testData, 
+                                ...observationsData,
+                                strengthData,
+                                capturedImages: capturedImages
+                              }
                             } 
-                          } 
-                        })}
+                          });
+                        }}
                       >
                         <i className="fas fa-clipboard-check me-2"></i> Complete Test
                       </Button>
@@ -672,6 +746,59 @@ const StrengthGraph = () => {
           )}
         </Card.Body>
       </Card>
+
+      {/* Error Modal - Auto-dismisses after 3 seconds */}
+      <Modal 
+        show={showErrorModal} 
+        onHide={() => setShowErrorModal(false)}
+        backdrop="static" 
+        keyboard={false} 
+        centered
+      >
+        <Modal.Header style={{ backgroundColor: '#dc3545', borderBottom: 'none' }}>
+          <Modal.Title style={{ color: '#fff' }}>
+            <i className="fas fa-exclamation-circle me-2"></i>Validation Error
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '40px' }}>
+          <i className="fas fa-exclamation-circle fa-4x mb-3" style={{ color: '#dc3545' }}></i>
+          <h4>{errorMessage}</h4>
+          <p className="text-muted mt-3">This message will close automatically in 3 seconds.</p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#2c2c2c', borderTop: '1px solid #444' }}>
+          <Button 
+            variant="outline-light" 
+            onClick={() => setShowErrorModal(false)}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal 
+        show={showSuccessModal} 
+        backdrop="static" 
+        keyboard={false} 
+        centered
+      >
+        <Modal.Header style={{ backgroundColor: '#198754', borderBottom: 'none' }}>
+          <Modal.Title style={{ color: '#fff' }}>
+            <i className="fas fa-check-circle me-2"></i>Success!
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '40px' }}>
+          <i className="fas fa-check-circle fa-4x mb-3" style={{ color: '#198754' }}></i>
+          <h4>Graph Data Saved Successfully!</h4>
+          <p className="text-muted mt-3">Your strength data and observations have been saved to the database.</p>
+          <div className="mt-3">
+            <div className="spinner-border text-success" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="text-muted mt-2">Generating graph...</p>
+          </div>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

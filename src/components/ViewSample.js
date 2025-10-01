@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Button, Badge, Table, Row, Col, Alert } from 'react-bootstrap';
+import { Container, Card, Button, Badge, Table, Row, Col, Alert, Modal } from 'react-bootstrap';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faList } from '@fortawesome/free-solid-svg-icons';
@@ -12,6 +12,8 @@ const ViewSample = () => {
   const [testRequest, setTestRequest] = useState(null);
   const [loading, setLoading] = useState(false);
   const [observationsCompleted, setObservationsCompleted] = useState(false);
+  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false);
+  const [selectedTestForEdit, setSelectedTestForEdit] = useState(null);
   
   // Debug: Log the received data
   console.log('ViewSample - location.state:', location.state);
@@ -252,94 +254,97 @@ const ViewSample = () => {
             >
               <i className="fas fa-edit"></i> Edit
             </Button>
-            <Button 
-              variant={observationsCompleted ? "info" : "warning"} 
-              size="sm" 
-              className="px-3 py-2"
-              onClick={() => {
-                const reqId = testRequestId || testRequest?.id;
-                console.log('🔍 testRequestId from URL:', testRequestId);
-                console.log('🔍 testRequest.id:', testRequest?.id);
-                console.log('🔍 testRequest object:', testRequest);
-                console.log('🔍 Final reqId:', reqId);
-                
-                if (!reqId) {
-                  alert('Error: Test Request ID is missing!');
-                  return;
-                }
-                
-                navigate(`/test-observations/${reqId}`, {
-                  state: {
-                    testRequest: { ...testRequest, id: reqId },
-                    testData: testRequest.cubeTests?.[0],
-                    testIndex: 0,
-                    editMode: observationsCompleted
-                  }
-                });
-              }}
-              style={{
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = observationsCompleted 
-                  ? '0 4px 12px rgba(23, 162, 184, 0.5)' 
-                  : '0 4px 12px rgba(255, 193, 7, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              {observationsCompleted ? (
-                <>
+            {observationsCompleted ? (
+              <>
+                <Button 
+                  variant="success" 
+                  size="sm" 
+                  className="px-3 py-2 me-2"
+                  onClick={() => {
+                    const reqId = testRequestId || testRequest?.id;
+                    navigate('/strength-graph', {
+                      state: {
+                        formData: testRequest,
+                        testData: testRequest.cubeTests?.[0],
+                        testIndex: 0,
+                        testRequestId: reqId
+                      }
+                    });
+                  }}
+                  style={{
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <i className="fas fa-chart-bar"></i> View Graph
+                </Button>
+                <Button 
+                  variant="info" 
+                  size="sm" 
+                  className="px-3 py-2"
+                  onClick={() => {
+                    setSelectedTestForEdit({ test: testRequest.cubeTests?.[0], index: 0 });
+                    setShowEditConfirmModal(true);
+                  }}
+                  style={{
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(23, 162, 184, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
                   <i className="fas fa-edit"></i> Edit Observations
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-camera"></i> Capture Images & Observations
-                </>
-              )}
-            </Button>
-            <Button 
-              variant="warning" 
-              size="sm" 
-              className="px-3 py-2"
-              style={{
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <i className="fas fa-chart-bar"></i> Generate Graph
-            </Button>
-            <Button 
-              variant="success" 
-              size="sm" 
-              className="px-3 py-2"
-              style={{
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <i className="fas fa-file-pdf"></i> Preview PDF
-            </Button>
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="warning" 
+                size="sm" 
+                className="px-3 py-2"
+                onClick={() => {
+                  const reqId = testRequestId || testRequest?.id;
+                  if (!reqId) {
+                    alert('Error: Test Request ID is missing! Please navigate to this page from Dashboard or Samples to get a valid test request ID.');
+                    return;
+                  }
+                  navigate(`/test-observations/${reqId}`, {
+                    state: {
+                      testRequest: { ...testRequest, id: parseInt(reqId) },
+                      testData: testRequest.cubeTests?.[0],
+                      testIndex: 0
+                    }
+                  });
+                }}
+                style={{
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <i className="fas fa-plus"></i> Enter Observations
+              </Button>
+            )}
           </div>
         </Card.Header>
         
@@ -429,23 +434,67 @@ const ViewSample = () => {
                         <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{testRequest.ulrNumber || 'None'}</td>
                         <td style={{ padding: '12px 8px', textAlign: 'center', color: '#fff' }}>{testRequest.jobNumber}</td>
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                          <Button 
-                            variant="warning" 
-                            size="sm"
-                            style={{ whiteSpace: 'nowrap', fontSize: '13px' }}
-                            onClick={() => {
-                              const reqId = testRequestId || testRequest?.id;
-                              navigate(`/test-observations/${reqId}`, {
-                                state: {
-                                  testRequest: testRequest,
-                                  testData: test,
-                                  testIndex: index
-                                }
-                              });
-                            }}
-                          >
-                            <i className="fas fa-plus"></i> Enter Observations
-                          </Button>
+                          <div className="d-flex gap-2 justify-content-center">
+                            {test.has_results ? (
+                              <>
+                                {/* View Graph Button */}
+                                <Button 
+                                  variant="success" 
+                                  size="sm"
+                                  style={{ whiteSpace: 'nowrap', fontSize: '13px' }}
+                                  onClick={() => {
+                                    const reqId = testRequestId || testRequest?.id;
+                                    navigate('/strength-graph', {
+                                      state: {
+                                        formData: testRequest,
+                                        testData: test,
+                                        testIndex: index,
+                                        testRequestId: reqId
+                                      }
+                                    });
+                                  }}
+                                >
+                                  <i className="fas fa-chart-bar"></i> View Graph
+                                </Button>
+                                
+                                {/* Edit Observations Button */}
+                                <Button 
+                                  variant="info" 
+                                  size="sm"
+                                  style={{ whiteSpace: 'nowrap', fontSize: '13px' }}
+                                  onClick={() => {
+                                    setSelectedTestForEdit({ test, index });
+                                    setShowEditConfirmModal(true);
+                                  }}
+                                >
+                                  <i className="fas fa-edit"></i> Edit
+                                </Button>
+                              </>
+                            ) : (
+                              /* Enter Observations Button - Only shown when no data */
+                              <Button 
+                                variant="warning" 
+                                size="sm"
+                                style={{ whiteSpace: 'nowrap', fontSize: '13px' }}
+                                onClick={() => {
+                                  const reqId = testRequestId || testRequest?.id;
+                                  if (!reqId) {
+                                    alert('Error: Test Request ID is missing! Please navigate to this page from Dashboard or Samples to get a valid test request ID.');
+                                    return;
+                                  }
+                                  navigate(`/test-observations/${reqId}`, {
+                                    state: {
+                                      testRequest: { ...testRequest, id: parseInt(reqId) },
+                                      testData: test,
+                                      testIndex: index
+                                    }
+                                  });
+                                }}
+                              >
+                                <i className="fas fa-plus"></i> Enter Observations
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -512,6 +561,48 @@ const ViewSample = () => {
           <FontAwesomeIcon icon={faList} size="lg" />
         </Link>
       </div>
+
+      {/* Edit Confirmation Modal */}
+      <Modal show={showEditConfirmModal} onHide={() => setShowEditConfirmModal(false)} centered>
+        <Modal.Header closeButton style={{ backgroundColor: '#ffc107', borderBottom: 'none' }}>
+          <Modal.Title style={{ color: '#000' }}>
+            <i className="fas fa-exclamation-triangle me-2"></i>Confirm Edit
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '30px' }}>
+          <i className="fas fa-edit fa-3x mb-3" style={{ color: '#ffc107' }}></i>
+          <h5>Are you sure you want to edit observations?</h5>
+          <p className="text-muted mt-3">
+            You are about to modify previously saved observation data. This action will allow you to change the test results.
+          </p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#2c2c2c', borderTop: '1px solid #444' }}>
+          <Button variant="outline-light" onClick={() => setShowEditConfirmModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="warning" 
+            onClick={() => {
+              const reqId = testRequestId || testRequest?.id;
+              if (!reqId || !selectedTestForEdit) {
+                alert('Error: Test Request ID is missing!');
+                return;
+              }
+              setShowEditConfirmModal(false);
+              navigate(`/test-observations/${reqId}`, {
+                state: {
+                  testRequest: { ...testRequest, id: parseInt(reqId) },
+                  testData: selectedTestForEdit.test,
+                  testIndex: selectedTestForEdit.index,
+                  editMode: true
+                }
+              });
+            }}
+          >
+            <i className="fas fa-edit me-2"></i>Yes, Edit Observations
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

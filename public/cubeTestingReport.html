@@ -1069,8 +1069,360 @@
 </head>
 
 <body>
+    <script>
+        // IMMEDIATE EXECUTION - Update data BEFORE anything else
+        (function() {
+            console.log('🚨 IMMEDIATE SCRIPT RUNNING!');
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Update customer name IMMEDIATELY
+            const customerName = urlParams.get('customer_name') || '';
+            const siteName = urlParams.get('site_name') || '';
+            const siteAddress = urlParams.get('site_address') || '';
+            
+            console.log('IMMEDIATE UPDATE - Customer:', customerName, 'Site:', siteName);
+            
+            // Wait for DOM then update ALL fields
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🔥 DOM READY - FORCE UPDATING ALL FIELDS NOW!');
+                
+                // Update customer
+                const el = document.getElementById('customer-site-name');
+                if (el) {
+                    el.textContent = `${customerName}, ${siteName} ${siteAddress}`;
+                    console.log('✅ customer-site-name:', el.textContent);
+                }
+                
+                // Update all date fields
+                const dateReport = document.getElementById('date-of-report');
+                if (dateReport) dateReport.textContent = urlParams.get('date_of_report') || new Date().toLocaleDateString('en-GB');
+                
+                const ulrEl = document.getElementById('ulr-number');
+                if (ulrEl) ulrEl.textContent = urlParams.get('ulr_number') || '';
+                
+                const refEl = document.getElementById('reference-number');
+                if (refEl) refEl.textContent = urlParams.get('reference_number') || '';
+                
+                const jobEl = document.getElementById('job-code-number');
+                if (jobEl) jobEl.textContent = urlParams.get('job_code_number') || '';
+                
+                const gradeEl = document.getElementById('grade-of-specimen');
+                if (gradeEl) gradeEl.innerHTML = `<span class="highlight-text">${urlParams.get('grade_of_specimen') || 'M25'}</span>`;
+                
+                const ageEl = document.getElementById('age-of-specimen');
+                if (ageEl) ageEl.innerHTML = `<div class="age-cell-content"><span class="highlight-text">${urlParams.get('age_of_specimen') || '28'}</span><div class="age-divider"></div><span>Days</span></div>`;
+                
+                const locationEl = document.getElementById('location-structure');
+                if (locationEl) locationEl.textContent = urlParams.get('location_structure') || '';
+                
+                const machineEl = document.getElementById('machine-used');
+                if (machineEl) machineEl.textContent = urlParams.get('machine_used') || 'CTM (2000KN)';
+                
+                // Update test sample table
+                for (let i = 1; i <= 3; i++) {
+                    const idEl = document.getElementById(`sample-${i}-id`);
+                    if (idEl) idEl.textContent = urlParams.get(`block_id_${i}`) || '------';
+                    
+                    const lengthEl = document.getElementById(`sample-${i}-length`);
+                    if (lengthEl) lengthEl.textContent = urlParams.get(`length_${i}`) || '';
+                    
+                    const breadthEl = document.getElementById(`sample-${i}-breadth`);
+                    if (breadthEl) breadthEl.textContent = urlParams.get(`breadth_${i}`) || '';
+                    
+                    const heightEl = document.getElementById(`sample-${i}-height`);
+                    if (heightEl) heightEl.textContent = urlParams.get(`height_${i}`) || '';
+                    
+                    const areaEl = document.getElementById(`sample-${i}-area`);
+                    if (areaEl) areaEl.textContent = urlParams.get(`area_${i}`) || '';
+                    
+                    const weightEl = document.getElementById(`sample-${i}-weight`);
+                    if (weightEl) weightEl.textContent = urlParams.get(`weight_${i}`) || '';
+                    
+                    const loadEl = document.getElementById(`sample-${i}-load`);
+                    if (loadEl) loadEl.textContent = urlParams.get(`load_max_${i}`) || '';
+                    
+                    const densityEl = document.getElementById(`result-${i}-density`);
+                    if (densityEl) densityEl.textContent = urlParams.get(`density_${i}`) || '';
+                    
+                    const strengthEl = document.getElementById(`result-${i}-strength`);
+                    if (strengthEl) strengthEl.textContent = urlParams.get(`compressive_strength_${i}`) || '';
+                }
+                
+                // Calculate and update average strength
+                let sumStrength = 0;
+                let countStrength = 0;
+                for (let i = 1; i <= 3; i++) {
+                    const val = parseFloat(urlParams.get(`compressive_strength_${i}`));
+                    if (!isNaN(val) && val > 0) {
+                        sumStrength += val;
+                        countStrength++;
+                    }
+                }
+                const avgStrength = countStrength > 0 ? (sumStrength / countStrength).toFixed(2) : '0.00';
+                const avgEl = document.getElementById('average-strength');
+                if (avgEl) {
+                    avgEl.innerHTML = `<span class="highlight-text">${avgStrength}</span>`;
+                    console.log('✅ Average strength updated:', avgStrength);
+                }
+                
+                // ===== UPDATE STRENGTH GRAPH (PAGE 4) - WITH RETRY =====
+                setTimeout(() => {
+                    const r7 = parseFloat(urlParams.get('required_7')) || 16;
+                    const a7 = parseFloat(urlParams.get('actual_7')) || 20;
+                    const r14 = parseFloat(urlParams.get('required_14')) || 30;
+                    const a14 = parseFloat(urlParams.get('actual_14')) || 41;
+                    const r28 = parseFloat(urlParams.get('required_28')) || 35;
+                    const a28 = parseFloat(urlParams.get('actual_28')) || 45;
+                    
+                    console.log('📊 UPDATING GRAPH NOW! VALUES:', {r7, a7, r14, a14, r28, a28});
+                    
+                    const barsContainer = document.getElementById('bars-container');
+                    console.log('🔍 bars-container element:', barsContainer);
+                    
+                    if (barsContainer) {
+                        const maxHeight = 200;
+                        const maxStrength = 45;
+                        const calcHeight = (val) => (val / maxStrength) * maxHeight;
+                        
+                        console.log('📏 Heights - 7d:', calcHeight(a7), '14d:', calcHeight(a14), '28d:', calcHeight(a28));
+                        
+                        barsContainer.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                <div style="width: 50px; height: ${calcHeight(r7)}px; background-color: #4682B4;"></div>
+                                <div style="width: 50px; height: ${calcHeight(a7)}px; background-color: #FFA500;"></div>
+                            </div>
+                            <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
+                            <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                <span>${r7.toFixed(1)}</span>
+                                <span>${a7.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                <div style="width: 50px; height: ${calcHeight(r14)}px; background-color: #4682B4;"></div>
+                                <div style="width: 50px; height: ${calcHeight(a14)}px; background-color: #FFA500;"></div>
+                            </div>
+                            <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
+                            <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                <span>${r14.toFixed(1)}</span>
+                                <span>${a14.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                <div style="width: 50px; height: ${calcHeight(r28)}px; background-color: #4682B4;"></div>
+                                <div style="width: 50px; height: ${calcHeight(a28)}px; background-color: #FFA500;"></div>
+                            </div>
+                            <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
+                            <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                <span>${r28.toFixed(1)}</span>
+                                <span>${a28.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `;
+                        console.log('✅✅✅ GRAPH BARS UPDATED!');
+                    } else {
+                        console.error('❌ bars-container NOT FOUND!');
+                    }
+                    
+                    // ===== UPDATE 6 OBSERVATIONS (PAGE 4) =====
+                    const obs1 = urlParams.get('obs_strength_duration') || 'Satisfactory';
+                    const obs2 = urlParams.get('obs_test_results') || 'Satisfactory';
+                    const obs3 = urlParams.get('obs_weight') || 'Satisfactory';
+                    const obs4 = urlParams.get('obs_failure_pattern') || 'Satisfactory';
+                    const obs5 = urlParams.get('obs_bonding') || 'Satisfactory';
+                    const obs6 = urlParams.get('obs_strength_criteria') || 'Satisfactory';
+                    
+                    const obsEls = [
+                        document.getElementById('obs-strength-duration'),
+                        document.getElementById('obs-test-results'),
+                        document.getElementById('obs-weight'),
+                        document.getElementById('obs-failure-pattern'),
+                        document.getElementById('obs-bonding'),
+                        document.getElementById('obs-strength-criteria')
+                    ];
+                    const obsVals = [obs1, obs2, obs3, obs4, obs5, obs6];
+                    
+                    obsEls.forEach((el, i) => {
+                        if (el) {
+                            el.textContent = obsVals[i];
+                            console.log(`✅ Observation ${i+1}:`, obsVals[i]);
+                        }
+                    });
+                    
+                    // ===== UPDATE IMAGES (PAGE 3) FROM sessionStorage =====
+                    const testRequestId = urlParams.get('test_request_id') || '248';
+                    const imagesJson = sessionStorage.getItem('testImages_' + testRequestId);
+                    
+                    if (imagesJson) {
+                        try {
+                            const images = JSON.parse(imagesJson);
+                            console.log('📸 Loaded images from sessionStorage:', Object.keys(images));
+                            
+                            // Update cube images
+                            for (let i = 1; i <= 3; i++) {
+                                const frontImg = images[`front_failure_${i}`];
+                                const screenImg = images[`digital_reading_${i}`];
+                                const backImg = images[`back_failure_${i}`];
+                                
+                                const frontEl = document.getElementById(`cube${i}-front-img`);
+                                if (frontEl && frontImg) {
+                                    frontEl.src = frontImg;
+                                    console.log(`✅ Updated cube${i} front image`);
+                                }
+                                
+                                const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                if (screenEl && screenImg) {
+                                    screenEl.src = screenImg;
+                                    console.log(`✅ Updated cube${i} screen image`);
+                                }
+                                
+                                const backEl = document.getElementById(`cube${i}-back-img`);
+                                if (backEl && backImg) {
+                                    backEl.src = backImg;
+                                    console.log(`✅ Updated cube${i} back image`);
+                                }
+                            }
+                            
+                            console.log('✅ Images updated from sessionStorage!');
+                        } catch (e) {
+                            console.error('❌ Error loading images:', e);
+                        }
+                    } else {
+                        console.warn('⚠️ No images found in sessionStorage for test:', testRequestId);
+                    }
+                    
+                    console.log('✅✅✅ ALL DATA UPDATED - TABLES, GRAPH, OBSERVATIONS, IMAGES!');
+                }, 500); // Wait 500ms for pages to be visible
+                
+                // SECOND ATTEMPT - Force update graph again after 1 second
+                setTimeout(() => {
+                    console.log('🔁 SECOND ATTEMPT - Updating graph again...');
+                    const barsContainer2 = document.getElementById('bars-container');
+                    console.log('🔍 Second attempt - bars-container found:', !!barsContainer2);
+                    
+                    if (barsContainer2) {
+                        const r7 = parseFloat(urlParams.get('required_7')) || 16;
+                        const a7 = parseFloat(urlParams.get('actual_7')) || 20;
+                        const r14 = parseFloat(urlParams.get('required_14')) || 30;
+                        const a14 = parseFloat(urlParams.get('actual_14')) || 41;
+                        const r28 = parseFloat(urlParams.get('required_28')) || 35;
+                        const a28 = parseFloat(urlParams.get('actual_28')) || 45;
+                        
+                        const maxHeight = 200;
+                        const maxStrength = 45;
+                        const calcHeight = (val) => (val / maxStrength) * maxHeight;
+                        
+                        barsContainer2.innerHTML = `
+                            <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                    <div style="width: 50px; height: ${calcHeight(r7)}px; background-color: #4682B4;"></div>
+                                    <div style="width: 50px; height: ${calcHeight(a7)}px; background-color: #FFA500;"></div>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
+                                <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                    <span>${r7.toFixed(1)}</span>
+                                    <span>${a7.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                    <div style="width: 50px; height: ${calcHeight(r14)}px; background-color: #4682B4;"></div>
+                                    <div style="width: 50px; height: ${calcHeight(a14)}px; background-color: #FFA500;"></div>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
+                                <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                    <span>${r14.toFixed(1)}</span>
+                                    <span>${a14.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                    <div style="width: 50px; height: ${calcHeight(r28)}px; background-color: #4682B4;"></div>
+                                    <div style="width: 50px; height: ${calcHeight(a28)}px; background-color: #FFA500;"></div>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
+                                <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                    <span>${r28.toFixed(1)}</span>
+                                    <span>${a28.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        `;
+                        console.log('✅✅✅ SECOND ATTEMPT - GRAPH UPDATED!');
+                    } else {
+                        console.error('❌ bars-container STILL NOT FOUND after 1 second!');
+                        console.log('Available element IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+                    }
+                }, 1000);
+                
+                // THIRD ATTEMPT - 2 second delay
+                setTimeout(() => {
+                    console.log('🔁🔁 THIRD ATTEMPT - Final retry...');
+                    const all = document.querySelectorAll('[id]');
+                    console.log('All elements with IDs:', Array.from(all).map(el => el.id));
+                    
+                    const bars3 = document.getElementById('bars-container');
+                    if (bars3) {
+                        console.log('✅ FOUND IT ON THIRD TRY!');
+                        const r7 = parseFloat(urlParams.get('required_7')) || 0;
+                        const a7 = parseFloat(urlParams.get('actual_7')) || 0;
+                        const r14 = parseFloat(urlParams.get('required_14')) || 0;
+                        const a14 = parseFloat(urlParams.get('actual_14')) || 0;
+                        const r28 = parseFloat(urlParams.get('required_28')) || 0;
+                        const a28 = parseFloat(urlParams.get('actual_28')) || 0;
+                        
+                        console.log('FINAL VALUES:', {r7, a7, r14, a14, r28, a28});
+                        
+                        if (r7 > 0 || a7 > 0) {
+                            const calcHeight = (val) => (val / 45) * 200;
+                            bars3.innerHTML = `
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: ${calcHeight(r7)}px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: ${calcHeight(a7)}px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>${r7}</span>
+                                        <span>${a7}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: ${calcHeight(r14)}px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: ${calcHeight(a14)}px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>${r14}</span>
+                                        <span>${a14}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: ${calcHeight(r28)}px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: ${calcHeight(a28)}px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>${r28}</span>
+                                        <span>${a28}</span>
+                                    </div>
+                                </div>
+                            `;
+                            console.log('🎉🎉🎉 GRAPH FINALLY UPDATED ON THIRD TRY!');
+                        }
+                    } else {
+                        console.error('💀 BARS CONTAINER NOT FOUND EVEN ON THIRD TRY!');
+                    }
+                }, 2000);
+            });
+        })();
+    </script>
+    
     <!-- PAGE 1: OBSERVATION REPORT -->
-    <div class="page">
+    <div class="page" id="page1">
         <table class="header-table">
             <tr>
                 <td class="logo-cell"><img src="/logo.png" alt="Vitrag Associates logo"></td>
@@ -1261,7 +1613,7 @@
     </div>
 
     <!-- PAGE 2: TEST REPORT -->
-    <div class="page">
+    <div class="page" id="page2">
         <!-- Header Section - 3 Column Flexbox -->
         <div class="header">
             <!-- Left Column - Company Logo -->
@@ -1487,15 +1839,15 @@
                     Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 2 of 4 <br>
+                    Page 1 of 3 <br>
                     Issue No. 03
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Page 2 - A4 Size -->
-    <div class="page">
+    <!-- PAGE 3 - A4 Size -->
+    <div class="page" id="page3">
         <!-- Header Section - 3 Column Flexbox -->
         <div class="header">
             <!-- Left Column - Company Logo -->
@@ -1532,14 +1884,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><img src="/cube1_front.jpg" alt="Cube 1 Front" class="annexure-image"></td>
-                        <td><img src="/cube1_screen.jpg" alt="Cube 1 Screen" class="annexure-image"></td>
-                        <td><img src="/cube1_back.jpg" alt="Cube 1 Back" class="annexure-image"></td>
+                        <td><img id="cube1-front-img" src="/cube1_front.jpg" alt="Cube 1 Front" class="annexure-image"></td>
+                        <td><img id="cube1-screen-img" src="/cube1_screen.jpg" alt="Cube 1 Screen" class="annexure-image"></td>
+                        <td><img id="cube1-back-img" src="/cube1_back.jpg" alt="Cube 1 Back" class="annexure-image"></td>
                     </tr>
                     <tr>
-                        <td><img src="/cube2_front.jpg" alt="Cube 2 Front" class="annexure-image"></td>
-                        <td><img src="/cube2_screen.jpg" alt="Cube 2 Screen" class="annexure-image"></td>
-                        <td><img src="/cube2_back.jpg" alt="Cube 2 Back" class="annexure-image"></td>
+                        <td><img id="cube2-front-img" src="/cube2_front.jpg" alt="Cube 2 Front" class="annexure-image"></td>
+                        <td><img id="cube2-screen-img" src="/cube2_screen.jpg" alt="Cube 2 Screen" class="annexure-image"></td>
+                        <td><img id="cube2-back-img" src="/cube2_back.jpg" alt="Cube 2 Back" class="annexure-image"></td>
                     </tr>
                     <tr>
                         <td><img src="/cube3_front.jpg" alt="Cube 3 Front" class="annexure-image"></td>
@@ -1589,15 +1941,15 @@
                     Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 3 of 4 <br>
+                    Page 2 of 3 <br>
                     Issue No. 03
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Page 3 - A4 Size -->
-    <div class="page">
+    <!-- PAGE 4 - A4 Size -->
+    <div class="page" id="page4">
         <!-- Header Section - 3 Column Flexbox -->
         <div class="header">
             <!-- Left Column - Company Logo -->
@@ -1629,32 +1981,32 @@
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">1</td>
                         <td style="width: 70%;">Compressive Strength acquired after specified duration</td>
-                        <td style="width: 25%; text-align: center;">--</td>
+                        <td id="obs-strength-duration" style="width: 25%; text-align: center;">--</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">2</td>
                         <td style="width: 70%;">Individual test results within ±15% of average strength</td>
-                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-test-results" style="width: 25%; text-align: center;">Satisfactory</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">3</td>
                         <td style="width: 70%;">Weight of cube</td>
-                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-weight" style="width: 25%; text-align: center;">Satisfactory</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">4</td>
                         <td style="width: 70%;">Type of failure Pattern as per IS 516(Part-1/Sec-1): - 2021 Fig 1</td>
-                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-failure-pattern" style="width: 25%; text-align: center;">Satisfactory</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">5</td>
                         <td style="width: 70%;">Bonding between Aggregates and cement paste.</td>
-                        <td style="width: 25%; text-align: center;">Satisfactory</td>
+                        <td id="obs-bonding" style="width: 25%; text-align: center;">Satisfactory</td>
                     </tr>
                     <tr>
                         <td style="width: 5%; text-align: center; font-weight: bold;">6</td>
                         <td style="width: 70%;">Compressive Strength as per acceptance criteria as C1,16.1 of IS 456:2000 (Fck+4) From Table No.11</td>
-                        <td style="width: 25%; text-align: center;">--</td>
+                        <td id="obs-strength-criteria" style="width: 25%; text-align: center;">--</td>
                     </tr>
                 </tbody>
             </table>
@@ -1812,7 +2164,7 @@
                     Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 4 of 4 <br>
+                    Page 3 of 3 <br>
                     Issue No. 03
                 </div>
             </div>
@@ -1823,9 +2175,55 @@
     <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
 
     <script>
+        // ✅ CONTROL WHICH PAGES TO SHOW BASED ON page_type PARAMETER
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageType = urlParams.get('page_type');
+            
+            console.log('🔍 PDF Page Type:', pageType);
+            
+            // Get all page elements
+            const page1 = document.getElementById('page1');
+            const page2 = document.getElementById('page2');
+            const page3 = document.getElementById('page3');
+            const page4 = document.getElementById('page4');
+            
+            if (pageType === 'observation') {
+                // OBSERVATION SHEET: Show ONLY page 1
+                console.log('✅ Showing ONLY Page 1 (Observation Sheet)');
+                page1.style.display = 'block';
+                page2.style.display = 'none';
+                page3.style.display = 'none';
+                page4.style.display = 'none';
+            } else if (pageType === 'full') {
+                // FULL REPORT: Show ONLY pages 2, 3, 4 (hide page 1)
+                console.log('✅ Showing Pages 2, 3, 4 (Full Report)');
+                page1.style.display = 'none';
+                page2.style.display = 'block';
+                page3.style.display = 'block';
+                page4.style.display = 'block';
+            } else {
+                // DEFAULT: Show all pages
+                console.log('⚠️ No page_type specified, showing all pages');
+                page1.style.display = 'block';
+                page2.style.display = 'block';
+                page3.style.display = 'block';
+                page4.style.display = 'block';
+            }
+        })();
+        
         // Function to populate form data from URL parameters
         function populateFormData() {
+            console.log('========================================');
+            console.log('🚀 POPULATE FORM DATA STARTED!');
+            console.log('========================================');
+            
             const urlParams = new URLSearchParams(window.location.search);
+            
+            console.log('📋 ALL URL PARAMS:');
+            for (let [key, value] of urlParams.entries()) {
+                console.log(`   ${key}:`, value);
+            }
 
             // General Information (Observation Report - Page 1)
             document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.';
@@ -1909,6 +2307,12 @@
             
             // Populate Test Report Customer Information Table AFTER average is calculated
             populateTestReportData(urlParams);
+            
+            // Populate Strength Graph (Page 4)
+            populateStrengthGraph(urlParams);
+            
+            // Populate Observations (Page 4)
+            populateObservations(urlParams);
         }
         
         // Function to auto-resize metadata text based on content length
@@ -1998,54 +2402,305 @@
             }
         }
         
-        // Function to populate Test Report data
+        // Function to populate Test Report data (PAGE 2)
         function populateTestReportData(urlParams) {
-            // Customer Information Table
+            console.log('====================================');
+            console.log('📄 POPULATING PAGE 2 DATA NOW!');
+            console.log('====================================');
+            
+            // Customer Information Table - Page 2
             const customerName = urlParams.get('customer_name') || '';
             const siteName = urlParams.get('site_name') || '';
             const siteAddress = urlParams.get('site_address') || '';
-            const dateOfReport = urlParams.get('date_of_report') || new Date().toISOString().split('T')[0];
+            
+            console.log('📍 Customer Name:', customerName);
+            console.log('📍 Site Name:', siteName);
+            console.log('📍 Site Address:', siteAddress);
+            
+            // Update customer-site-name element
+            const customerSiteEl = document.getElementById('customer-site-name');
+            if (customerSiteEl) {
+                customerSiteEl.textContent = `${customerName}, ${siteName} ${siteAddress}`;
+                console.log('✅ Updated customer-site-name:', customerSiteEl.textContent);
+            }
+            
+            // Update date of report
+            const dateOfReport = urlParams.get('date_of_report') || new Date().toLocaleDateString('en-GB');
+            const dateOfReportEl = document.getElementById('date-of-report');
+            if (dateOfReportEl) {
+                dateOfReportEl.textContent = dateOfReport;
+            }
+            
+            // Update ULR Number
             const ulrNumber = urlParams.get('ulr_number') || '';
+            const ulrEl = document.getElementById('ulr-number');
+            if (ulrEl) {
+                ulrEl.textContent = ulrNumber;
+            }
+            
+            // Update Reference Number
             const referenceNumber = urlParams.get('reference_number') || '';
+            const refEl = document.getElementById('reference-number');
+            if (refEl) {
+                refEl.textContent = referenceNumber;
+            }
+            
+            // Update Job Code Number
             const jobCodeNumber = urlParams.get('job_code_number') || '';
-            const dateOfMaterialReceipt = urlParams.get('date_of_material_receipt') || '';
-            const materialDescription = urlParams.get('material_description') || '';
-            const conditionOfSample = urlParams.get('condition_of_sample') || 'Acceptable';
-            const locationOfTesting = urlParams.get('location_of_testing') || 'Lab';
-            
-            // Update customer information table cells
-            const customerTableRows = document.querySelectorAll('.customer-table tr');
-            if (customerTableRows.length >= 7) {
-                // Customer Name
-                customerTableRows[0].cells[0].textContent = `Customer Name : ${customerName}`;
-                // Site Name & Address
-                customerTableRows[1].cells[0].textContent = `Site Name & Address : ${siteName} ${siteAddress}`;
-                // Date of Report and ULR Number
-                customerTableRows[2].cells[1].textContent = dateOfReport;
-                customerTableRows[2].cells[3].textContent = ulrNumber;
-                // Reference Number and Job Code Number
-                customerTableRows[3].cells[1].textContent = referenceNumber;
-                customerTableRows[3].cells[3].textContent = jobCodeNumber;
-                // Date of Material Receipt and Period of Testing
-                customerTableRows[4].cells[1].textContent = dateOfMaterialReceipt;
-                customerTableRows[4].cells[3].textContent = urlParams.get('date_of_testing') || '';
-                // Material Description and Condition of Sample
-                customerTableRows[5].cells[1].textContent = materialDescription;
-                customerTableRows[5].cells[3].textContent = conditionOfSample;
-                // Location of Testing
-                customerTableRows[6].cells[1].textContent = locationOfTesting;
+            const jobEl = document.getElementById('job-code-number');
+            if (jobEl) {
+                jobEl.textContent = jobCodeNumber;
             }
             
-            // Update Test Results Summary with calculated average
-            const averageElement = document.getElementById('average-compressive-strength');
-            const calculatedAverage = averageElement ? averageElement.textContent : '0.00';
-            
-            // Update the second page average result
-            const averageResultElement = document.getElementById('average-compressive-strength-result');
-            if (averageResultElement) {
-                averageResultElement.textContent = calculatedAverage;
-                console.log('Updated average compressive strength result:', calculatedAverage);
+            // Update Date of Receipt
+            const dateOfReceipt = urlParams.get('date_of_receipt') || '';
+            const receiptEl = document.getElementById('date-of-receipt');
+            if (receiptEl) {
+                receiptEl.textContent = dateOfReceipt;
             }
+            
+            // Update Date of Casting
+            const dateOfCasting = urlParams.get('date_of_casting') || '';
+            const castingEl = document.getElementById('date-of-casting');
+            if (castingEl) {
+                castingEl.innerHTML = `<span class="highlight-text">${dateOfCasting}</span>`;
+            }
+            
+            // Update Date of Testing
+            const dateOfTesting = urlParams.get('date_of_testing') || '';
+            const testingEl = document.getElementById('date-of-testing');
+            if (testingEl) {
+                testingEl.textContent = dateOfTesting;
+            }
+            
+            // Update Location/Structure Type
+            const locationStructure = urlParams.get('location_structure') || '';
+            const locationEl = document.getElementById('location-structure');
+            if (locationEl) {
+                locationEl.textContent = locationStructure;
+            }
+            
+            // Update Age of Specimen
+            const ageOfSpecimen = urlParams.get('age_of_specimen') || '';
+            const ageEl = document.getElementById('age-of-specimen');
+            if (ageEl) {
+                ageEl.innerHTML = `<div class="age-cell-content"><span class="highlight-text">${ageOfSpecimen}</span><div class="age-divider"></div><span>Days</span></div>`;
+            }
+            
+            // Update Grade of Specimen
+            const gradeOfSpecimen = urlParams.get('grade_of_specimen') || '';
+            const gradeEl = document.getElementById('grade-of-specimen');
+            if (gradeEl) {
+                gradeEl.innerHTML = `<span class="highlight-text">${gradeOfSpecimen}</span>`;
+            }
+            
+            // Update Type of Specimen
+            const typeOfSpecimen = urlParams.get('type_of_specimen') || 'Concrete Cube';
+            const typeEl = document.getElementById('type-of-specimen');
+            if (typeEl) {
+                typeEl.textContent = typeOfSpecimen;
+            }
+            
+            // Update Condition of Specimen
+            const conditionOfSpecimen = urlParams.get('condition_of_specimen') || 'Acceptable';
+            const conditionEl = document.getElementById('condition-of-specimen');
+            if (conditionEl) {
+                conditionEl.textContent = conditionOfSpecimen;
+            }
+            
+            // Update Machine Used
+            const machineUsed = urlParams.get('machine_used') || '';
+                const machineEl = document.getElementById('machine-used');
+                if (machineEl) {
+                    const machineText = urlParams.get('machine_used') || 'Fully automatic Digital Compression Testing Machine';
+                    machineEl.textContent = machineText;
+                    console.log('✅ Machine updated to:', machineText);
+                }
+            
+            // Update Capacity Range
+            const capacityRange = urlParams.get('capacity_range') || '2000KN';
+            const capacityEl = document.getElementById('capacity-range');
+            if (capacityEl) {
+                capacityEl.textContent = capacityRange;
+            }
+            
+            // Update Calibration Due Date
+            const calibrationDueDate = urlParams.get('calibration_due_date') || '';
+            const calEl = document.getElementById('calibration-due-date');
+            if (calEl) {
+                calEl.textContent = calibrationDueDate;
+            }
+            
+            // ===== POPULATE TEST SAMPLE TABLES (Page 2) =====
+            // Update "DESCRIPTION OF TEST SAMPLE" table
+            for (let i = 1; i <= 3; i++) {
+                const blockId = urlParams.get(`block_id_${i}`) || '------';
+                const length = urlParams.get(`length_${i}`) || '';
+                const breadth = urlParams.get(`breadth_${i}`) || '';
+                const height = urlParams.get(`height_${i}`) || '';
+                const area = urlParams.get(`area_${i}`) || '';
+                const weight = urlParams.get(`weight_${i}`) || '';
+                const load = urlParams.get(`load_max_${i}`) || '';
+                
+                // Update elements
+                const idEl = document.getElementById(`sample-${i}-id`);
+                if (idEl) idEl.textContent = blockId;
+                
+                const lengthEl = document.getElementById(`sample-${i}-length`);
+                if (lengthEl) lengthEl.textContent = length;
+                
+                const breadthEl = document.getElementById(`sample-${i}-breadth`);
+                if (breadthEl) breadthEl.textContent = breadth;
+                
+                const heightEl = document.getElementById(`sample-${i}-height`);
+                if (heightEl) heightEl.textContent = height;
+                
+                const areaEl = document.getElementById(`sample-${i}-area`);
+                if (areaEl) areaEl.textContent = area;
+                
+                const weightEl = document.getElementById(`sample-${i}-weight`);
+                if (weightEl) weightEl.textContent = weight;
+                
+                const loadEl = document.getElementById(`sample-${i}-load`);
+                if (loadEl) loadEl.textContent = load;
+            }
+            
+            // Update "Test Result for Density and Compressive Strength" table
+            let strengthSum = 0;
+            let count = 0;
+            
+            for (let i = 1; i <= 3; i++) {
+                const resultId = urlParams.get(`block_id_${i}`) || `C${i}`;
+                const density = urlParams.get(`density_${i}`) || '';
+                const strength = urlParams.get(`compressive_strength_${i}`) || '';
+                
+                const idEl = document.getElementById(`result-${i}-id`);
+                if (idEl) idEl.textContent = resultId;
+                
+                const densityEl = document.getElementById(`result-${i}-density`);
+                if (densityEl) densityEl.textContent = density;
+                
+                const strengthEl = document.getElementById(`result-${i}-strength`);
+                if (strengthEl) strengthEl.textContent = strength;
+                
+                // Calculate average
+                const strengthVal = parseFloat(strength);
+                if (!isNaN(strengthVal) && strengthVal > 0) {
+                    strengthSum += strengthVal;
+                    count++;
+                }
+            }
+            
+            // Update average strength
+            const avgStrength = count > 0 ? (strengthSum / count).toFixed(2) : '0.00';
+            const avgEl = document.getElementById('average-strength');
+            if (avgEl) {
+                avgEl.innerHTML = `<span class="highlight-text">${avgStrength}</span>`;
+            }
+            
+            console.log('✅ Page 2 ALL data populated!');
+        }
+
+        // Function to populate Strength Graph (Page 4)
+        function populateStrengthGraph(urlParams) {
+            const required_7 = parseFloat(urlParams.get('required_7')) || 16.5;
+            const actual_7 = parseFloat(urlParams.get('actual_7')) || 18.5;
+            const required_14 = parseFloat(urlParams.get('required_14')) || 22.5;
+            const actual_14 = parseFloat(urlParams.get('actual_14')) || 24.1;
+            const required_28 = parseFloat(urlParams.get('required_28')) || 30.0;
+            const actual_28 = parseFloat(urlParams.get('actual_28')) || 31.5;
+            
+            console.log('📊 Strength Graph Data:', {required_7, actual_7, required_14, actual_14, required_28, actual_28});
+            
+            // Find the bars container
+            const barsContainer = document.getElementById('bars-container');
+            if (!barsContainer) {
+                console.warn('Bars container not found!');
+                return;
+            }
+            
+            // Maximum value for scaling (45 N/mm²)
+            const maxHeight = 200; // pixels
+            const maxStrength = 45; // N/mm²
+            
+            // Calculate bar heights (proportional to strength values)
+            const calculateHeight = (value) => {
+                return (value / maxStrength) * maxHeight;
+            };
+            
+            // Create bars HTML
+            barsContainer.innerHTML = `
+                <!-- 7 Days -->
+                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                        <div style="width: 50px; height: ${calculateHeight(required_7)}px; background-color: #4682B4;"></div>
+                        <div style="width: 50px; height: ${calculateHeight(actual_7)}px; background-color: #FFA500;"></div>
+                    </div>
+                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
+                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                        <span>${required_7.toFixed(1)}</span>
+                        <span>${actual_7.toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <!-- 14 Days -->
+                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                        <div style="width: 50px; height: ${calculateHeight(required_14)}px; background-color: #4682B4;"></div>
+                        <div style="width: 50px; height: ${calculateHeight(actual_14)}px; background-color: #FFA500;"></div>
+                    </div>
+                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
+                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                        <span>${required_14.toFixed(1)}</span>
+                        <span>${actual_14.toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <!-- 28 Days -->
+                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                        <div style="width: 50px; height: ${calculateHeight(required_28)}px; background-color: #4682B4;"></div>
+                        <div style="width: 50px; height: ${calculateHeight(actual_28)}px; background-color: #FFA500;"></div>
+                    </div>
+                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
+                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                        <span>${required_28.toFixed(1)}</span>
+                        <span>${actual_28.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            
+            console.log('✅ Strength graph populated!');
+        }
+        
+        // Function to populate Observations (Page 4) - The 6 observation points
+        function populateObservations(urlParams) {
+            console.log('📝 Populating observations...');
+            
+            // Get observation values from URL params
+            const obs1 = urlParams.get('obs_strength_duration') || '--';
+            const obs2 = urlParams.get('obs_test_results') || 'Satisfactory';
+            const obs3 = urlParams.get('obs_weight') || 'Satisfactory';
+            const obs4 = urlParams.get('obs_failure_pattern') || 'Satisfactory';
+            const obs5 = urlParams.get('obs_bonding') || 'Satisfactory';
+            const obs6 = urlParams.get('obs_strength_criteria') || '--';
+            
+            // Update the observation cells
+            const obs1El = document.getElementById('obs-strength-duration');
+            const obs2El = document.getElementById('obs-test-results');
+            const obs3El = document.getElementById('obs-weight');
+            const obs4El = document.getElementById('obs-failure-pattern');
+            const obs5El = document.getElementById('obs-bonding');
+            const obs6El = document.getElementById('obs-strength-criteria');
+            
+            if (obs1El) obs1El.textContent = obs1;
+            if (obs2El) obs2El.textContent = obs2;
+            if (obs3El) obs3El.textContent = obs3;
+            if (obs4El) obs4El.textContent = obs4;
+            if (obs5El) obs5El.textContent = obs5;
+            if (obs6El) obs6El.textContent = obs6;
+            
+            console.log('✅ Observations populated:', {obs1, obs2, obs3, obs4, obs5, obs6});
         }
 
         // Download PDF function
@@ -2195,11 +2850,11 @@
 
         // Populate form data when page loads
         window.onload = function () {
-            console.log('=== PAGE LOADED ===');
+            console.log('==========================================================');
+            console.log('✅ PDF PAGE LOADED - STARTING DATA POPULATION');
+            console.log('==========================================================');
             populateFormData();
-            console.log('About to render strength graph...');
-            renderStrengthGraph();
-            console.log('Strength graph rendering called.');
+            console.log('✅ populateFormData() completed!');
 
             // Auto-resize text after a short delay to ensure content is loaded
             setTimeout(autoResizeText, 100);

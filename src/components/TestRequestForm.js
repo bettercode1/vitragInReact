@@ -301,10 +301,11 @@ const TestRequestForm = () => {
       
       // Navigate to view sample page after successful submission
       setTimeout(() => {
-        navigate('/view-sample', { 
+        const testReqId = response.id || response.test_request_id;
+        navigate(`/view-sample/${testReqId}`, { 
           state: { 
             formData: formData,
-            testRequestId: response.id || response.test_request_id
+            testRequestId: testReqId
           } 
         });
       }, 3000);
@@ -1010,10 +1011,11 @@ const TestRequestForm = () => {
               size="lg"
               onClick={() => {
                 setShowSuccessModal(false);
-                navigate('/view-sample', { 
+                const testReqId = successData?.testRequestId;
+                navigate(`/view-sample/${testReqId}`, { 
                   state: { 
                     formData: formData,
-                    testRequestId: successData?.testRequestId
+                    testRequestId: testReqId
                   } 
                 });
               }}

@@ -26,7 +26,11 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 # Enable CORS for React frontend
-CORS(app, origins=['http://localhost:3000'])
+CORS(app, 
+     origins=['http://localhost:3000'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization'],
+     supports_credentials=True)
 
 # Set a secret key for session encryption
 app.secret_key = "vitrag_associates_secure_key_2025"
@@ -585,9 +589,14 @@ def get_test_request_details(test_request_id):
                 'failure_type': ct.failure_type,
                 'test_remarks': ct.test_remarks,
                 'observations_json': ct.observations_json,
+                'test_results_json': ct.test_results_json,
                 'tested_by': ct.tested_by,
                 'checked_by': ct.checked_by,
                 'verified_by': ct.verified_by,
+                'sample_description': ct.sample_description,
+                'cube_condition': ct.cube_condition,
+                'curing_condition': ct.curing_condition,
+                'machine_used': ct.machine_used,
             })
 
         # Get testing materials for this test request
@@ -736,6 +745,125 @@ def get_pending_tests():
         return jsonify({'error': 'Failed to fetch pending tests'}), 500
 
 # API endpoint to save test observations and results
+@app.route('/api/test-observations/<int:test_request_id>', methods=['GET', 'OPTIONS'])
+def get_test_observations(test_request_id):
+    """Retrieve saved test observations for editing"""
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        from models import TestRequest, ConcreteTest
+        import json
+        
+        print(f"\n{'='*50}")
+        print(f"📥 GET TEST OBSERVATIONS - Request ID: {test_request_id}")
+        print(f"{'='*50}\n")
+        
+        # Get test request
+        test_request = db.session.get(TestRequest, test_request_id)
+        if not test_request:
+            print(f"❌ Test request {test_request_id} not found")
+            return jsonify({'error': 'Test request not found'}), 404
+        
+        # Get concrete tests with results - try has_results=True first, then all tests
+        concrete_tests = ConcreteTest.query.filter_by(
+            test_request_id=test_request_id,
+            has_results=True
+        ).all()
+        
+        # If no tests with results, return empty structure (new test - no saved data yet)
+        if not concrete_tests:
+            print(f"⚠️ No tests with has_results=True")
+            print(f"✅ Returning empty observation structure for new test")
+            return jsonify({
+                'formData': {
+                    'sampleDescription': 'Concrete Cube Specimen',
+                    'cubeCondition': 'Acceptable',
+                    'curingCondition': '',
+                    'machineUsed': 'CTM (2000KN)',
+                    'testMethod': 'IS 516 (Part1/Sec1):2021',
+                    'averageStrength': '',
+                    'testedBy': '',
+                    'checkedBy': '',
+                    'verifiedBy': 'Mr. P A Sanghave',
+                    'testRemarks': ''
+                },
+                'testRows': [],
+                'capturedImages': {},
+                'isEmpty': True
+            }), 200
+        
+        print(f"✅ Found {len(concrete_tests)} concrete test(s)")
+        
+        # Get the first concrete test (or you can get specific one)
+        concrete_test = concrete_tests[0]
+        
+        print(f"✅ Concrete Test Details:")
+        print(f"   - ID: {concrete_test.id}")
+        print(f"   - Weight: {concrete_test.weight}")
+        print(f"   - Compressive Strength: {concrete_test.compressive_strength}")
+        print(f"   - Has Results: {concrete_test.has_results}")
+        
+        # Build response data
+        saved_data = {
+            'formData': {
+                'sampleDescription': concrete_test.sample_description or 'Concrete Cube Specimen',
+                'cubeCondition': concrete_test.cube_condition or 'Acceptable',
+                'curingCondition': concrete_test.curing_condition or '',
+                'machineUsed': concrete_test.machine_used or 'CTM (2000KN)',
+                'testMethod': concrete_test.test_method or 'IS 516 (Part1/Sec1):2021',
+                'averageStrength': str(concrete_test.average_strength) if concrete_test.average_strength else '',
+                'testedBy': concrete_test.tested_by or '',
+                'checkedBy': concrete_test.checked_by or '',
+                'verifiedBy': concrete_test.verified_by or 'Mr. P A Sanghave',
+                'testRemarks': concrete_test.test_remarks or ''
+            },
+            'testRows': [],
+            'capturedImages': {}
+        }
+        
+        print(f"✅ Built formData")
+        
+        # Build test rows from saved concrete tests
+        print(f"✅ Building test rows from {len(concrete_tests)} concrete tests...")
+        for idx, ct in enumerate(concrete_tests):
+            print(f"   Row {idx + 1}: weight={ct.weight}, strength={ct.compressive_strength}")
+            row = {
+                'id': idx + 1,
+                'cubeId': f'C{idx + 1}',
+                'length': str(ct.dimension_length) if ct.dimension_length else '',
+                'breadth': str(ct.dimension_width) if ct.dimension_width else '',
+                'height': str(ct.dimension_height) if ct.dimension_height else '',
+                'area': str(ct.dimension_length * ct.dimension_width) if (ct.dimension_length and ct.dimension_width) else '',
+                'weight': str(ct.weight) if ct.weight else '',
+                'density': '',  # Calculate if needed
+                'crushingLoad': str(ct.crushing_load) if ct.crushing_load else '',
+                'compressiveStrength': str(ct.compressive_strength) if ct.compressive_strength else '',
+                'failureType': str(ct.failure_type) if ct.failure_type else ''
+            }
+            saved_data['testRows'].append(row)
+        
+        print(f"✅ Built {len(saved_data['testRows'])} test rows")
+        
+        # TODO: Load captured images from database if stored
+        
+        print(f"✅ Returning saved observations data:")
+        print(f"   - formData fields: {len(saved_data['formData'])}")
+        print(f"   - testRows: {len(saved_data['testRows'])}")
+        print(f"{'='*50}\n")
+        
+        return jsonify(saved_data), 200
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        app.logger.error(f"Error retrieving test observations: {error_trace}")
+        print(f"\n❌ ERROR RETRIEVING OBSERVATIONS:")
+        print(error_trace)
+        print(f"{'='*50}\n")
+        return jsonify({'error': f'Failed to retrieve observations: {str(e)}'}), 500
+
 @app.route('/api/test-observations/<int:test_request_id>', methods=['POST'])
 def save_test_observations(test_request_id):
     """Save test observations including cube results"""
@@ -804,6 +932,121 @@ def save_test_observations(test_request_id):
         app.logger.error(f"Error saving test observations: {error_trace}")
         print(f"OBSERVATIONS ERROR: {error_trace}")
         return jsonify({'error': f'Failed to save observations: {str(e)}'}), 500
+
+@app.route('/api/strength-graph/<int:test_request_id>', methods=['POST'])
+def save_strength_graph(test_request_id):
+    """Save strength graph data and observations"""
+    import sys
+    sys.stdout.flush()  # Force output
+    
+    print(f"\n{'='*50}", flush=True)
+    print(f"[STRENGTH GRAPH] ENDPOINT HIT!", flush=True)
+    print(f"   Method: {request.method}", flush=True)
+    print(f"   Test Request ID: {test_request_id}", flush=True)
+    print(f"{'='*50}\n", flush=True)
+    
+    try:
+        from models import TestRequest, ConcreteTest
+        import json
+        
+        # Get JSON data
+        data = request.get_json()
+        if not data:
+            print("❌ ERROR: No JSON data received")
+            return jsonify({'error': 'No data provided'}), 400
+            
+        print(f"📥 Received data: {data}")
+        
+        # Get test request
+        test_request = db.session.get(TestRequest, test_request_id)
+        if not test_request:
+            print(f"❌ ERROR: Test request {test_request_id} not found")
+            return jsonify({'error': 'Test request not found'}), 404
+        
+        print(f"✅ Found test request: {test_request.job_number}")
+        
+        # Get concrete tests
+        concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
+        if not concrete_tests:
+            print(f"⚠️ WARNING: No concrete tests found for request {test_request_id}")
+            print(f"⚠️ Creating a new concrete test record...")
+            
+            # Create a new concrete test record
+            concrete_test = ConcreteTest(
+                test_request_id=test_request_id,
+                has_results=True,
+                test_method='IS 516 (Part1/Sec1):2021'
+            )
+            db.session.add(concrete_test)
+            db.session.flush()  # Get the ID
+            print(f"✅ Created new concrete test with ID: {concrete_test.id}")
+        else:
+            print(f"✅ Found {len(concrete_tests)} concrete test(s)")
+            # We'll save to the first concrete test
+            concrete_test = concrete_tests[0]
+        
+        # Extract strength data - handle empty strings
+        def safe_float(value):
+            if value == '' or value is None:
+                return None
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return None
+        
+        strength_data = {
+            "required_7": safe_float(data.get('required_7')),
+            "actual_7": safe_float(data.get('actual_7')),
+            "required_14": safe_float(data.get('required_14')),
+            "actual_14": safe_float(data.get('actual_14')),
+            "required_28": safe_float(data.get('required_28')),
+            "actual_28": safe_float(data.get('actual_28')),
+            "has_data": True
+        }
+        
+        # Extract observations
+        observations_data = {
+            "obs_strength_duration": str(data.get('obs_strength_duration', '')),
+            "obs_test_results": str(data.get('obs_test_results', '')),
+            "obs_weight": str(data.get('obs_weight', '')),
+            "obs_failure_pattern": str(data.get('obs_failure_pattern', '')),
+            "obs_bonding": str(data.get('obs_bonding', '')),
+            "obs_strength_criteria": str(data.get('obs_strength_criteria', ''))
+        }
+        
+        print(f"📊 Strength data: {strength_data}")
+        print(f"📝 Observations: {observations_data}")
+        
+        # Save as JSON strings
+        concrete_test.test_results_json = json.dumps(strength_data)
+        concrete_test.observations_json = json.dumps(observations_data)
+        
+        # Update test request status
+        test_request.status = 'graph_generated'
+        
+        # Commit to database
+        db.session.commit()
+        
+        print(f"✅ Successfully saved strength graph data for test request {test_request_id}")
+        print(f"{'='*50}\n")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Strength graph data saved successfully',
+            'test_request_id': test_request_id,
+            'strength_data': strength_data,
+            'observations': observations_data
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        error_trace = traceback.format_exc()
+        app.logger.error(f"Error saving strength graph: {error_trace}")
+        print(f"\n❌ STRENGTH GRAPH ERROR:")
+        print(error_trace)
+        print(f"{'='*50}\n")
+        return jsonify({'error': f'Failed to save strength graph: {str(e)}'}), 500
 
 # Error handlers
 @app.errorhandler(404)

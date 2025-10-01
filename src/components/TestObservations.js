@@ -7,10 +7,16 @@ import axios from 'axios';
 const TestObservations = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { testRequestId } = useParams();
+  const { testRequestId: urlTestRequestId } = useParams();
   
   // Get test data from location state or will fetch from API
-  const { testData, testRequest, testIndex } = location.state || {};
+  const { testData, testRequest, testIndex, editMode } = location.state || {};
+  
+  // Get testRequestId from URL params, location state, or testRequest object
+  const testRequestId = urlTestRequestId || testRequest?.id || testData?.test_request_id;
+  
+  console.log('🔍 TestObservations Edit Mode:', editMode);
+  console.log('🔍 TestObservations testData:', testData);
   
   const [apiTestRequest, setApiTestRequest] = useState(null);
   const [apiConcreteTests, setApiConcreteTests] = useState([]);
@@ -41,6 +47,8 @@ const TestObservations = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletePhotoKey, setDeletePhotoKey] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   
   // Fetch test request data if URL has testRequestId
   useEffect(() => {
@@ -63,8 +71,100 @@ const TestObservations = () => {
     fetchTestData();
   }, [testRequestId]);
 
-  // Initialize test rows based on number of cubes
+  // Load saved data when in edit mode
   useEffect(() => {
+    const loadSavedData = async () => {
+      if (editMode && testRequestId) {
+        console.log('📥 Loading saved observations for edit mode...');
+        console.log('📥 Test Request ID:', testRequestId);
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/test-observations/${testRequestId}`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              timeout: 10000
+            }
+          );
+          const savedData = response.data;
+          
+          console.log('✅ Loaded saved observations:', savedData);
+          console.log('✅ Form Data:', savedData.formData);
+          console.log('✅ Test Rows:', savedData.testRows);
+          
+          // Check if data is empty (no saved observations yet)
+          if (savedData.isEmpty) {
+            console.log('ℹ️ No saved observations found - user can enter fresh data');
+            setLoading(false);
+            return;
+          }
+          
+          // Pre-fill form data
+          if (savedData.formData) {
+            setFormData(prev => ({
+              ...prev,
+              sampleDescription: savedData.formData.sampleDescription || 'Concrete Cube Specimen',
+              cubeCondition: savedData.formData.cubeCondition || 'Acceptable',
+              curingCondition: savedData.formData.curingCondition || '',
+              machineUsed: savedData.formData.machineUsed || 'CTM (2000KN)',
+              testMethod: savedData.formData.testMethod || 'IS 516 (Part1/Sec1):2021',
+              averageStrength: savedData.formData.averageStrength || '',
+              testedBy: savedData.formData.testedBy || '',
+              checkedBy: savedData.formData.checkedBy || '',
+              verifiedBy: savedData.formData.verifiedBy || 'Mr. P A Sanghave',
+              testRemarks: savedData.formData.testRemarks || ''
+            }));
+            console.log('✅ Form data pre-filled');
+          }
+          
+          // Pre-fill test rows
+          if (savedData.testRows && savedData.testRows.length > 0) {
+            console.log(`✅ Setting ${savedData.testRows.length} test rows`);
+            setTestRows(savedData.testRows);
+          }
+          
+          // Pre-fill captured images
+          if (savedData.capturedImages) {
+            console.log('✅ Setting captured images');
+            setCapturedImages(savedData.capturedImages);
+          }
+          
+          console.log('✅ All saved data loaded successfully!');
+          
+        } catch (error) {
+          console.error('❌ Error loading saved observations:', error);
+          console.error('❌ Error response:', error.response);
+          console.error('❌ Error message:', error.message);
+          
+          if (error.response) {
+            console.error('❌ Server error:', error.response.data);
+          } else if (error.request) {
+            console.error('❌ No response from server');
+          }
+          
+          // Show error to user
+          setErrorMessage('Could not load saved observations. You can still enter data manually.');
+          setShowErrorModal(true);
+          setTimeout(() => setShowErrorModal(false), 3000);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadSavedData();
+  }, [editMode, testRequestId]);
+
+  // Initialize test rows based on number of cubes (only if NOT in edit mode)
+  useEffect(() => {
+    // Skip initialization if in edit mode - data will be loaded from backend
+    if (editMode) {
+      console.log('⏭️ Skipping test rows initialization - Edit mode active');
+      return;
+    }
+    
     const numCubes = testData?.quantity || apiConcreteTests?.[0]?.quantity || apiConcreteTests?.length || 3;
     const actualCubes = Math.min(Math.max(numCubes, 1), 3);
     
@@ -85,7 +185,7 @@ const TestObservations = () => {
       });
     }
     setTestRows(initialRows);
-  }, [testData, apiConcreteTests]);
+  }, [testData, apiConcreteTests, editMode]);
 
   // DISABLED - Don't load old localStorage data (causes dummy data issue)
   // Load saved data if available
@@ -210,20 +310,18 @@ const TestObservations = () => {
     // Check for validation errors before submitting
     const hasValidationErrors = Object.values(validationErrors).some(error => error !== null);
     if (hasValidationErrors) {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please fix validation errors before submitting.' 
-      });
+      setErrorMessage('Please fix validation errors before submitting.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
     
     // Validate all required fields are filled
     if (!formData.curingCondition || formData.curingCondition.trim() === '') {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please fill in all required fields (Curing Condition is required).' 
-      });
+      setErrorMessage('Please fill in all required fields (Curing Condition is required).');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
@@ -232,18 +330,17 @@ const TestObservations = () => {
     const hasEmptyRows = testRows.some(row => 
       !row.cubeId || 
       !row.weight || 
-      !row.dimensionLength || 
-      !row.dimensionWidth || 
-      !row.dimensionHeight || 
+      !row.length || 
+      !row.breadth || 
+      !row.height || 
       !row.crushingLoad || 
       !row.compressiveStrength
     );
     
     if (hasEmptyRows) {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please fill in all test result fields for all cubes.' 
-      });
+      setErrorMessage('Please fill in all test result fields for all cubes.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
@@ -256,10 +353,9 @@ const TestObservations = () => {
       const backImage = capturedImages[`back_failure_${i + 1}`];
       
       if (!frontImage || !digitalImage || !backImage) {
-        setSubmitMessage({ 
-          type: 'danger', 
-          text: `Please capture all 3 photos (Front, Digital, Back) for Cube/Core Specimen #${i + 1}.` 
-        });
+        setErrorMessage(`Please capture all 3 photos (Front, Digital, Back) for Cube/Core Specimen #${i + 1}.`);
+        setShowErrorModal(true);
+        setTimeout(() => setShowErrorModal(false), 3000);
         setIsSubmitting(false);
         return;
       }
@@ -267,29 +363,26 @@ const TestObservations = () => {
     
     // Validate average strength is calculated
     if (!formData.averageStrength || formData.averageStrength === '') {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please calculate the average strength before saving.' 
-      });
+      setErrorMessage('Please calculate the average strength before saving.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
     
     // Validate Tested By and Checked By are filled
     if (!formData.testedBy || formData.testedBy.trim() === '') {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please enter "Tested By" name.' 
-      });
+      setErrorMessage('Please enter "Tested By" name.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
     
     if (!formData.checkedBy || formData.checkedBy.trim() === '') {
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Please enter "Checked By" name.' 
-      });
+      setErrorMessage('Please enter "Checked By" name.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
       setIsSubmitting(false);
       return;
     }
@@ -316,17 +409,27 @@ const TestObservations = () => {
         },
         testRows: testRows,
         capturedImages: capturedImages,
-        testRequestId: testRequest?.id || testData?.id,
+        testRequestId: testRequestId,
         timestamp: new Date().toISOString()
       };
 
       setSaveProgress(30);
 
+      // Validate we have a test request ID before saving
+      if (!testRequestId) {
+        setErrorMessage('Error: Test Request ID is missing. Cannot save observations.');
+        setShowErrorModal(true);
+        setTimeout(() => setShowErrorModal(false), 3000);
+        setIsSubmitting(false);
+        setSaveProgress(0);
+        clearInterval(interval);
+        return;
+      }
+
       try {
         // Try to save to database first
         setSaveProgress(50);
-        const requestId = testRequestId || testRequest?.id || testData?.id;
-        await axios.post(`http://localhost:5000/api/test-observations/${requestId}`, observationsData);
+        await axios.post(`http://localhost:5000/api/test-observations/${testRequestId}`, observationsData);
         setSaveProgress(80);
         setSubmitMessage({ type: 'success', text: 'Test observations saved successfully!' });
         setShowSuccessModal(true);
@@ -335,7 +438,7 @@ const TestObservations = () => {
         
         // Fallback to localStorage
         setSaveProgress(60);
-        const storageKey = `test_observations_${testRequest?.id || testData?.id || 'temp'}`;
+        const storageKey = `test_observations_${testRequestId || 'temp'}`;
         localStorage.setItem(storageKey, JSON.stringify(observationsData));
         setSaveProgress(80);
         
@@ -348,10 +451,9 @@ const TestObservations = () => {
       
     } catch (error) {
       console.error('Error saving test observations:', error);
-      setSubmitMessage({ 
-        type: 'danger', 
-        text: 'Failed to save test observations. Please try again.' 
-      });
+      setErrorMessage('Failed to save test observations. Please try again.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
     } finally {
       setIsSubmitting(false);
       setSaveProgress(0);
@@ -518,7 +620,9 @@ const TestObservations = () => {
   const currentConcreteTests = apiConcreteTests.length > 0 ? apiConcreteTests : (testData ? [testData] : []);
   
   console.log('🔍 TestObservations Data:');
-  console.log('  testRequestId:', testRequestId);
+  console.log('  urlTestRequestId (from URL):', urlTestRequestId);
+  console.log('  testRequest?.id (from state):', testRequest?.id);
+  console.log('  testRequestId (final):', testRequestId);
   console.log('  apiTestRequest:', apiTestRequest);
   console.log('  apiConcreteTests:', apiConcreteTests);
   console.log('  currentTestRequest:', currentTestRequest);
@@ -1474,6 +1578,7 @@ const TestObservations = () => {
                   formData: testRequest,
                   testData: testData,
                   testIndex: testIndex,
+                  testRequestId: testRequestId,
                   observationsData: {
                     formData: {
                       ...formData,
@@ -1481,7 +1586,7 @@ const TestObservations = () => {
                     },
                     testRows: testRows,
                     capturedImages: capturedImages,
-                    testRequestId: testRequest?.id || testData?.id,
+                    testRequestId: testRequestId,
                     timestamp: new Date().toISOString()
                   }
                 } 
@@ -1489,6 +1594,34 @@ const TestObservations = () => {
             }}
           >
             Continue to Graph <i className="fas fa-arrow-right ms-2"></i>
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Error Modal - Auto-dismisses after 3 seconds */}
+      <Modal 
+        show={showErrorModal} 
+        onHide={() => setShowErrorModal(false)}
+        backdrop="static" 
+        keyboard={false} 
+        centered
+      >
+        <Modal.Header style={{ backgroundColor: '#dc3545', borderBottom: 'none' }}>
+          <Modal.Title style={{ color: '#fff' }}>
+            <i className="fas fa-exclamation-circle me-2"></i>Validation Error
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: '#1a1a1a', color: '#fff', textAlign: 'center', padding: '40px' }}>
+          <i className="fas fa-exclamation-circle fa-4x mb-3" style={{ color: '#dc3545' }}></i>
+          <h4>{errorMessage}</h4>
+          <p className="text-muted mt-3">This message will close automatically in 3 seconds.</p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: '#2c2c2c', borderTop: '1px solid #444' }}>
+          <Button 
+            variant="outline-light" 
+            onClick={() => setShowErrorModal(false)}
+          >
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

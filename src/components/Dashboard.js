@@ -14,7 +14,8 @@ import {
   faFilePdf,
   faEye,
   faEdit,
-  faPaperclip
+  faPaperclip,
+  faHourglass
 } from '@fortawesome/free-solid-svg-icons';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { getDashboardData } from '../apis/dashboard';
@@ -730,24 +731,45 @@ const Dashboard = () => {
                           }}>
                             <Button 
                               size="sm" 
-                              variant={test.status === 'sample-received' ? 'success' : 'warning'}
+                              variant={
+                                test.status === 'test_completed' || test.status === 'completed' ? 'success' :
+                                test.status === 'observations_completed' ? 'info' :
+                                test.status === 'graph_generated' ? 'primary' :
+                                'warning'
+                              }
                               style={{
                                 borderRadius: '20px',
                                 padding: '8px 16px',
                                 fontWeight: '600',
-                                boxShadow: test.status === 'sample-received' ? '0 2px 8px rgba(40, 167, 69, 0.3)' : '0 2px 8px rgba(255, 193, 7, 0.3)',
+                                boxShadow: 
+                                  test.status === 'test_completed' || test.status === 'completed' ? '0 2px 8px rgba(40, 167, 69, 0.3)' :
+                                  test.status === 'observations_completed' ? '0 2px 8px rgba(13, 202, 240, 0.3)' :
+                                  test.status === 'graph_generated' ? '0 2px 8px rgba(13, 110, 253, 0.3)' :
+                                  '0 2px 8px rgba(255, 193, 7, 0.3)',
                                 border: 'none',
-                                backgroundColor: test.status === 'sample-received' ? '#28a745' : '#ffc107',
-                                color: test.status === 'sample-received' ? '#ffffff' : '#000000',
+                                backgroundColor: 
+                                  test.status === 'test_completed' || test.status === 'completed' ? '#28a745' :
+                                  test.status === 'observations_completed' ? '#0dcaf0' :
+                                  test.status === 'graph_generated' ? '#0d6efd' :
+                                  '#ffc107',
+                                color: 
+                                  test.status === 'test_completed' || test.status === 'completed' ? '#ffffff' :
+                                  test.status === 'observations_completed' ? '#000000' :
+                                  test.status === 'graph_generated' ? '#ffffff' :
+                                  '#000000',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px'
                               }}
                             >
-                              {test.status === 'sample-received' ? (
+                              {test.status === 'test_completed' || test.status === 'completed' ? (
+                                <FontAwesomeIcon icon={faCheckCircle} />
+                              ) : test.status === 'observations_completed' ? (
                                 <FontAwesomeIcon icon={faPaperclip} />
-                              ) : (
+                              ) : test.status === 'graph_generated' ? (
                                 <FontAwesomeIcon icon={faChartLine} />
+                              ) : (
+                                <FontAwesomeIcon icon={faHourglass} />
                               )}
                               {test.statusText}
                             </Button>
