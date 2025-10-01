@@ -101,7 +101,7 @@ const Samples = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [applyFilters]);
+  }, [testRequestsData, searchQuery, statusFilter, typeFilter, fromDate, toDate]);
 
   const applyFilters = useCallback(() => {
     let filtered = [...testRequestsData];

@@ -213,7 +213,52 @@ const BulkDensityMoistureForm = () => {
 
   const handleConfirmSubmit = () => {
     console.log('Form submitted:', formData);
-    alert('Test data saved successfully!');
+    
+    // Create URL parameters from form data
+    const params = new URLSearchParams();
+    
+    // General Information
+    params.append('customer_name', formData.customer_name || '');
+    params.append('site_name', formData.site_name || '');
+    params.append('site_address', formData.site_address || '');
+    params.append('reference_number', formData.reference_number || '');
+    params.append('capacity_range', formData.capacity_range || '');
+    params.append('test_method', formData.test_method || '');
+    
+    // Test Results
+    for (let i = 1; i <= 3; i++) {
+      params.append(`weight_before_${i}`, formData[`weight_before_${i}`] || '0.000');
+      params.append(`weight_after_${i}`, formData[`weight_after_${i}`] || '0.000');
+      params.append(`length_${i}`, formData[`length_${i}`] || '0.0');
+      params.append(`breadth_${i}`, formData[`breadth_${i}`] || '0.0');
+      params.append(`depth_${i}`, formData[`depth_${i}`] || '0.0');
+      params.append(`volume_${i}`, formData[`volume_${i}`] || '0.000000');
+      params.append(`bulk_density_${i}`, formData[`bulk_density_${i}`] || '0.0');
+      params.append(`moisture_content_${i}`, formData[`moisture_content_${i}`] || '0.00');
+    }
+    
+    // Customer Information
+    params.append('customer_name', formData.customer_name || '');
+    params.append('site_address', formData.site_address || '');
+    params.append('ulr_number', formData.ulr_number || '');
+    params.append('job_code_number', formData.job_code_number || '');
+    params.append('reference_number', formData.reference_number || '');
+    params.append('date_of_report', new Date().toISOString().split('T')[0]);
+    params.append('date_of_material_receipt', formData.date_of_material_receipt || '');
+    params.append('material_description', formData.material_description || '');
+    params.append('condition_of_sample', formData.condition_of_sample || 'Acceptable');
+    params.append('location_of_testing', formData.location_of_testing || 'Laboratory');
+    
+    // Authorization
+    params.append('reviewed_by', formData.reviewed_by || 'Lalita S. Dussa - Quality Manager');
+    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
+    
+    // Build the report URL
+    const reportUrl = `/BulkDensity/BulkDensityReport.html?${params.toString()}`;
+    
+    // Open the report in a new tab
+    window.open(reportUrl, '_blank');
+    
     setShowPreview(false);
   };
 

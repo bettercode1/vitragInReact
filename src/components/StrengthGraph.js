@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Container, Card, Button, Table, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Button, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faDownload, faChartLine, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import GraphService from '../services/graphService';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const StrengthGraph = () => {
   const navigate = useNavigate();
@@ -29,10 +28,6 @@ const StrengthGraph = () => {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
-  const [generatedGraph, setGeneratedGraph] = useState(null);
-  const [serviceStatus, setServiceStatus] = useState({ available: false });
-  const canvasRef = useRef(null);
-  const chartRef = useRef(null);
 
   // Load data from observations when component mounts
   useEffect(() => {
@@ -53,21 +48,7 @@ const StrengthGraph = () => {
     }
   }, [observationsData]);
 
-  // Check graph service status on component mount
-  useEffect(() => {
-    const checkService = async () => {
-      const status = await GraphService.checkServiceStatus();
-      setServiceStatus(status);
-    };
-    checkService();
-  }, []);
 
-  // Redraw graph when data changes
-  useEffect(() => {
-    if (showGraph) {
-      drawGraph();
-    }
-  }, [strengthData, showGraph]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,99 +58,6 @@ const StrengthGraph = () => {
     }));
   };
 
-  // Generate graph using Matplotlib service
-  const generateMatplotlibGraph = async () => {
-    if (!serviceStatus.available) {
-      alert('Graph generation service is not available. Please ensure the Python backend is running.');
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      // Prepare test data for graph generation
-      const testResults = [];
-      
-      // Add test results from observations if available
-      if (observationsData?.testRows && observationsData.testRows.length > 0) {
-        observationsData.testRows.forEach((row, index) => {
-          testResults.push({
-            cube_number: index + 1,
-            compressive_strength: parseFloat(row.compressiveStrength) || 0,
-            age_in_days: 28, // Default age
-            casting_date: row.castingDate || 'N/A',
-            testing_date: row.testingDate || 'N/A'
-          });
-        });
-      } else {
-        // Use manual input data
-        if (strengthData.actual_7) {
-          testResults.push({
-            cube_number: 1,
-            compressive_strength: parseFloat(strengthData.actual_7) || 0,
-            age_in_days: 7,
-            casting_date: 'N/A',
-            testing_date: 'N/A'
-          });
-        }
-        if (strengthData.actual_14) {
-          testResults.push({
-            cube_number: 2,
-            compressive_strength: parseFloat(strengthData.actual_14) || 0,
-            age_in_days: 14,
-            casting_date: 'N/A',
-            testing_date: 'N/A'
-          });
-        }
-        if (strengthData.actual_28) {
-          testResults.push({
-            cube_number: 3,
-            compressive_strength: parseFloat(strengthData.actual_28) || 0,
-            age_in_days: 28,
-            casting_date: 'N/A',
-            testing_date: 'N/A'
-          });
-        }
-      }
-
-      if (testResults.length === 0) {
-        alert('Please enter test results before generating the graph.');
-        return;
-      }
-
-      // Prepare test data
-      const testData = {
-        job_number: formData?.jobNumber || testData?.job_number || 'N/A',
-        customer_name: formData?.customerName || testData?.customer_name || 'N/A',
-        site_name: formData?.siteName || testData?.site_name || 'N/A',
-        grade: 'M25', // Default grade
-        casting_date: 'N/A',
-        test_results: testResults
-      };
-
-      // Generate graph
-      const result = await GraphService.generateStrengthGraph(testData);
-      
-      if (result.success) {
-        setGeneratedGraph(result);
-        setShowGraph(true);
-      } else {
-        alert(`Graph generation failed: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Error generating graph:', error);
-      alert('Error generating graph. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // Download generated graph
-  const downloadGraph = () => {
-    if (generatedGraph) {
-      const filename = `strength_graph_${generatedGraph.jobNumber || 'test'}.png`;
-      GraphService.downloadGraph(generatedGraph.imageData, filename);
-    }
-  };
 
   const fillRandomData = () => {
     setStrengthData({
@@ -195,52 +83,11 @@ const StrengthGraph = () => {
     setTimeout(() => {
       setIsGenerating(false);
       setShowGraph(true);
-      drawGraph();
-    }, 2000);
+    }, 1000);
   };
 
-  const drawGraph = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Set background
-    ctx.fillStyle = '#1C2333';
-    ctx.fillRect(0, 0, width, height);
-
-    // Graph dimensions
-    const margin = 60;
-    const graphWidth = width - 2 * margin;
-    const graphHeight = height - 2 * margin;
-
-    // Draw axes
-    ctx.strokeStyle = '#FFA500';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(margin, margin);
-    ctx.lineTo(margin, height - margin);
-    ctx.lineTo(width - margin, height - margin);
-    ctx.stroke();
-
-    // Draw grid lines
-    ctx.strokeStyle = '#6c757d';
-    ctx.lineWidth = 1;
-    for (let i = 1; i <= 4; i++) {
-      const y = margin + (graphHeight / 5) * i;
-      ctx.beginPath();
-      ctx.moveTo(margin, y);
-      ctx.lineTo(width - margin, y);
-      ctx.stroke();
-    }
-
-    // Prepare data
-    const days = [7, 14, 28];
+  // Prepare chart data
+  const getChartData = () => {
     const requiredValues = [
       parseFloat(strengthData.required_7) || 0,
       parseFloat(strengthData.required_14) || 0,
@@ -252,64 +99,42 @@ const StrengthGraph = () => {
       parseFloat(strengthData.actual_28) || 0
     ];
 
-    const maxValue = Math.max(...requiredValues, ...actualValues, 30);
-    const scale = graphHeight / maxValue;
-
-    // Draw required strength bars
-    ctx.fillStyle = '#FFA500';
-    for (let i = 0; i < days.length; i++) {
-      const barWidth = graphWidth / 6;
-      const x = margin + (i * graphWidth / 3) + barWidth * 0.1;
-      const barHeight = requiredValues[i] * scale;
-      const y = height - margin - barHeight;
-      
-      ctx.fillRect(x, y, barWidth * 0.8, barHeight);
-    }
-
-    // Draw actual strength bars
-    ctx.fillStyle = '#28a745';
-    for (let i = 0; i < days.length; i++) {
-      const barWidth = graphWidth / 6;
-      const x = margin + (i * graphWidth / 3) + barWidth * 0.1 + barWidth * 0.9;
-      const barHeight = actualValues[i] * scale;
-      const y = height - margin - barHeight;
-      
-      ctx.fillRect(x, y, barWidth * 0.8, barHeight);
-    }
-
-    // Draw labels
-    ctx.fillStyle = '#FFA500';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
+    const maxValue = Math.max(...requiredValues, ...actualValues, 35);
+    const yMax = Math.ceil(maxValue / 5) * 5;
     
-    // X-axis labels
-    for (let i = 0; i < days.length; i++) {
-      const x = margin + (i * graphWidth / 3) + graphWidth / 6;
-      ctx.fillText(`${days[i]} Days`, x, height - margin + 20);
-    }
+    return {
+      data: [
+        { name: '7 days strength', required: requiredValues[0], actual: actualValues[0] },
+        { name: '14 days strength', required: requiredValues[1], actual: actualValues[1] },
+        { name: '28 days strength', required: requiredValues[2], actual: actualValues[2] }
+      ],
+      yMax
+    };
+  };
 
-    // Y-axis labels
-    ctx.textAlign = 'right';
-    for (let i = 0; i <= 5; i++) {
-      const value = (maxValue / 5) * i;
-      const y = height - margin - (graphHeight / 5) * i;
-      ctx.fillText(value.toFixed(1), margin - 10, y + 5);
-    }
-
-    // Draw legend
-    ctx.fillStyle = '#FFA500';
-    ctx.font = 'bold 16px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('Required Strength', margin + graphWidth + 20, margin + 30);
+  // Direct PDF view with strength data
+  const handleViewPDF = () => {
+    const params = new URLSearchParams();
     
-    ctx.fillStyle = '#28a745';
-    ctx.fillText('Actual Strength', margin + graphWidth + 20, margin + 60);
-
-    // Draw title
-    ctx.fillStyle = '#FFA500';
-    ctx.font = 'bold 18px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Concrete Cube Strength Comparison', width / 2, 30);
+    console.log('=== VIEW PDF CLICKED ===');
+    console.log('Current strengthData:', strengthData);
+    
+    // Add strength data - FORCE VALUES
+    params.append('required_7', strengthData.required_7 || '15.0');
+    params.append('actual_7', strengthData.actual_7 || '20.0');
+    params.append('required_14', strengthData.required_14 || '25.0');
+    params.append('actual_14', strengthData.actual_14 || '30.0');
+    params.append('required_28', strengthData.required_28 || '35.0');
+    params.append('actual_28', strengthData.actual_28 || '45.0');
+    
+    // Add basic info
+    params.append('customer_name', formData?.customerName || testData?.customerName || 'Customer');
+    params.append('site_name', formData?.siteName || testData?.siteName || 'Site');
+    
+    const reportUrl = `/cubeTestingReport.html?${params.toString()}`;
+    console.log('Opening PDF with URL:', reportUrl);
+    alert(`Opening PDF with data:\n7 days: ${strengthData.required_7}/${strengthData.actual_7}\n14 days: ${strengthData.required_14}/${strengthData.actual_14}\n28 days: ${strengthData.required_28}/${strengthData.actual_28}`);
+    window.open(reportUrl, '_blank');
   };
 
   return (
@@ -370,6 +195,33 @@ const StrengthGraph = () => {
           background-color: #1C2333 !important;
           color: white !important;
         }
+        
+        /* Bar Chart CSS */
+        .chart-bar-required {
+          width: 80px;
+          background-color: #4682B4;
+        }
+        
+        .chart-bar-actual {
+          width: 80px;
+          background-color: #FFA500;
+        }
+        
+        .chart-bar-group {
+          display: flex;
+          gap: 5px;
+          align-items: flex-end;
+        }
+        
+        .chart-data-labels {
+          margin-top: 3px;
+          font-size: 9pt;
+          text-align: center;
+          color: #000;
+          display: flex;
+          flex-direction: column;
+          line-height: 1.4;
+        }
       `}</style>
 
       <Card className="shadow mb-4">
@@ -384,7 +236,7 @@ const StrengthGraph = () => {
             <div>
               <h3 className="mb-0">Concrete Cube Strength Graph</h3>
               <div className="mt-2">
-                <span className="badge" style={{ backgroundColor: '#FFA500' }} className="fs-6 p-2">
+                <span className="badge fs-6 p-2" style={{ backgroundColor: '#FFA500' }}>
                   Reference Number: {testData?.referenceNumber || 'N/A'}
                 </span>
               </div>
@@ -394,7 +246,7 @@ const StrengthGraph = () => {
             <Button variant="light" size="sm" onClick={() => navigate('/test-observations', { state: location.state })}>
               <i className="fas fa-arrow-left"></i> Back
             </Button>
-            <Button variant="warning" size="sm">
+            <Button variant="warning" size="sm" onClick={handleViewPDF}>
               <i className="fas fa-file-pdf"></i> View PDF
             </Button>
             <Button variant="success" size="sm">
@@ -642,26 +494,7 @@ const StrengthGraph = () => {
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-chart-bar me-2"></i> Generate Graph (Chart.js)
-                      </>
-                    )}
-                  </Button>
-                  <Button 
-                    variant="warning" 
-                    size="lg"
-                    onClick={generateMatplotlibGraph}
-                    disabled={isGenerating || !serviceStatus.available}
-                    title={!serviceStatus.available ? 'Graph service not available' : 'Generate professional graph with Matplotlib'}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <FontAwesomeIcon icon={faSpinner} className="me-2" spin />
-                        Generating Matplotlib Graph...
-                      </>
-                    ) : (
-                      <>
-                        <FontAwesomeIcon icon={faChartLine} className="me-2" />
-                        Generate Matplotlib Graph
+                        <i className="fas fa-chart-bar me-2"></i> Generate Graph
                       </>
                     )}
                   </Button>
@@ -699,48 +532,92 @@ const StrengthGraph = () => {
           {showGraph && !isGenerating && (
             <Row className="mt-4">
               <Col xs={12}>
-                <h4 className="text-center mb-3 text-white">Fig. 2 – Graphical Representation of Comparison of Compressive Strengths</h4>
                 <Card>
                   <Card.Body className="text-center">
                     <div className="d-flex justify-content-center">
-                      <div className="p-4 rounded" style={{ backgroundColor: '#1C2333', minHeight: '500px', width: '100%', maxWidth: '800px' }}>
-                        <canvas
-                          ref={canvasRef}
-                          width={700}
-                          height={400}
-                          style={{ maxWidth: '100%', height: 'auto' }}
-                        />
-                        
-                        {/* Data Summary */}
-                        <div className="mt-4 text-white">
-                          <h5 className="text-warning mb-3">Data Summary</h5>
-                          <div className="row">
-                            <div className="col-md-4">
-                              <div className="card bg-dark border-warning">
-                                <div className="card-body p-3">
-                                  <h6 className="card-title text-warning">7 Days</h6>
-                                  <p className="card-text mb-1">Actual: {strengthData.actual_7 || 'N/A'} N/mm²</p>
-                                  <p className="card-text mb-0">Required: {strengthData.required_7 || 'N/A'} N/mm²</p>
+                      <div className="p-4 rounded" style={{ backgroundColor: 'white', width: '100%', maxWidth: '900px', border: '3px solid #000' }}>
+                        {/* Pure CSS Bar Chart */}
+                        <div style={{ fontFamily: "'Times New Roman', Times, serif", padding: '20px', position: 'relative' }}>
+                          {/* Graph Title */}
+                          <div style={{ textAlign: 'center', fontSize: '11pt', color: '#666', marginBottom: '30px' }}>
+                            Graphical presentation of compressive strength
+                          </div>
+                          
+                          {/* Chart Container */}
+                          <div style={{ position: 'relative', height: '450px', marginTop: '20px', marginLeft: '50px' }}>
+                            {/* Y-axis */}
+                            <div style={{ position: 'absolute', left: '60px', top: '0', height: '350px', borderLeft: '2px solid #000' }}>
+                              {/* Y-axis labels - 0 to 45 with gap of 5 */}
+                              {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45].reverse().map((value, i) => {
+                                return (
+                                  <div key={i} style={{ position: 'absolute', right: '10px', top: `${(i / 9) * 100}%`, transform: 'translateY(-50%)', fontSize: '9pt', color: '#000' }}>
+                                    {value}
+                                  </div>
+                                );
+                              })}
+                              {/* Grid lines */}
+                              {[...Array(9)].map((_, i) => (
+                                <div key={i} style={{ position: 'absolute', left: '0', top: `${((i + 1) / 9) * 100}%`, width: '680px', borderTop: '1px solid rgba(0,0,0,0.15)' }} />
+                              ))}
+                            </div>
+                            
+                            {/* X-axis line */}
+                            <div style={{ position: 'absolute', left: '60px', top: '350px', width: '680px', borderBottom: '2px solid #000' }}></div>
+                            
+                            {/* Bars - positioned absolutely at bottom of Y-axis */}
+                            <div style={{ position: 'absolute', left: '70px', bottom: '35px', width: '680px', height: '350px', display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end' }}>
+                              {getChartData().data.map((item, index) => {
+                                const requiredHeight = (item.required / 45) * 350;
+                                const actualHeight = (item.actual / 45) * 350;
+                                
+                                return (
+                                  <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '200px', position: 'relative' }}>
+                                    {/* Bar group */}
+                                    <div className="chart-bar-group">
+                                      {/* Required bar */}
+                                      <div className="chart-bar-required" style={{ height: `${requiredHeight}px` }} />
+                                      {/* Actual bar */}
+                                      <div className="chart-bar-actual" style={{ height: `${actualHeight}px` }} />
                                 </div>
+                                    {/* X-axis label */}
+                                    <div style={{ marginTop: '8px', fontSize: '9pt', textAlign: 'center', color: '#000' }}>{item.name}</div>
+                                    {/* Data values below x-axis label - vertical layout */}
+                                    <div className="chart-data-labels">
+                                      <span>{item.required.toFixed(1)}</span>
+                                      <span>{item.actual.toFixed(2)}</span>
                               </div>
                             </div>
-                            <div className="col-md-4">
-                              <div className="card bg-dark border-warning">
-                                <div className="card-body p-3">
-                                  <h6 className="card-title text-warning">14 Days</h6>
-                                  <p className="card-text mb-1">Actual: {strengthData.actual_14 || 'N/A'} N/mm²</p>
-                                  <p className="card-text mb-0">Required: {strengthData.required_14 || 'N/A'} N/mm²</p>
+                                );
+                              })}
                                 </div>
                               </div>
+                          
+                          {/* Y-axis label */}
+                          <div style={{ position: 'absolute', left: '40px', top: '45%', transform: 'rotate(-90deg)', transformOrigin: 'center', fontSize: '10pt', color: '#000' }}>
+                            Strength N/mm2
+                          </div>
+                          
+                          {/* Legend - Left Side (Lower Position) */}
+                          <div style={{ position: 'absolute', left: '0px', top: '480px', fontSize: '9pt', lineHeight: '1.8', color: '#000' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                              <div style={{ width: '20px', height: '15px', backgroundColor: '#4682B4' }} />
+                              <span style={{ color: '#000' }}>Required strength N/mm2</span>
                             </div>
-                            <div className="col-md-4">
-                              <div className="card bg-dark border-warning">
-                                <div className="card-body p-3">
-                                  <h6 className="card-title text-warning">28 Days</h6>
-                                  <p className="card-text mb-1">Actual: {strengthData.actual_28 || 'N/A'} N/mm²</p>
-                                  <p className="card-text mb-0">Required: {strengthData.required_28 || 'N/A'} N/mm²</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '20px', height: '15px', backgroundColor: '#FFA500' }} />
+                              <span style={{ color: '#000' }}>Actual Cube strength</span>
                                 </div>
                               </div>
+                          
+                          {/* Legend - Bottom Center */}
+                          <div style={{ marginTop: '-15px', marginLeft: '60px', display: 'flex', justifyContent: 'center', gap: '80px', fontSize: '9pt', color: '#000' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '25px', height: '12px', backgroundColor: '#4682B4' }} />
+                              <span style={{ color: '#000' }}>Required strength N/mm2</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '25px', height: '12px', backgroundColor: '#FFA500' }} />
+                              <span style={{ color: '#000' }}>Actual Cube strength</span>
                             </div>
                           </div>
                         </div>
@@ -749,68 +626,6 @@ const StrengthGraph = () => {
                   </Card.Body>
                 </Card>
                 
-                {/* Matplotlib Graph Display */}
-                {generatedGraph && (
-                  <Row className="mt-4">
-                    <Col xs={12}>
-                      <h4 className="text-center mb-3 text-white">
-                        <FontAwesomeIcon icon={faChartLine} className="me-2" />
-                        Professional Matplotlib Graph
-                      </h4>
-                      <Card>
-                        <Card.Body className="text-center">
-                          <div className="d-flex justify-content-center mb-3">
-                            <img 
-                              src={GraphService.getImageDataUrl(generatedGraph.imageData)}
-                              alt="Matplotlib Strength Graph"
-                              style={{ 
-                                maxWidth: '100%', 
-                                height: 'auto',
-                                border: '2px solid #FFA500',
-                                borderRadius: '8px'
-                              }}
-                            />
-                          </div>
-                          <div className="d-flex justify-content-center gap-2">
-                            <Button 
-                              variant="warning" 
-                              onClick={downloadGraph}
-                            >
-                              <FontAwesomeIcon icon={faDownload} className="me-2" />
-                              Download Graph
-                            </Button>
-                            <Button 
-                              variant="outline-light" 
-                              onClick={() => setGeneratedGraph(null)}
-                            >
-                              Close Graph
-                            </Button>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  </Row>
-                )}
-                
-                {/* Service Status Alert */}
-                {!serviceStatus.available && (
-                  <Row className="mt-3">
-                    <Col xs={12}>
-                      <Alert variant="warning">
-                        <Alert.Heading>Graph Service Not Available</Alert.Heading>
-                        <p>
-                          The Matplotlib graph generation service is not running. 
-                          To use professional graph generation:
-                        </p>
-                        <ol>
-                          <li>Install Python dependencies: <code>pip install matplotlib numpy</code></li>
-                          <li>Start the graph server: <code>node graph-server.js</code></li>
-                          <li>Refresh this page</li>
-                        </ol>
-                      </Alert>
-                    </Col>
-                  </Row>
-                )}
                 
                 {/* Complete Test Button */}
                 <div className="text-center mt-4">
@@ -826,7 +641,26 @@ const StrengthGraph = () => {
                         variant="success" 
                         size="lg" 
                         className="px-5 py-3"
-                        onClick={() => navigate('/test-report-preview', { state: { testData: { ...formData, ...testData, strengthData } } })}
+                        onClick={() => navigate('/test-report-preview', { 
+                          state: { 
+                            testData: { 
+                              ...formData, 
+                              ...testData, 
+                              ...observationsData,
+                              strengthData,
+                              // Ensure rows data is passed
+                              rows: observationsData?.testRows || observationsData?.rows || [],
+                              testRemarks: observationsData?.formData?.testRemarks || observationsData?.testRemarks || '',
+                              testedBy: observationsData?.formData?.testedBy || observationsData?.testedBy || '',
+                              checkedBy: observationsData?.formData?.checkedBy || observationsData?.checkedBy || '',
+                              verifiedBy: observationsData?.formData?.verifiedBy || observationsData?.verifiedBy || '',
+                              sampleDescription: observationsData?.formData?.sampleDescription || observationsData?.sampleDescription || '',
+                              cubeCondition: observationsData?.formData?.cubeCondition || observationsData?.cubeCondition || '',
+                              curingCondition: observationsData?.formData?.curingCondition || observationsData?.curingCondition || '',
+                              machineUsed: observationsData?.formData?.machineUsed || observationsData?.machineUsed || '',
+                            } 
+                          } 
+                        })}
                       >
                         <i className="fas fa-clipboard-check me-2"></i> Complete Test
                       </Button>

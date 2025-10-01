@@ -80,7 +80,7 @@
 
         .logo-left {
             height: 90px;
-            width: 130px;
+            width: 160px;
             border: 2px solid #666666;
             display: flex;
             align-items: center;
@@ -307,13 +307,13 @@
 
 
         .bar-chart {
-            width: 75%;
+            width: 85%;
             justify-self: center;
-            height: 300px;
+            height: 350px;
             border: 1px solid #000000;
-            margin: 20px 0;
+            margin: 20px auto;
             position: relative;
-            background-color: #fafafa;
+            background-color: #ffffff;
         }
 
         .chart-caption {
@@ -423,7 +423,7 @@
             border-collapse: collapse;
             margin-bottom: 8px;
             margin-top: -15px;
-            font-size: 12px;
+            font-size: 14px;
             font-family: 'Times New Roman';
         }
 
@@ -686,11 +686,11 @@
         /* Terms & Conditions */
         .terms-section {
             margin: 20px 0;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .terms-section h4 {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             margin-bottom: 8px;
         }
@@ -909,6 +909,136 @@
             }
         }
 
+        /* Header Table for Page 1 */
+        .header-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+        .header-table td{ border:1px solid #111; vertical-align:middle; padding:12px 16px; }
+        .logo-cell{ width:3.9cm; text-align:center; }
+        .logo-cell img{ width:3.26cm; height:auto; object-fit:contain; }
+        .title-cell{ text-align:center; font-weight:700; }
+        .title-cell h1{ margin:0; font-size:33px; font-weight:700; color:var(--title-color); text-transform:uppercase; line-height:1.0; }
+        .title-cell .subtitle{ display:block; margin-top:8px; font-size:19px; font-weight:700; color:var(--subtitle-color); line-height:1.0; white-space:nowrap; }
+
+        /* Metadata table */
+        .meta-wrap{ margin-top:10px; }
+        table.meta{ width:100%; border-collapse:collapse; table-layout:fixed; }
+        table.meta td{ border:1px solid #111; padding:4px 6px; height:0cm; vertical-align:middle; font-size:14.67px; overflow:hidden; white-space:normal; word-wrap:break-word; width:25% !important; }
+        table.meta tr{ height:0cm; }
+        
+        /* Auto-sizing classes for different text lengths */
+        table.meta td.auto-fit{ font-size:clamp(8px, 2.5vw, 14.67px); }
+        table.meta td.auto-resize{ font-size:14.67px; white-space:normal; overflow:hidden; text-overflow:unset; }
+        table.meta td.auto-resize.long-text{ font-size:12px; }
+        table.meta td.auto-resize.very-long-text{ font-size:10px; }
+        table.meta td.auto-resize.extra-long-text{ font-size:8px; }
+        
+        /* Remarks section styling */
+        #remarks-content {
+            font-size: 16px;
+            line-height: 1.4;
+            min-height: 30mm;
+            max-height: 30mm;
+            height: 30mm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Remarks section auto-sizing */
+        #remarks-content.auto-resize{ font-size:16px; white-space:normal; overflow:hidden; text-overflow:unset; }
+        #remarks-content.auto-resize.long-text{ font-size:14px; }
+        #remarks-content.auto-resize.very-long-text{ font-size:12px; }
+        #remarks-content.auto-resize.extra-long-text{ font-size:10px; }
+        
+        /* Make all columns same width - this rule should be last */
+        table.meta td{ width:25% !important; }
+
+        /* Test result */
+        .test-result{ margin-top:12px; padding:0; }
+        .test-result h3{ margin:0; text-align:center; font-size:16px; font-weight:700; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; border:none; }
+
+        table.results{ width:100%; border-collapse:collapse; margin-top:4px; font-size:16px; table-layout:auto; }
+        table.results th, table.results td{ border:1px solid #111; text-align:center; vertical-align:middle; }
+        table.results thead th{ background:#f7f2f2; font-weight:700; font-size:16px; padding:2px; height:0.6cm; }
+        table.results tbody tr{ height:0.8cm; }
+        table.results th:first-child, table.results td:first-child{ width:1%; }
+        table.results th:nth-child(2), table.results td:nth-child(2){ width:12%; }
+        table.results th:nth-child(3), table.results td:nth-child(3){ width:55%; }
+        table.results th:nth-child(4), table.results td:nth-child(4){ width:8%; }
+        table.results th:nth-child(5), table.results td:nth-child(5){ width:12%; }
+        table.results th:nth-child(6), table.results td:nth-child(6){ width:22%; }
+        /* Base styles for table.results tfoot - only for Average row */
+        table.results tfoot tr:first-child td{ border:1px solid #111; height:1cm; font-weight:700; text-align:right; padding-right:6px; }
+        table.results tfoot tr:first-child td:last-child{ text-align:center; }
+        /* Remarks row */
+        table.results tfoot tr:nth-child(2) td{ border:1px solid #111; height:25mm; vertical-align:top; text-align:left; padding:6px; font-weight:normal; }
+        
+        /* Old signature table CSS removed - now using dedicated signature table CSS below */
+
+        /* ========================================
+           SIGNATURE TABLE - Page 1 (Dedicated CSS - SEPARATE TABLE)
+           ======================================== */
+        
+        /* Signature table base styles */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            table-layout: fixed;
+        }
+        
+        /* Signature table rows - Base styles with LEFT alignment */
+        .signature-table td {
+            height: 0.7cm;
+            border: 1px solid #111;
+            text-align: left !important;
+            padding-left: 8px !important;
+            font-weight: 700 !important;
+            font-size: 16px !important;
+        }
+        
+        /* Column widths for signature table */
+        .signature-table td:first-child {
+            width: 35% !important;
+        }
+        
+        .signature-table td:nth-child(2) {
+            width: 30% !important;
+        }
+        
+        .signature-table td:last-child {
+            width: 35% !important;
+        }
+        
+        /* Signature title cells */
+        .signature-cell-title {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+        
+        /* Signature name spans */
+        .signature-name {
+            font-weight: 700;
+        }
+        
+        /* Signature date cells */
+        .signature-cell-date {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+        
+        /* Signature sign cells */
+        .signature-cell-sign {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+
         /* Download Button */
         .download-btn {
             position: fixed;
@@ -939,6 +1069,198 @@
 </head>
 
 <body>
+    <!-- PAGE 1: OBSERVATION REPORT -->
+    <div class="page">
+        <table class="header-table">
+            <tr>
+                <td class="logo-cell"><img src="/logo.png" alt="Vitrag Associates logo"></td>
+                <td class="title-cell">
+                    <h1>VITRAG ASSOCIATES LLP</h1>
+                    <div class="subtitle">(CONSTRUCTION MATERIAL TESTING LABORATORY)</div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="meta-wrap">
+            <table class="meta">
+                <tr>
+                    <td colspan="4" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21.33px; height:1cm;">COMPRESSIVE STRENGTH OF CONCRETE CUBE</td>
+                </tr>
+                <tr>
+                    <td><strong>Sample Test Code Number</strong></td>
+                    <td id="sample-test-code">AAC-2024-001</td>
+                    <td><strong>Sample Description</strong></td>
+                    <td id="sample-description">AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.</td>
+                </tr>
+                <tr>
+                    <td><strong>Quantity of Cubes</strong></td>
+                    <td id="quantity-of-blocks"></td>
+                    <td><strong>Date of Receipt</strong></td>
+                    <td id="date-of-receipt"></td>
+                </tr>
+                <tr>
+                    <td><strong>Date of Casting</strong></td>
+                    <td id="date-of-casting"></td>
+                    <td><strong>Date of Testing</strong></td>
+                    <td id="date-of-testing"></td>
+                </tr>
+                <tr>
+                    <td><strong>Grade of Cube</strong></td>
+                    <td id="grade-of-blocks">Grade 3.5</td>
+                    <td><strong>Cube Condition</strong></td>
+                    <td id="blocks-condition"></td>
+                </tr>
+                <tr>
+                    <td><strong>Age of Cube</strong></td>
+                    <td id="manufacture-of-blocks">ABC Construction Ltd.</td>
+                    <td><strong>Curing Condition</strong></td>
+                    <td id="curing-condition"></td>
+                </tr>
+                <tr>
+                    <td><strong>Machine used for Testing</strong></td>
+                    <td id="machine-used-for-testing"></td>
+                    <td><strong>Test Method</strong></td>
+                    <td id="test-method">IS 6441 (Part-5): 1972</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="test-result">
+            <table class="results">
+                <thead>
+                    <tr>
+                        <td colspan="9" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21px; height:0.6cm;">TEST RESULT</td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">Sr. No.</th>
+                        <th rowspan="2">Cube ID</th>
+                        <th>Size</th>
+                        <th>Area</th>
+                        <th>Cube Weight</th>
+                        <th>Maximum Load</th>
+                        <th>Density</th>
+                        <th>Compressive Strength</th>
+                        <th>Type of Failure</th>
+                    </tr>
+                    <tr>
+                        <th>mm</th>
+                        <th>mm²</th>
+                        <th>Kg</th>
+                        <th>KN</th>
+                        <th>kg/m³</th>
+                        <th>Mpa</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-1"></td>
+                        <td id="size-1"></td>
+                        <td id="area-1"></td>
+                        <td id="weight-1"></td>
+                        <td id="load-max-1"></td>
+                        <td id="density-1"></td>
+                        <td id="compressive-strength-1"></td>
+                        <td id="failure-type-1"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-2"></td>
+                        <td id="size-2"></td>
+                        <td id="area-2"></td>
+                        <td id="weight-2"></td>
+                        <td id="load-max-2"></td>
+                        <td id="density-2"></td>
+                        <td id="compressive-strength-2"></td>
+                        <td id="failure-type-2"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-3"></td>
+                        <td id="size-3"></td>
+                        <td id="area-3"></td>
+                        <td id="weight-3"></td>
+                        <td id="load-max-3"></td>
+                        <td id="density-3"></td>
+                        <td id="compressive-strength-3"></td>
+                        <td id="failure-type-3"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-4"></td>
+                        <td id="size-4"></td>
+                        <td id="area-4"></td>
+                        <td id="weight-4"></td>
+                        <td id="load-max-4"></td>
+                        <td id="density-4"></td>
+                        <td id="compressive-strength-4"></td>
+                        <td id="failure-type-4"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-5"></td>
+                        <td id="size-5"></td>
+                        <td id="area-5"></td>
+                        <td id="weight-5"></td>
+                        <td id="load-max-5"></td>
+                        <td id="density-5"></td>
+                        <td id="compressive-strength-5"></td>
+                        <td id="failure-type-5"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td id="block-id-6"></td>
+                        <td id="size-6"></td>
+                        <td id="area-6"></td>
+                        <td id="weight-6"></td>
+                        <td id="load-max-6"></td>
+                        <td id="density-6"></td>
+                        <td id="compressive-strength-6"></td>
+                        <td id="failure-type-6"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">Average</td>
+                        <td id="avg-load-max" colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="9" style="text-align:left; padding:12px; height:40mm; vertical-align:top; font-size:16px;">
+                            <div style="font-weight:bold; margin-bottom:8px; font-size:18px;">Remarks:</div>
+                            <div id="remarks-content" style="font-size:16px; min-height: 30mm; max-height: 30mm; overflow: hidden;"></div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- SEPARATE SIGNATURE TABLE -->
+            <table class="signature-table">
+                <tbody>
+                    <!-- Signature Table - Title Row -->
+                    <tr class="signature-row-title">
+                        <td class="signature-cell-title">Tested By: <span id="tested-by-name" class="signature-name">John Doe</span></td>
+                        <td class="signature-cell-title">Checked By: <span id="checked-by-name" class="signature-name">Jane Smith</span></td>
+                        <td class="signature-cell-title">Verified By: <span id="verified-by-name" class="signature-name">Prakarsh A Sangave</span></td>
+                    </tr>
+                    <!-- Signature Table - Date Row -->
+                    <tr class="signature-row-date">
+                        <td class="signature-cell-date">Date: <span id="tested-by-date"></span></td>
+                        <td class="signature-cell-date">Date: <span id="checked-by-date"></span></td>
+                        <td class="signature-cell-date">Date: <span id="verified-by-date"></span></td>
+                    </tr>
+                    <!-- Signature Table - Sign Row -->
+                    <tr class="signature-row-sign">
+                        <td class="signature-cell-sign">Sign:</td>
+                        <td class="signature-cell-sign">Sign:</td>
+                        <td class="signature-cell-sign">Sign:</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 2: TEST REPORT -->
     <div class="page">
         <!-- Header Section - 3 Column Flexbox -->
         <div class="header">
@@ -1162,10 +1484,10 @@
                 </div>
                 <div class="footer-center">
                     34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
-                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                    Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 1 of 1 <br>
+                    Page 2 of 4 <br>
                     Issue No. 03
                 </div>
             </div>
@@ -1264,10 +1586,10 @@
                 </div>
                 <div class="footer-center">
                     34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
-                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                    Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 2 of 3 <br>
+                    Page 3 of 4 <br>
                     Issue No. 03
                 </div>
             </div>
@@ -1339,11 +1661,114 @@
 
             <!-- Bar Chart Section -->
             <div class="chart-container">
-                
-                <div class="bar-chart">
-                    <!-- Blank space for graph - will be replaced with generated chart -->
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-style: italic;">
-                        Graph will be placed here
+                <div class="bar-chart" id="strength-graph-container">
+                    <!-- Pure CSS/JS Strength Graph -->
+                    <div style="font-family: 'Times New Roman', Times, serif; padding: 10px; position: relative; width: 100%; height: 100%;">
+                        <!-- Graph Title -->
+                        <div style="text-align: center; font-size: 10pt; color: #666; margin-bottom: 10px;">
+                            Graphical presentation of compressive strength
+                        </div>
+                        <!-- DEBUG INFO -->
+                        <div id="debug-info" style="font-size: 8pt; color: red; text-align: center; margin-bottom: 5px;"></div>
+                        
+                        <!-- Chart Container -->
+                        <div style="position: relative; width: calc(100% - 30px); height: 230px; margin: 0 auto;">
+                            <!-- Y-axis -->
+                            <div style="position: absolute; left: 50px; top: 10px; height: 200px; border-left: 2px solid #000;">
+                                <!-- Y-axis labels - 0 to 45 with gap of 5 -->
+                                <div style="position: absolute; right: 10px; top: 0%; transform: translateY(-50%); font-size: 7pt; color: #000;">45</div>
+                                <div style="position: absolute; right: 10px; top: 11.1%; transform: translateY(-50%); font-size: 7pt; color: #000;">40</div>
+                                <div style="position: absolute; right: 10px; top: 22.2%; transform: translateY(-50%); font-size: 7pt; color: #000;">35</div>
+                                <div style="position: absolute; right: 10px; top: 33.3%; transform: translateY(-50%); font-size: 7pt; color: #000;">30</div>
+                                <div style="position: absolute; right: 10px; top: 44.4%; transform: translateY(-50%); font-size: 7pt; color: #000;">25</div>
+                                <div style="position: absolute; right: 10px; top: 55.6%; transform: translateY(-50%); font-size: 7pt; color: #000;">20</div>
+                                <div style="position: absolute; right: 10px; top: 66.7%; transform: translateY(-50%); font-size: 7pt; color: #000;">15</div>
+                                <div style="position: absolute; right: 10px; top: 77.8%; transform: translateY(-50%); font-size: 7pt; color: #000;">10</div>
+                                <div style="position: absolute; right: 10px; top: 88.9%; transform: translateY(-50%); font-size: 7pt; color: #000;">5</div>
+                                <div style="position: absolute; right: 10px; top: 100%; transform: translateY(-50%); font-size: 7pt; color: #000;">0</div>
+                                
+                                <!-- Grid lines -->
+                                <div style="position: absolute; left: 0; top: 11.1%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 22.2%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 33.3%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 44.4%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 55.6%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 66.7%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 77.8%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 88.9%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                                <div style="position: absolute; left: 0; top: 100%; width: calc(100% - 60px); max-width: 600px; border-top: 1px solid rgba(0,0,0,0.15);"></div>
+                            </div>
+                            
+                            <!-- X-axis line -->
+                            <div style="position: absolute; left: 50px; top: 210px; width: calc(100% - 60px); max-width: 600px; border-bottom: 2px solid #000;"></div>
+                            
+                            <!-- Bars Container -->
+                            <div id="bars-container" style="position: absolute; left: 55px; bottom: -25px; width: calc(100% - 65px); max-width: 595px; height: 200px; display: flex; justify-content: space-around; align-items: flex-end;">
+                                <!-- Test bars - will be replaced by JavaScript -->
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: 73px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: 82px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">7 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>16.5</span>
+                                        <span>18.50</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: 100px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: 107px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">14 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>22.5</span>
+                                        <span>24.10</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                                    <div style="display: flex; gap: 4px; align-items: flex-end;">
+                                        <div style="width: 50px; height: 133px; background-color: #4682B4;"></div>
+                                        <div style="width: 50px; height: 140px; background-color: #FFA500;"></div>
+                                    </div>
+                                    <div style="margin-top: 6px; font-size: 7pt; color: #000;">28 days strength</div>
+                                    <div style="margin-top: 3px; font-size: 7pt; color: #000; display: flex; flex-direction: column; line-height: 1.3;">
+                                        <span>30.0</span>
+                                        <span>31.50</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Y-axis label -->
+                        <div style="position: absolute; left: 8px; top: 52%; transform: rotate(-90deg); transform-origin: center; font-size: 8pt; color: #000;">
+                            Strength N/mm2
+                        </div>
+                        
+                        <!-- Legend - Left Side -->
+                        <div style="position: absolute; left: 5px; bottom: 55px; font-size: 7pt; line-height: 1.5; color: #000;">
+                            <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+                                <div style="width: 15px; height: 10px; background-color: #4682B4;"></div>
+                                <span>Required strength N/mm2</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <div style="width: 15px; height: 10px; background-color: #FFA500;"></div>
+                                <span>Actual Cube strength</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Legend - Bottom Center -->
+                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; font-size: 7pt; color: #000;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <div style="width: 18px; height: 10px; background-color: #4682B4;"></div>
+                                <span>Required strength N/mm2</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <div style="width: 18px; height: 10px; background-color: #FFA500;"></div>
+                                <span>Actual Cube strength</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-caption">Fig. 2 - Graphical Representation of Comparison of Compressive Strengths</div>
@@ -1377,17 +1802,17 @@
 
         <!-- Footer for Page 3 -->
         <div class="footer">
-            <div class="footer-divider">X———X———X——— END OF ANNEXURE 1 ——X———X———X</div>
+            <div class="footer-divider">X———X———X——— END OF OBSERVATIONS ——X———X———X</div>
             <div class="footer-content">
                 <div class="footer-left">
                     VA/TR/I-3/24
                 </div>
                 <div class="footer-center">
                     34A/26 West, New Pachha Peth, Ashok Chowk, Solapur <br>
-                    Mob. No.-9552529235, 8830263787, E-mail: vitragassociates3@gmail.com
+                    Mob. No.-9552529235, 9145153496, E-mail: vitragassociates3@gmail.com
                 </div>
                 <div class="footer-right">
-                    Page 3 of 3 <br>
+                    Page 4 of 4 <br>
                     Issue No. 03
                 </div>
             </div>
@@ -1402,70 +1827,225 @@
         function populateFormData() {
             const urlParams = new URLSearchParams(window.location.search);
 
-            // Customer Information
-            document.getElementById('customer-site-name').textContent = urlParams.get('customer_site_name') || 'Lords Developers Shivyogi Residency, shelgi solapur';
-            document.getElementById('date-of-report').textContent = urlParams.get('date_of_report') || '23/09/2025';
-            document.getElementById('reference-number').textContent = urlParams.get('reference_number') || 'VA/CC/2025/AUG-74';
-            document.getElementById('ulr-number').textContent = urlParams.get('ulr_number') || 'TC-1575625000001840F';
-            document.getElementById('location-structure').textContent = urlParams.get('location_structure') || 'column';
-            document.getElementById('job-code-number').textContent = urlParams.get('job_code_number') || 'T-2501690';
-            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '25/08/2025';
-            // Update highlighted fields with span wrapper
-            const ageElement = document.getElementById('age-of-specimen');
-            const ageValue = urlParams.get('age_of_specimen') || '28 Days';
-            const ageNumber = ageValue.split(' ')[0] || '28';
-            ageElement.innerHTML = `
-        <div class="age-cell-content">
-          <span class="highlight-text">${ageNumber}</span>
-          <div class="age-divider"></div>
-          <span>Days</span>
-        </div>
-      `;
-
-            const castingElement = document.getElementById('date-of-casting');
-            castingElement.innerHTML = `<span class="highlight-text">${urlParams.get('date_of_casting') || '11/08/2025'}</span>`;
-
-            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '08/09/2025';
-            document.getElementById('type-of-specimen').textContent = urlParams.get('type_of_specimen') || 'Concrete Cube';
-
-            const gradeElement = document.getElementById('grade-of-specimen');
-            gradeElement.innerHTML = `<span class="highlight-text">${urlParams.get('grade_of_specimen') || 'M-25'}</span>`;
-            document.getElementById('condition-of-specimen').textContent = urlParams.get('condition_of_specimen') || 'Acceptable';
-            document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '28.0';
-            document.getElementById('machine-used').textContent = urlParams.get('machine_used') || 'Fully automatic Digital Compression Testing Machine';
-            document.getElementById('capacity-range').textContent = urlParams.get('capacity_range') || '2000KN';
-            document.getElementById('calibration-due-date').textContent = urlParams.get('calibration_due_date') || '01/07/2026';
-            document.getElementById('test-method').textContent = urlParams.get('test_method') || 'IS 516 (Part1/Sec1):2021';
-            document.getElementById('environmental-condition').textContent = urlParams.get('environmental_condition') || 'Not Applicable';
-
-            // Sample Description
-            for (let i = 1; i <= 3; i++) {
-                document.getElementById(`sample-${i}-id`).textContent = urlParams.get(`sample_${i}_id`) || `C${i}`;
-                document.getElementById(`sample-${i}-dimensions`).textContent = urlParams.get(`sample_${i}_dimensions`) || '150×150×150';
-                document.getElementById(`sample-${i}-area`).textContent = urlParams.get(`sample_${i}_area`) || '22500';
-                document.getElementById(`sample-${i}-weight`).textContent = urlParams.get(`sample_${i}_weight`) || (8.4 + i * 0.1).toFixed(1);
-                document.getElementById(`sample-${i}-load`).textContent = urlParams.get(`sample_${i}_load`) || (558 + i * 15).toFixed(2);
+            // General Information (Observation Report - Page 1)
+            document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.';
+            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '';
+            document.getElementById('sample-test-code').textContent = urlParams.get('sample_test_code') || 'AAC-2024-001';
+            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '';
+            document.getElementById('quantity-of-blocks').textContent = urlParams.get('quantity_of_blocks') || '';
+            document.getElementById('date-of-casting').textContent = urlParams.get('date_of_casting') || '';
+            document.getElementById('grade-of-blocks').textContent = urlParams.get('grade_of_blocks') || 'Grade 3.5';
+            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || '';
+            document.getElementById('manufacture-of-blocks').textContent = urlParams.get('manufacture_of_blocks') || 'ABC Construction Ltd.';
+            document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '';
+            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || '';
+            document.getElementById('environmental-conditions').textContent = urlParams.get('environmental_conditions') || 'Laboratory Conditions';
+            
+            // Test Results (Observation Report - Page 1)
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`block-id-${i}`).textContent = urlParams.get(`block_id_${i}`) || '';
+                // Combine length x breadth x height for size
+                const length = urlParams.get(`length_${i}`) || '';
+                const breadth = urlParams.get(`breadth_${i}`) || '';
+                const height = urlParams.get(`height_${i}`) || '';
+                const size = length && breadth && height ? `${length} x ${breadth} x ${height}` : '';
+                document.getElementById(`size-${i}`).textContent = size;
+                document.getElementById(`area-${i}`).textContent = urlParams.get(`area_${i}`) || '';
+                document.getElementById(`weight-${i}`).textContent = urlParams.get(`weight_${i}`) || '';
+                document.getElementById(`load-max-${i}`).textContent = urlParams.get(`load_max_${i}`) || '';
+                document.getElementById(`density-${i}`).textContent = urlParams.get(`density_${i}`) || '';
+                document.getElementById(`compressive-strength-${i}`).textContent = urlParams.get(`compressive_strength_${i}`) || '';
+                document.getElementById(`failure-type-${i}`).textContent = urlParams.get(`failure_type_${i}`) || '';
             }
-
-            // Test Results
-            for (let i = 1; i <= 3; i++) {
-                document.getElementById(`result-${i}-id`).textContent = urlParams.get(`sample_${i}_id`) || `C${i}`;
-                document.getElementById(`result-${i}-density`).textContent = urlParams.get(`result_${i}_density`) || (2390 + i * 10);
-                document.getElementById(`result-${i}-strength`).textContent = urlParams.get(`result_${i}_strength`) || (24.8 + i * 0.7).toFixed(1);
-            }
-
-            // Calculate and display average compressive strength
-            let sum = 0;
+            
+            // Calculate and display averages
+            let compressiveSum = 0;
+            let densitySum = 0;
+            let loadSum = 0;
             let count = 0;
-            for (let i = 1; i <= 3; i++) {
-                const value = parseFloat(urlParams.get(`result_${i}_strength`)) || (24.8 + i * 0.7);
-                if (value > 0) {
-                    sum += value;
+            
+            for (let i = 1; i <= 6; i++) {
+                const compressiveValue = parseFloat(urlParams.get(`compressive_strength_${i}`)) || 0;
+                const densityValue = parseFloat(urlParams.get(`density_${i}`)) || 0;
+                const loadValue = parseFloat(urlParams.get(`load_max_${i}`)) || 0;
+                
+                if (compressiveValue > 0) {
+                    compressiveSum += compressiveValue;
+                    densitySum += densityValue;
+                    loadSum += loadValue;
                     count++;
                 }
             }
-            const average = count > 0 ? (sum / count).toFixed(2) : '25.47';
-            document.getElementById('average-strength').innerHTML = `<span class="highlight-text">${average}</span>`;
+            
+            const compressiveAverage = count > 0 ? (compressiveSum / count).toFixed(2) : '0.00';
+            const densityAverage = count > 0 ? (densitySum / count).toFixed(2) : '0.00';
+            const loadAverage = count > 0 ? (loadSum / count).toFixed(2) : '0.00';
+            
+            document.getElementById('avg-compressive-strength').textContent = compressiveAverage;
+            document.getElementById('avg-density').textContent = densityAverage;
+            document.getElementById('avg-load-max').textContent = loadAverage;
+            document.getElementById('average-compressive-strength-result').textContent = compressiveAverage;
+            console.log('Calculated averages - Compressive:', compressiveAverage, 'Density:', densityAverage, 'Load:', loadAverage, 'from', count, 'values');
+            
+            // Verification (Observation Report - Page 1)
+            document.getElementById('tested-by-name').textContent = urlParams.get('tested_by_name') || 'John Doe';
+            document.getElementById('tested-by-date').textContent = urlParams.get('tested_by_date') || '';
+            document.getElementById('checked-by-name').textContent = urlParams.get('checked_by_name') || 'Jane Smith';
+            document.getElementById('checked-by-date').textContent = urlParams.get('checked_by_date') || '';
+            document.getElementById('verified-by-name').textContent = urlParams.get('verified_by_name') || 'Prakarsh A Sangave';
+            document.getElementById('verified-by-date').textContent = urlParams.get('verified_by_date') || '';
+            
+            // Remarks (Observation Report - Page 1)
+            document.getElementById('remarks-content').textContent = urlParams.get('remarks') || '';
+            
+            // Current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB');
+            
+            // Auto-resize text for metadata fields
+            autoResizeMetadataText();
+            
+            // Set up observer for dynamic content changes
+            setupContentObserver();
+            
+            // Populate Test Report Customer Information Table AFTER average is calculated
+            populateTestReportData(urlParams);
+        }
+        
+        // Function to auto-resize metadata text based on content length
+        function autoResizeMetadataText() {
+            // Get all metadata table cells (excluding header cells)
+            const metaTable = document.querySelector('table.meta');
+            if (!metaTable) return;
+            
+            const allCells = metaTable.querySelectorAll('td');
+            
+            allCells.forEach(cell => {
+                const text = cell.textContent.trim();
+                const length = text.length;
+                
+                // Remove existing auto-sizing classes
+                cell.classList.remove('long-text', 'very-long-text', 'extra-long-text', 'auto-fit', 'auto-resize');
+                
+                // Apply appropriate class based on text length
+                if (length > 100) {
+                    cell.classList.add('auto-resize', 'extra-long-text');
+                } else if (length > 70) {
+                    cell.classList.add('auto-resize', 'very-long-text');
+                } else if (length > 50) {
+                    cell.classList.add('auto-resize', 'long-text');
+                } else {
+                    // Keep default size for short text but still apply auto-resize
+                    cell.classList.add('auto-resize');
+                }
+            });
+            
+            // Handle Remarks section auto-sizing
+            const remarksContent = document.getElementById('remarks-content');
+            if (remarksContent) {
+                const remarksText = remarksContent.textContent.trim();
+                const remarksLength = remarksText.length;
+                
+                // Remove existing auto-sizing classes
+                remarksContent.classList.remove('long-text', 'very-long-text', 'extra-long-text', 'auto-resize');
+                
+                // Apply appropriate class based on text length
+                if (remarksLength > 200) {
+                    remarksContent.classList.add('auto-resize', 'extra-long-text');
+                } else if (remarksLength > 150) {
+                    remarksContent.classList.add('auto-resize', 'very-long-text');
+                } else if (remarksLength > 100) {
+                    remarksContent.classList.add('auto-resize', 'long-text');
+                } else {
+                    // Keep default size for short text but still apply auto-resize
+                    remarksContent.classList.add('auto-resize');
+                }
+            }
+        }
+        
+        // Function to set up observer for dynamic content changes
+        function setupContentObserver() {
+            const metaTable = document.querySelector('table.meta');
+            if (!metaTable) return;
+            
+            // Create a MutationObserver to watch for content changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        // Re-run auto-sizing when content changes
+                        setTimeout(autoResizeMetadataText, 100);
+                    }
+                });
+            });
+            
+            // Observe all cells in the metadata table
+            const allCells = metaTable.querySelectorAll('td');
+            allCells.forEach(cell => {
+                observer.observe(cell, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true
+                });
+            });
+            
+            // Also observe the remarks content
+            const remarksContent = document.getElementById('remarks-content');
+            if (remarksContent) {
+                observer.observe(remarksContent, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true
+                });
+            }
+        }
+        
+        // Function to populate Test Report data
+        function populateTestReportData(urlParams) {
+            // Customer Information Table
+            const customerName = urlParams.get('customer_name') || '';
+            const siteName = urlParams.get('site_name') || '';
+            const siteAddress = urlParams.get('site_address') || '';
+            const dateOfReport = urlParams.get('date_of_report') || new Date().toISOString().split('T')[0];
+            const ulrNumber = urlParams.get('ulr_number') || '';
+            const referenceNumber = urlParams.get('reference_number') || '';
+            const jobCodeNumber = urlParams.get('job_code_number') || '';
+            const dateOfMaterialReceipt = urlParams.get('date_of_material_receipt') || '';
+            const materialDescription = urlParams.get('material_description') || '';
+            const conditionOfSample = urlParams.get('condition_of_sample') || 'Acceptable';
+            const locationOfTesting = urlParams.get('location_of_testing') || 'Lab';
+            
+            // Update customer information table cells
+            const customerTableRows = document.querySelectorAll('.customer-table tr');
+            if (customerTableRows.length >= 7) {
+                // Customer Name
+                customerTableRows[0].cells[0].textContent = `Customer Name : ${customerName}`;
+                // Site Name & Address
+                customerTableRows[1].cells[0].textContent = `Site Name & Address : ${siteName} ${siteAddress}`;
+                // Date of Report and ULR Number
+                customerTableRows[2].cells[1].textContent = dateOfReport;
+                customerTableRows[2].cells[3].textContent = ulrNumber;
+                // Reference Number and Job Code Number
+                customerTableRows[3].cells[1].textContent = referenceNumber;
+                customerTableRows[3].cells[3].textContent = jobCodeNumber;
+                // Date of Material Receipt and Period of Testing
+                customerTableRows[4].cells[1].textContent = dateOfMaterialReceipt;
+                customerTableRows[4].cells[3].textContent = urlParams.get('date_of_testing') || '';
+                // Material Description and Condition of Sample
+                customerTableRows[5].cells[1].textContent = materialDescription;
+                customerTableRows[5].cells[3].textContent = conditionOfSample;
+                // Location of Testing
+                customerTableRows[6].cells[1].textContent = locationOfTesting;
+            }
+            
+            // Update Test Results Summary with calculated average
+            const averageElement = document.getElementById('average-compressive-strength');
+            const calculatedAverage = averageElement ? averageElement.textContent : '0.00';
+            
+            // Update the second page average result
+            const averageResultElement = document.getElementById('average-compressive-strength-result');
+            if (averageResultElement) {
+                averageResultElement.textContent = calculatedAverage;
+                console.log('Updated average compressive strength result:', calculatedAverage);
+            }
         }
 
         // Download PDF function
@@ -1515,9 +2095,111 @@
             }
         }
 
+        // Function to render strength graph
+        function renderStrengthGraph() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Show debug info on page
+            const debugDiv = document.getElementById('debug-info');
+            if (debugDiv) {
+                debugDiv.textContent = `DEBUG: req7=${urlParams.get('required_7')} act7=${urlParams.get('actual_7')} req14=${urlParams.get('required_14')} act14=${urlParams.get('actual_14')} req28=${urlParams.get('required_28')} act28=${urlParams.get('actual_28')}`;
+            }
+            
+            console.log('URL Parameters:', window.location.search);
+            console.log('required_7 param:', urlParams.get('required_7'));
+            console.log('actual_7 param:', urlParams.get('actual_7'));
+            
+            // Get strength data from URL parameters with default values for testing
+            const required7 = urlParams.has('required_7') ? parseFloat(urlParams.get('required_7')) : 16.5;
+            const actual7 = urlParams.has('actual_7') ? parseFloat(urlParams.get('actual_7')) : 18.5;
+            const required14 = urlParams.has('required_14') ? parseFloat(urlParams.get('required_14')) : 22.5;
+            const actual14 = urlParams.has('actual_14') ? parseFloat(urlParams.get('actual_14')) : 24.1;
+            const required28 = urlParams.has('required_28') ? parseFloat(urlParams.get('required_28')) : 30.0;
+            const actual28 = urlParams.has('actual_28') ? parseFloat(urlParams.get('actual_28')) : 31.5;
+            
+            console.log('Parsed values - 7 days:', { required: required7, actual: actual7 });
+            console.log('Parsed values - 14 days:', { required: required14, actual: actual14 });
+            console.log('Parsed values - 28 days:', { required: required28, actual: actual28 });
+            
+            const chartData = [
+                { name: '7 days strength', required: required7, actual: actual7 },
+                { name: '14 days strength', required: required14, actual: actual14 },
+                { name: '28 days strength', required: required28, actual: actual28 }
+            ];
+            
+            const barsContainer = document.getElementById('bars-container');
+            if (!barsContainer) {
+                console.error('Bars container not found!');
+                return;
+            }
+            
+            console.log('Rendering strength graph with data:', chartData);
+            console.log('Bars container found, clearing existing content...');
+            
+            // Clear existing content - FORCE CLEAR
+            barsContainer.innerHTML = '';
+            console.log('Container cleared. Children count:', barsContainer.children.length);
+            
+            // Generate bars for each data point
+            chartData.forEach((item, index) => {
+                console.log(`Creating bars for ${item.name}: Required=${item.required}, Actual=${item.actual}`);
+                const requiredHeight = Math.max((item.required / 45) * 200, 2);
+                const actualHeight = Math.max((item.actual / 45) * 200, 2);
+                console.log(`Bar heights: Required=${requiredHeight}px, Actual=${actualHeight}px`);
+                
+                // Create bar group container
+                const barGroupContainer = document.createElement('div');
+                barGroupContainer.style.cssText = 'display: flex; flex-direction: column; align-items: center; flex: 1; position: relative;';
+                
+                // Create bars container
+                const barsDiv = document.createElement('div');
+                barsDiv.style.cssText = 'display: flex; gap: 4px; align-items: flex-end; justify-content: center;';
+                
+                // Required bar
+                const requiredBar = document.createElement('div');
+                requiredBar.style.cssText = `width: 50px; height: ${requiredHeight}px; background-color: #4682B4;`;
+                barsDiv.appendChild(requiredBar);
+                
+                // Actual bar
+                const actualBar = document.createElement('div');
+                actualBar.style.cssText = `width: 50px; height: ${actualHeight}px; background-color: #FFA500;`;
+                barsDiv.appendChild(actualBar);
+                
+                barGroupContainer.appendChild(barsDiv);
+                
+                // X-axis label
+                const xLabel = document.createElement('div');
+                xLabel.style.cssText = 'margin-top: 6px; font-size: 7pt; text-align: center; color: #000;';
+                xLabel.textContent = item.name;
+                barGroupContainer.appendChild(xLabel);
+                
+                // Data values - vertical layout
+                const dataLabels = document.createElement('div');
+                dataLabels.style.cssText = 'margin-top: 3px; font-size: 7pt; text-align: center; color: #000; display: flex; flex-direction: column; line-height: 1.3;';
+                
+                const requiredLabel = document.createElement('span');
+                requiredLabel.textContent = item.required.toFixed(1);
+                dataLabels.appendChild(requiredLabel);
+                
+                const actualLabel = document.createElement('span');
+                actualLabel.textContent = item.actual.toFixed(2);
+                dataLabels.appendChild(actualLabel);
+                
+                barGroupContainer.appendChild(dataLabels);
+                
+                barsContainer.appendChild(barGroupContainer);
+            });
+            
+            console.log('Graph rendering complete. Total bars created:', barsContainer.children.length);
+        }
+
         // Populate form data when page loads
         window.onload = function () {
+            console.log('=== PAGE LOADED ===');
             populateFormData();
+            console.log('About to render strength graph...');
+            renderStrengthGraph();
+            console.log('Strength graph rendering called.');
 
             // Auto-resize text after a short delay to ensure content is loaded
             setTimeout(autoResizeText, 100);

@@ -115,6 +115,10 @@ const LiquidAdmixtureForm = () => {
 
   // Preview and PDF functions
   const handleSaveTestData = () => {
+    setShowPreview(true);
+  };
+
+  const handleConfirmSubmit = () => {
     // Create URL parameters from form data
     const params = new URLSearchParams();
     
@@ -170,8 +174,11 @@ const LiquidAdmixtureForm = () => {
     params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
     
     // Redirect to HTML report page
-    const reportUrl = `/LiquidAdmixtureReport.html?${params.toString()}`;
+    const reportUrl = `/LiquidAdmixture/LiquidAdmixtureReport.html?${params.toString()}`;
     window.open(reportUrl, '_blank');
+    
+    // Close preview
+    setShowPreview(false);
   };
 
   const handleEditForm = () => {
@@ -236,24 +243,6 @@ const LiquidAdmixtureForm = () => {
     setShowPreview(true);
   };
 
-  const handleConfirmSubmit = async () => {
-    // Handle final form submission and generate PDF
-    console.log('Form submitted:', formData);
-    
-    try {
-      // Generate and download PDF
-      const success = await generateLiquidAdmixturePDF(formData);
-      if (success) {
-        alert('Test data saved successfully! PDF has been downloaded.');
-        setShowPreview(false);
-      } else {
-        alert('Test data saved, but PDF generation failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      alert('Test data saved, but PDF generation failed. Please try again.');
-    }
-  };
 
   // Preview Form Component
   const PreviewForm = () => (
@@ -962,8 +951,8 @@ const LiquidAdmixtureForm = () => {
                 size="lg" 
                 className="me-3"
               >
-                <FontAwesomeIcon icon={faEye} className="me-2" />
-                Preview Report
+                <FontAwesomeIcon icon={faSave} className="me-2" />
+                Save Test Data
               </Button>
               <Button 
                 as={Link} 
@@ -986,6 +975,7 @@ const LiquidAdmixtureForm = () => {
           formData={formData}
           onEdit={handleEditForm}
           onDownloadPDF={handleDownloadPDF}
+          onConfirmSave={handleConfirmSubmit}
         />
       )}
     </div>

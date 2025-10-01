@@ -16,14 +16,12 @@ import {
 import FineAggregateTestSelection from './otherServices/FineAggregate/FineAggregateTestSelection';
 import CoarseAggregateTestSelection from './otherServices/CoarseAggregate/CoarseAggregateTestSelection';
 import CementTestingSelection from './otherServices/CementTesting/CementTestingSelection';
-import SoilTestingSelection from './otherServices/SoilTesting/SoilTestingSelection';
 
 const OtherServices = () => {
   const navigate = useNavigate();
   const [showFineAggregatePopup, setShowFineAggregatePopup] = useState(false);
   const [showCoarseAggregatePopup, setShowCoarseAggregatePopup] = useState(false);
   const [showCementTestingPopup, setShowCementTestingPopup] = useState(false);
-  const [showSoilTestingPopup, setShowSoilTestingPopup] = useState(false);
 
   const handleFineAggregateClick = () => {
     setShowFineAggregatePopup(true);
@@ -57,18 +55,6 @@ const OtherServices = () => {
     setShowCementTestingPopup(false);
     // Navigate to cement testing form with selected tests
     navigate('/cement-testing-form', { 
-      state: { selectedTests } 
-    });
-  };
-
-  const handleSoilTestingClick = () => {
-    setShowSoilTestingPopup(true);
-  };
-
-  const handleSoilTestingProceed = (selectedTests) => {
-    setShowSoilTestingPopup(false);
-    // Navigate to soil testing form with selected tests
-    navigate('/soil-testing-form', { 
       state: { selectedTests } 
     });
   };
@@ -204,7 +190,8 @@ const OtherServices = () => {
             </Button>
           ) : service.id === 7 ? (
             <Button
-              onClick={handleSoilTestingClick}
+              as={Link}
+              to="/soil-testing-form"
               variant="primary"
               className="btn-vitrag-primary"
             >
@@ -260,13 +247,6 @@ const OtherServices = () => {
         show={showCementTestingPopup}
         onHide={() => setShowCementTestingPopup(false)}
         onProceed={handleCementTestingProceed}
-      />
-
-      {/* Soil Testing Selection Popup */}
-      <SoilTestingSelection
-        show={showSoilTestingPopup}
-        onHide={() => setShowSoilTestingPopup(false)}
-        onProceed={handleSoilTestingProceed}
       />
 
     </div>
