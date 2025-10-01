@@ -14,14 +14,1350 @@ import {
   faComment,
   faEye
 } from '@fortawesome/free-solid-svg-icons';
+import SoilTestingSelection from './SoilTestingSelection';
 
-// Import individual form components
-import Form1CompactionTest from './forms/Form1CompactionTest';
-import Form2FreeSwellIndex from './forms/Form2FreeSwellIndex';
-import Form3GrainSizeAnalysis from './forms/Form3GrainSizeAnalysis';
-import Form4LiquidLimit from './forms/Form4LiquidLimit';
-import Form5PlasticLimit from './forms/Form5PlasticLimit';
-import Form6WaterContent from './forms/Form6WaterContent';
+// Inline form components - all forms consolidated into this file
+
+// Form 1: Compaction Test Component
+const Form1CompactionTest = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      as="textarea" 
+                      rows={2} 
+                      name="test_method" 
+                      value={formData.test_method} 
+                      onChange={handleInputChange} 
+                      className="form-control-vitrag" 
+                      placeholder="IS 2720 (PART 7-1980)&#10;IS 2720 (PART 8-1983)"
+                      style={{ fontWeight: 'bold' }}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <div className="table-responsive">
+                <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                  <thead className="table-dark">
+                    <tr>
+                      <th style={{ width: '50px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Sr.No</th>
+                      <th style={{ width: '300px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem' }}>Description</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>1</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>2</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>3</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>4</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of the mould Wm (gm)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_1" value={formData.weight_mould_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_2" value={formData.weight_mould_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_3" value={formData.weight_mould_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_4" value={formData.weight_mould_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_5" value={formData.weight_mould_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of the Mould + compacted soil W (gm)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_soil_1" value={formData.weight_mould_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_soil_2" value={formData.weight_mould_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_soil_3" value={formData.weight_mould_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_soil_4" value={formData.weight_mould_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_mould_soil_5" value={formData.weight_mould_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Moisture Container No.</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_1" value={formData.container_no_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_2" value={formData.container_no_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_3" value={formData.container_no_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_4" value={formData.container_no_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_5" value={formData.container_no_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>4</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of moisture container W₁ (gm)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_container_1" value={formData.weight_container_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_container_2" value={formData.weight_container_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_container_3" value={formData.weight_container_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_container_4" value={formData.weight_container_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_container_5" value={formData.weight_container_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>5</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of Container + Wet Soil W₂ (gm)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_wet_soil_1" value={formData.weight_wet_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_wet_soil_2" value={formData.weight_wet_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_wet_soil_3" value={formData.weight_wet_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_wet_soil_4" value={formData.weight_wet_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_wet_soil_5" value={formData.weight_wet_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>6</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of Container + Dry Soil W₃ (gm)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_dry_soil_1" value={formData.weight_dry_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_dry_soil_2" value={formData.weight_dry_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_dry_soil_3" value={formData.weight_dry_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_dry_soil_4" value={formData.weight_dry_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_dry_soil_5" value={formData.weight_dry_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>7</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wet Density γm = (W-Wm)/ Vm (gm/cm³)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wet_density_1" value={formData.wet_density_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wet_density_2" value={formData.wet_density_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wet_density_3" value={formData.wet_density_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wet_density_4" value={formData.wet_density_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wet_density_5" value={formData.wet_density_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>8</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Moisture Content w% = (W₂-W₃) ×100/(W₃-W₁)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_1" value={formData.moisture_content_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_2" value={formData.moisture_content_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_3" value={formData.moisture_content_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_4" value={formData.moisture_content_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_5" value={formData.moisture_content_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>9</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Dry Density γd = γm/ (1+w/100) (gm/cm³)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="dry_density_1" value={formData.dry_density_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="dry_density_2" value={formData.dry_density_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="dry_density_3" value={formData.dry_density_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="dry_density_4" value={formData.dry_density_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="dry_density_5" value={formData.dry_density_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Observation Tables */}
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <h6 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', marginBottom: '1rem' }}>Observation</h6>
+                  <table className="table transparent-table" style={{ fontSize: '0.9rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                    <thead className="table-dark">
+                      <tr>
+                        <th style={{ width: '50px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem', textAlign: 'center' }}>Sr.No</th>
+                        <th style={{ width: '200px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem' }}>Description</th>
+                        <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem', textAlign: 'center' }}>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Volume of Mould, Vm :</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_mould" value={formData.volume_mould} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Weight of the Rammer :</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_rammer" value={formData.weight_rammer} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Percentage passing <Form.Control size="sm" type="number" name="sieve_size_passing" value={formData.sieve_size_passing} onChange={handleInputChange} style={{ width: '60px', display: 'inline-block', fontSize: '0.8rem' }} /> mm Sieve:</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percentage_passing" value={formData.percentage_passing} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>4</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Percentage retained on <Form.Control size="sm" type="number" name="sieve_size_retained" value={formData.sieve_size_retained} onChange={handleInputChange} style={{ width: '60px', display: 'inline-block', fontSize: '0.8rem' }} /> mm Sieve:</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percentage_retained" value={formData.percentage_retained} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="col-md-6 mb-3">
+                  <h6 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', marginBottom: '1rem' }}>Observation</h6>
+                  <table className="table transparent-table" style={{ fontSize: '0.9rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                    <thead className="table-dark">
+                      <tr>
+                        <th style={{ width: '50px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem', textAlign: 'center' }}>Sr.No</th>
+                        <th style={{ width: '200px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem' }}>Description</th>
+                        <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '0.9rem', textAlign: 'center' }}>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Maximum Dry Density</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="max_dry_density" value={formData.max_dry_density} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Optimum Moisture Content</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="optimum_moisture" value={formData.optimum_moisture} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Form 2: Free Swell Index Component
+const Form2FreeSwellIndex = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      type="text" 
+                      name="test_method" 
+                      value={formData.test_method} 
+                      onChange={handleInputChange} 
+                      className="form-control-vitrag" 
+                      defaultValue="IS2720 (PART-40)-1977"
+                      style={{ fontWeight: 'bold' }}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <h5 style={{ color: 'var(--vitrag-gold)', marginBottom: '1rem', textAlign: 'center' }}>Free Swell Index of Soil Sample</h5>
+              <div className="table-responsive">
+                <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                  <thead className="table-dark">
+                    <tr>
+                      <th style={{ width: '60px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Sr.No</th>
+                      <th style={{ width: '400px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem' }}>Description</th>
+                      <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>1</th>
+                      <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>2</th>
+                      <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>3</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Volume of Soil Specimen read from graduated Cylinder containing distilled water (V1)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_water_1" value={formData.volume_water_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_water_2" value={formData.volume_water_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_water_3" value={formData.volume_water_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Volume of soil Specimen read from graduated Cylinder containing distilled kerosene (V2)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_kerosene_1" value={formData.volume_kerosene_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_kerosene_2" value={formData.volume_kerosene_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="volume_kerosene_3" value={formData.volume_kerosene_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Free Swell Index = (V1-V2)X100/ V2 (%)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="free_swell_index_1" value={formData.free_swell_index_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="free_swell_index_2" value={formData.free_swell_index_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="free_swell_index_3" value={formData.free_swell_index_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Final Result */}
+              <div className="text-center" style={{ marginTop: '2rem' }}>
+                <h5 style={{ color: 'var(--vitrag-gold)', marginBottom: '1rem' }}>
+                  <strong>Free Swell Index of Soil Sample = </strong>
+                  <Form.Control 
+                    type="number" 
+                    step="0.01" 
+                    name="final_free_swell_index" 
+                    value={formData.final_free_swell_index} 
+                    onChange={handleInputChange}
+                    style={{ 
+                      display: 'inline-block', 
+                      width: '150px', 
+                      marginLeft: '10px',
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold'
+                    }}
+                    className="form-control-vitrag"
+                  />
+                  <span style={{ marginLeft: '10px', fontSize: '1.1rem', fontWeight: 'bold' }}>%</span>
+                </h5>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Form 3: Grain Size Analysis Component
+const Form3GrainSizeAnalysis = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      type="text" 
+                      name="test_method" 
+                      value={formData.test_method} 
+                      onChange={handleInputChange} 
+                      className="form-control-vitrag" 
+                      defaultValue="IS 2720 (PART 4)-1985"
+                      style={{ fontWeight: 'bold' }}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              {/* Observation Section */}
+              <div className="mb-4">
+                <h5 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', textAlign: 'center', marginBottom: '1.5rem' }}>Observation</h5>
+                
+                {/* Observation List */}
+                <div className="mb-4">
+                  <div className="row mb-2">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <span className="me-3" style={{ fontWeight: 'bold', minWidth: '20px' }}>1.</span>
+                        <span className="me-3">Total Oven dried weight of representative sample:</span>
+                        <Form.Control 
+                          type="number" 
+                          step="0.01" 
+                          name="total_oven_dried_weight" 
+                          value={formData.total_oven_dried_weight} 
+                          onChange={handleInputChange}
+                          style={{ width: '150px' }}
+                          size="sm"
+                        />
+                        <span className="ms-2">gm</span>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <span className="me-3" style={{ fontWeight: 'bold', minWidth: '20px' }}>2.</span>
+                        <span className="me-3">Quantity Retained on 80 mm Sieve:</span>
+                        <Form.Control 
+                          type="number" 
+                          step="0.01" 
+                          name="quantity_retained_80mm" 
+                          value={formData.quantity_retained_80mm} 
+                          onChange={handleInputChange}
+                          style={{ width: '150px' }}
+                          size="sm"
+                        />
+                        <span className="ms-2">gm</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-2">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <span className="me-3" style={{ fontWeight: 'bold', minWidth: '20px' }}>3.</span>
+                        <span className="me-3">Quantity of Material Passing 80 mm Sieve:</span>
+                        <Form.Control 
+                          type="number" 
+                          step="0.01" 
+                          name="quantity_passing_80mm" 
+                          value={formData.quantity_passing_80mm} 
+                          onChange={handleInputChange}
+                          style={{ width: '150px' }}
+                          size="sm"
+                        />
+                        <span className="ms-2">gm</span>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <span className="me-3" style={{ fontWeight: 'bold', minWidth: '20px' }}>4.</span>
+                        <span className="me-3">Shape of Particles:</span>
+                        <Form.Select 
+                          name="particle_shape" 
+                          value={formData.particle_shape} 
+                          onChange={handleInputChange}
+                          style={{ width: '200px' }}
+                          size="sm"
+                        >
+                          <option value="">-- Select Shape --</option>
+                          <option value="Rounded">(1) Rounded</option>
+                          <option value="Sub-Rounded">(2) Sub-Rounded</option>
+                          <option value="Angular">(3) Angular</option>
+                          <option value="Sub-Angular">(4) Sub-Angular</option>
+                        </Form.Select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center">
+                        <span className="me-3" style={{ fontWeight: 'bold', minWidth: '20px' }}>5.</span>
+                        <span className="me-3">Quantity taken for test:</span>
+                        <Form.Control 
+                          type="number" 
+                          step="0.01" 
+                          name="quantity_taken_for_test" 
+                          value={formData.quantity_taken_for_test} 
+                          onChange={handleInputChange}
+                          style={{ width: '150px' }}
+                          size="sm"
+                        />
+                        <span className="ms-2">gm</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sieve Analysis Table */}
+                <div className="table-responsive">
+                  <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                    <thead className="table-dark">
+                      <tr>
+                        <th style={{ width: '150px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>IS Sieve Size (mm)</th>
+                        <th style={{ width: '150px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Weight of Soil retained (gm)</th>
+                        <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>% Retained</th>
+                        <th style={{ width: '100px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>% Passing</th>
+                        <th style={{ width: '200px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Remarks (about sample)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>80</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_80" value={formData.weight_80} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_80" value={formData.percent_retained_80} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_80" value={formData.percent_passing_80} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_80" value={formData.remarks_80} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>20</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_20" value={formData.weight_20} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_20" value={formData.percent_retained_20} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_20" value={formData.percent_passing_20} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_20" value={formData.remarks_20} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>4.75</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_475" value={formData.weight_475} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_475" value={formData.percent_retained_475} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_475" value={formData.percent_passing_475} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_475" value={formData.remarks_475} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>2.000</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_2000" value={formData.weight_2000} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_2000" value={formData.percent_retained_2000} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_2000" value={formData.percent_passing_2000} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_2000" value={formData.remarks_2000} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>0.600</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_0600" value={formData.weight_0600} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_0600" value={formData.percent_retained_0600} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_0600" value={formData.percent_passing_0600} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_0600" value={formData.remarks_0600} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>0.425</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_0425" value={formData.weight_0425} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_0425" value={formData.percent_retained_0425} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_0425" value={formData.percent_passing_0425} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_0425" value={formData.remarks_0425} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center', fontWeight: 'bold' }}>0.075</td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="weight_0075" value={formData.weight_0075} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_retained_0075" value={formData.percent_retained_0075} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="percent_passing_0075" value={formData.percent_passing_0075} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                        <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="remarks_0075" value={formData.remarks_0075} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Percentage Summary Section */}
+              <div className="mb-4">
+                <h5 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', textAlign: 'center', marginBottom: '1.5rem' }}>PERCENTAGE SUMMARY</h5>
+                
+                <div className="table-responsive">
+                  <table className="table transparent-table" style={{ fontSize: '0.9rem', tableLayout: 'fixed', width: '100%', border: '2px solid #000', borderRadius: '0' }}>
+                     <thead>
+                       <tr>
+                         <th colSpan="6" style={{ padding: '8px', border: '2px solid #000', fontSize: '1.1rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#343a40', color: 'white' }}>PERCENTAGE SUMMARY</th>
+                       </tr>
+                       <tr>
+                         <th colSpan="2" style={{ padding: '8px', border: '2px solid #000', fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#495057', color: 'white' }}>GRAVEL</th>
+                         <th colSpan="3" style={{ padding: '8px', border: '2px solid #000', fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#495057', color: 'white' }}>SAND</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#495057', color: 'white' }}>SLIT & CLAY</th>
+                       </tr>
+                       <tr>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>Coarse Gravel<br/>(80-20mm)</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>Fine Gravel<br/>(20-4.75mm)</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>Coarse Sand<br/>(4.75-2.00mm)</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>Medium Sand<br/>(2.00-0.425mm)</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>Fine Sand<br/>(0.425-0.075)</th>
+                         <th style={{ padding: '8px', border: '2px solid #000', fontSize: '0.9rem', textAlign: 'center', fontWeight: 'bold', backgroundColor: '#6c757d', color: 'white' }}>&lt;0.075mm</th>
+                       </tr>
+                     </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="coarse_gravel_percent" 
+                            value={formData.coarse_gravel_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="fine_gravel_percent" 
+                            value={formData.fine_gravel_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="coarse_sand_percent" 
+                            value={formData.coarse_sand_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="medium_sand_percent" 
+                            value={formData.medium_sand_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="fine_sand_percent" 
+                            value={formData.fine_sand_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="silt_clay_percent" 
+                            value={formData.silt_clay_percent} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="coarse_gravel_percent_2" 
+                            value={formData.coarse_gravel_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="fine_gravel_percent_2" 
+                            value={formData.fine_gravel_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="coarse_sand_percent_2" 
+                            value={formData.coarse_sand_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="medium_sand_percent_2" 
+                            value={formData.medium_sand_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="fine_sand_percent_2" 
+                            value={formData.fine_sand_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                        <td style={{ padding: '8px', border: '2px solid #000', textAlign: 'center' }}>
+                          <Form.Control 
+                            size="sm" 
+                            type="number" 
+                            step="0.01" 
+                            name="silt_clay_percent_2" 
+                            value={formData.silt_clay_percent_2} 
+                            onChange={handleInputChange} 
+                            style={{ fontSize: '0.8rem', border: '1px solid #000' }} 
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Form 4: Liquid Limit Component
+const Form4LiquidLimit = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      type="text" 
+                      name="test_method" 
+                      value={formData.test_method} 
+                      onChange={handleInputChange} 
+                      className="form-control-vitrag" 
+                      defaultValue="IS 2720 (PART 5)-1985"
+                      style={{ fontWeight: 'bold' }}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <h5 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', textAlign: 'center', marginBottom: '1.5rem' }}>Liquid Limit Determination</h5>
+              <div className="table-responsive">
+                <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                  <thead className="table-dark">
+                    <tr>
+                      <th style={{ width: '60px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Sr.No</th>
+                      <th style={{ width: '300px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem' }}>Description</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>1</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>2</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>3</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>4</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>No. of Blows</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="no_of_blows_1" value={formData.no_of_blows_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="no_of_blows_2" value={formData.no_of_blows_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="no_of_blows_3" value={formData.no_of_blows_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="no_of_blows_4" value={formData.no_of_blows_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="no_of_blows_5" value={formData.no_of_blows_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Container No.</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_1" value={formData.container_no_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_2" value={formData.container_no_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_3" value={formData.container_no_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_4" value={formData.container_no_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="container_no_5" value={formData.container_no_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container (W1) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_1" value={formData.wt_container_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_2" value={formData.wt_container_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_3" value={formData.wt_container_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_4" value={formData.wt_container_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_5" value={formData.wt_container_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>4</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container + Wet Soil (W2) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_wet_soil_1" value={formData.wt_container_wet_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_wet_soil_2" value={formData.wt_container_wet_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_wet_soil_3" value={formData.wt_container_wet_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_wet_soil_4" value={formData.wt_container_wet_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_wet_soil_5" value={formData.wt_container_wet_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>5</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container + Dry Soil (W3) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_dry_soil_1" value={formData.wt_container_dry_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_dry_soil_2" value={formData.wt_container_dry_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_dry_soil_3" value={formData.wt_container_dry_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_dry_soil_4" value={formData.wt_container_dry_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_container_dry_soil_5" value={formData.wt_container_dry_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>6</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Water (W2-W3) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_water_1" value={formData.wt_water_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_water_2" value={formData.wt_water_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_water_3" value={formData.wt_water_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_water_4" value={formData.wt_water_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_water_5" value={formData.wt_water_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>7</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Dry Soil (W3-W1) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_dry_soil_1" value={formData.wt_dry_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_dry_soil_2" value={formData.wt_dry_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_dry_soil_3" value={formData.wt_dry_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_dry_soil_4" value={formData.wt_dry_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="wt_dry_soil_5" value={formData.wt_dry_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>8</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Moisture Content (%) = (W2-W3)/(W3-W1) × 100</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_1" value={formData.moisture_content_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_2" value={formData.moisture_content_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_3" value={formData.moisture_content_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_4" value={formData.moisture_content_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="moisture_content_5" value={formData.moisture_content_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Final Result */}
+              <div className="text-center" style={{ marginTop: '2rem' }}>
+                <h5 style={{ color: 'var(--vitrag-gold)', marginBottom: '1rem' }}>
+                  <strong>LIQUID LIMIT (LL) = MOISTURE CONTENT AT 25 BLOWS = </strong>
+                  <Form.Control 
+                    type="number" 
+                    step="0.01" 
+                    name="liquid_limit" 
+                    value={formData.liquid_limit} 
+                    onChange={handleInputChange}
+                    style={{ 
+                      display: 'inline-block', 
+                      width: '150px', 
+                      marginLeft: '10px',
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold'
+                    }}
+                    className="form-control-vitrag"
+                  />
+                  <span style={{ marginLeft: '10px', fontSize: '1.1rem', fontWeight: 'bold' }}>%</span>
+                </h5>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Form 5: Plastic Limit Component
+const Form5PlasticLimit = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      type="text" 
+                      name="test_method" 
+                      value={formData.test_method || "IS 2720 (PART-5)-1985"} 
+                      readOnly
+                      className="form-control-vitrag" 
+                      style={{ backgroundColor: 'rgba(108, 117, 125, 0.1)', borderColor: '#495057', opacity: 0.9 }}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <h5 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', textAlign: 'center', marginBottom: '1.5rem' }}>PLASTIC LIMIT DETERMINATION</h5>
+              <div className="table-responsive">
+                <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                  <thead className="table-dark">
+                    <tr>
+                      <th style={{ width: '60px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Sr.No</th>
+                      <th style={{ width: '300px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem' }}>Description</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>1</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>2</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>3</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>4</th>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Container No.</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="plastic_container_no_1" value={formData.plastic_container_no_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="plastic_container_no_2" value={formData.plastic_container_no_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="plastic_container_no_3" value={formData.plastic_container_no_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="plastic_container_no_4" value={formData.plastic_container_no_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="plastic_container_no_5" value={formData.plastic_container_no_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container (W1) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_1" value={formData.plastic_wt_container_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_2" value={formData.plastic_wt_container_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_3" value={formData.plastic_wt_container_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_4" value={formData.plastic_wt_container_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_5" value={formData.plastic_wt_container_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container + Wet Soil (W2) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_wet_soil_1" value={formData.plastic_wt_container_wet_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_wet_soil_2" value={formData.plastic_wt_container_wet_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_wet_soil_3" value={formData.plastic_wt_container_wet_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_wet_soil_4" value={formData.plastic_wt_container_wet_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_wet_soil_5" value={formData.plastic_wt_container_wet_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>4</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Container + Dry Soil (W3) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_dry_soil_1" value={formData.plastic_wt_container_dry_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_dry_soil_2" value={formData.plastic_wt_container_dry_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_dry_soil_3" value={formData.plastic_wt_container_dry_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_dry_soil_4" value={formData.plastic_wt_container_dry_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_container_dry_soil_5" value={formData.plastic_wt_container_dry_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>5</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Water (W2-W3) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_water_1" value={formData.plastic_wt_water_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_water_2" value={formData.plastic_wt_water_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_water_3" value={formData.plastic_wt_water_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_water_4" value={formData.plastic_wt_water_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_water_5" value={formData.plastic_wt_water_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>6</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Wt. of Dry Soil (W3-W1) gm</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_dry_soil_1" value={formData.plastic_wt_dry_soil_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_dry_soil_2" value={formData.plastic_wt_dry_soil_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_dry_soil_3" value={formData.plastic_wt_dry_soil_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_dry_soil_4" value={formData.plastic_wt_dry_soil_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_wt_dry_soil_5" value={formData.plastic_wt_dry_soil_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>7</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Moisture Content (%) = (W2-W3)/(W3-W1)× 100</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_moisture_content_1" value={formData.plastic_moisture_content_1} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_moisture_content_2" value={formData.plastic_moisture_content_2} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_moisture_content_3" value={formData.plastic_moisture_content_3} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_moisture_content_4" value={formData.plastic_moisture_content_4} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="plastic_moisture_content_5" value={formData.plastic_moisture_content_5} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Final Results */}
+              <div className="text-center" style={{ marginTop: '2rem' }}>
+                <div className="mb-3">
+                  <h5 style={{ color: 'var(--vitrag-gold)', marginBottom: '1rem' }}>
+                    <strong>PLASTIC LIMIT = </strong>
+                    <Form.Control 
+                      type="number" 
+                      step="0.01" 
+                      name="plastic_limit" 
+                      value={formData.plastic_limit} 
+                      onChange={handleInputChange}
+                      style={{ 
+                        display: 'inline-block', 
+                        width: '150px', 
+                        marginLeft: '10px',
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold'
+                      }}
+                      className="form-control-vitrag"
+                    />
+                    <span style={{ marginLeft: '10px', fontSize: '1.1rem', fontWeight: 'bold' }}>%</span>
+                  </h5>
+                </div>
+                <div>
+                  <h5 style={{ color: 'var(--vitrag-gold)', marginBottom: '1rem' }}>
+                    <strong>PLASTIC INDEX = LIQUID LIMIT - PLASTIC LIMIT = </strong>
+                    <Form.Control 
+                      type="number" 
+                      step="0.01" 
+                      name="plastic_index" 
+                      value={formData.plastic_index} 
+                      onChange={handleInputChange}
+                      style={{ 
+                        display: 'inline-block', 
+                        width: '150px', 
+                        marginLeft: '10px',
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold'
+                      }}
+                      className="form-control-vitrag"
+                    />
+                    <span style={{ marginLeft: '10px', fontSize: '1.1rem', fontWeight: 'bold' }}>%</span>
+                  </h5>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Form 6: Water Content Component
+const Form6WaterContent = ({ formData, handleInputChange }) => {
+  return (
+    <div>
+      {/* General Information */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faInfoCircle} className="me-2" />General Information</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Customer Name *</Form.Label>
+                    <Form.Select name="customer_id" value={formData.customer_id} onChange={handleInputChange} className="form-control-vitrag" required>
+                      <option value="">-- Select Customer --</option>
+                      <option value="1">Sample Customer 1</option>
+                      <option value="2">Sample Customer 2</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Test Code Number</Form.Label>
+                    <Form.Control type="text" name="sample_test_code" value={formData.sample_test_code} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Receipt</Form.Label>
+                    <Form.Control type="date" name="date_of_receipt" value={formData.date_of_receipt} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Quantity</Form.Label>
+                    <Form.Control type="text" name="quantity" value={formData.quantity} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Condition</Form.Label>
+                    <Form.Control type="text" name="sample_condition" value={formData.sample_condition} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Sample Description</Form.Label>
+                    <Form.Control as="textarea" rows={3} name="sample_description" value={formData.sample_description} onChange={handleInputChange} className="form-control-vitrag" placeholder="" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Testing</Form.Label>
+                    <Form.Control type="date" name="date_of_testing" value={formData.date_of_testing} onChange={handleInputChange} className="form-control-vitrag" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Test Method</Form.Label>
+                    <Form.Control 
+                      type="text" 
+                      name="test_method" 
+                      value={formData.test_method || "IS 2720 (PART 2)-1973"} 
+                      readOnly
+                      className="form-control-vitrag" 
+                      style={{ backgroundColor: 'rgba(108, 117, 125, 0.1)', borderColor: '#495057', opacity: 0.9 }}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Test Results */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="card-vitrag">
+            <Card.Header style={{ backgroundColor: 'var(--vitrag-secondary)' }}>
+              <h4 style={{ color: 'var(--vitrag-gold)', margin: 0 }}><FontAwesomeIcon icon={faTable} className="me-2" />Test Results</h4>
+            </Card.Header>
+            <Card.Body className="transparent-input-section">
+              <h5 style={{ color: 'var(--vitrag-gold)', textDecoration: 'underline', textAlign: 'center', marginBottom: '1.5rem' }}>Water Content Determination (Oven-Drying Method)</h5>
+              <div className="table-responsive">
+                <table className="table transparent-table" style={{ fontSize: '0.9rem', marginBottom: '2rem', tableLayout: 'fixed', width: '100%', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+                  <thead className="table-dark">
+                    <tr>
+                      <th style={{ width: '80px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Sr.No.</th>
+                      <th style={{ width: '400px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem' }}>Description</th>
+                      <th style={{ width: '150px', padding: '6px', border: '1px solid #dee2e6', fontSize: '1rem', textAlign: 'center' }}>Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>1</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Container No.</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="text" name="water_container_no" value={formData.water_container_no} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>2</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Mass of container W₁, in g</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_mass_container" value={formData.water_mass_container} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>3</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Mass of container and wet soil W₂, in g</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_mass_container_wet_soil" value={formData.water_mass_container_wet_soil} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>4</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Mass of container and dry soil W₃, in g</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_mass_container_dry_soil" value={formData.water_mass_container_dry_soil} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>5</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Mass of moisture ( W₂ - W₃ ), in g</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_mass_moisture" value={formData.water_mass_moisture} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>6</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Mass of dry soil ( W₃ - W₁ ), in g</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_mass_dry_soil" value={formData.water_mass_dry_soil} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6', textAlign: 'center' }}>7</td>
+                      <td style={{ padding: '6px', border: '1px solid #dee2e6' }}>Water Content (%) (( W₂ - W₃ ) x 100)/( W₃ - W₁)</td>
+                      <td style={{ padding: '4px', border: '1px solid #dee2e6' }}><Form.Control size="sm" type="number" step="0.01" name="water_content_percentage" value={formData.water_content_percentage} onChange={handleInputChange} style={{ fontSize: '0.8rem' }} /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
 
 const SoilTestingForm = () => {
   const navigate = useNavigate();
@@ -29,6 +1365,15 @@ const SoilTestingForm = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [currentTest, setCurrentTest] = useState(1);
   const [selectedTests, setSelectedTests] = useState([]);
+  const [showSelectionPopup, setShowSelectionPopup] = useState(false);
+
+  // Show popup on first load
+  useEffect(() => {
+    // Show popup on first load if no tests are selected
+    if (selectedTests.length === 0) {
+      setShowSelectionPopup(true);
+    }
+  }, []);
 
   // Handle selected tests from popup
   useEffect(() => {
@@ -48,10 +1393,6 @@ const SoilTestingForm = () => {
       } else if (location.state.selectedTests.includes('waterContent')) {
         setCurrentTest(6);
       }
-    } else {
-      // Default to all tests if no selection made
-      setSelectedTests(['compactionTest', 'freeSwellIndex', 'grainSizeAnalysis', 'liquidLimit', 'plasticLimit', 'waterContent']);
-      setCurrentTest(1);
     }
   }, [location.state]);
 
@@ -192,6 +1533,36 @@ const SoilTestingForm = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Handle popup selection
+  const handleSelectionProceed = (selectedTests) => {
+    setSelectedTests(selectedTests);
+    setShowSelectionPopup(false);
+    
+    // Create mapping from test keys to form numbers
+    const testToFormNumber = {
+      'compactionTest': 1,
+      'freeSwellIndex': 2,
+      'grainSizeAnalysis': 3,
+      'liquidLimit': 4,
+      'plasticLimit': 5,
+      'waterContent': 6
+    };
+    
+    // Set current test to first selected test
+    const firstSelectedTest = selectedTests[0];
+    const firstTestNumber = testToFormNumber[firstSelectedTest];
+    setCurrentTest(firstTestNumber);
+  };
+
+  const handleSelectionHide = () => {
+    // If no tests are selected, redirect back to other services
+    if (selectedTests.length === 0) {
+      navigate('/other-services');
+    } else {
+      setShowSelectionPopup(false);
+    }
   };
 
   const testTitles = {
@@ -371,11 +1742,49 @@ const SoilTestingForm = () => {
     }
   };
 
-  const handleSaveTestData = () => {
-    // Create URL parameters from form data
+  const handleSaveAndNext = () => {
+    // Create mapping from test keys to form numbers
+    const testToFormNumber = {
+      'compactionTest': 1,
+      'freeSwellIndex': 2,
+      'grainSizeAnalysis': 3,
+      'liquidLimit': 4,
+      'plasticLimit': 5,
+      'waterContent': 6
+    };
+    
+    // Create mapping from form numbers to test keys
+    const formNumberToTest = {
+      1: 'compactionTest',
+      2: 'freeSwellIndex',
+      3: 'grainSizeAnalysis',
+      4: 'liquidLimit',
+      5: 'plasticLimit',
+      6: 'waterContent'
+    };
+    
+    // Find the current test key
+    const currentTestKey = formNumberToTest[currentTest];
+    
+    // Find the index of current test in selected tests
+    const currentIndex = selectedTests.indexOf(currentTestKey);
+    
+    // If this is the last selected test, generate the report
+    if (currentIndex === selectedTests.length - 1) {
+      handleFinalSave();
+    } else {
+      // Get the next selected test
+      const nextTestKey = selectedTests[currentIndex + 1];
+      const nextTestNumber = testToFormNumber[nextTestKey];
+      setCurrentTest(nextTestNumber);
+    }
+  };
+
+  const handleFinalSave = () => {
+    // Create URL parameters from all form data
     const params = new URLSearchParams();
     
-    // General Information (for Observation Report)
+    // General Information
     params.append('sample_description', formData.sample_description || '');
     params.append('date_of_receipt', formData.date_of_receipt || '');
     params.append('sample_test_code', formData.sample_test_code || '');
@@ -384,7 +1793,7 @@ const SoilTestingForm = () => {
     params.append('test_method', formData.test_method || '');
     params.append('soil_type', formData.soil_type || '');
     
-    // Test Results (for Observation Report) - Form 1 Compaction Test
+    // Form 1: Compaction Test Data
     for (let i = 1; i <= 5; i++) {
       params.append(`weight_mould_${i}`, formData[`weight_mould_${i}`] || '');
       params.append(`weight_mould_soil_${i}`, formData[`weight_mould_soil_${i}`] || '');
@@ -396,8 +1805,6 @@ const SoilTestingForm = () => {
       params.append(`moisture_content_${i}`, formData[`moisture_content_${i}`] || '');
       params.append(`dry_density_${i}`, formData[`dry_density_${i}`] || '');
     }
-    
-    // Observation data
     params.append('volume_mould', formData.volume_mould || '');
     params.append('weight_rammer', formData.weight_rammer || '');
     params.append('sieve_size_passing', formData.sieve_size_passing || '');
@@ -408,7 +1815,77 @@ const SoilTestingForm = () => {
     params.append('optimum_moisture', formData.optimum_moisture || '');
     params.append('compaction_type', formData.compaction_type || '');
     
-    // Verification (for Observation Report)
+    // Form 2: Free Swell Index Data
+    for (let i = 1; i <= 3; i++) {
+      params.append(`volume_water_${i}`, formData[`volume_water_${i}`] || '');
+      params.append(`volume_kerosene_${i}`, formData[`volume_kerosene_${i}`] || '');
+      params.append(`free_swell_index_${i}`, formData[`free_swell_index_${i}`] || '');
+    }
+    params.append('final_free_swell_index', formData.final_free_swell_index || '');
+    
+    // Form 3: Grain Size Analysis Data
+    params.append('total_oven_dried_weight', formData.total_oven_dried_weight || '');
+    params.append('quantity_retained_80mm', formData.quantity_retained_80mm || '');
+    params.append('quantity_passing_80mm', formData.quantity_passing_80mm || '');
+    params.append('particle_shape', formData.particle_shape || '');
+    params.append('quantity_taken_for_test', formData.quantity_taken_for_test || '');
+    
+    const sieveSizes = ['80', '20', '475', '2000', '0600', '0425', '0075'];
+    sieveSizes.forEach(size => {
+      params.append(`weight_${size}`, formData[`weight_${size}`] || '');
+      params.append(`percent_retained_${size}`, formData[`percent_retained_${size}`] || '');
+      params.append(`percent_passing_${size}`, formData[`percent_passing_${size}`] || '');
+      params.append(`remarks_${size}`, formData[`remarks_${size}`] || '');
+    });
+    
+    params.append('coarse_gravel_percent', formData.coarse_gravel_percent || '');
+    params.append('fine_gravel_percent', formData.fine_gravel_percent || '');
+    params.append('coarse_sand_percent', formData.coarse_sand_percent || '');
+    params.append('medium_sand_percent', formData.medium_sand_percent || '');
+    params.append('fine_sand_percent', formData.fine_sand_percent || '');
+    params.append('silt_clay_percent', formData.silt_clay_percent || '');
+    params.append('coarse_gravel_percent_2', formData.coarse_gravel_percent_2 || '');
+    params.append('fine_gravel_percent_2', formData.fine_gravel_percent_2 || '');
+    params.append('coarse_sand_percent_2', formData.coarse_sand_percent_2 || '');
+    params.append('medium_sand_percent_2', formData.medium_sand_percent_2 || '');
+    params.append('fine_sand_percent_2', formData.fine_sand_percent_2 || '');
+    params.append('silt_clay_percent_2', formData.silt_clay_percent_2 || '');
+    
+    // Form 4: Liquid Limit Data
+    for (let i = 1; i <= 5; i++) {
+      params.append(`no_of_blows_${i}`, formData[`no_of_blows_${i}`] || '');
+      params.append(`wt_container_${i}`, formData[`wt_container_${i}`] || '');
+      params.append(`wt_container_wet_soil_${i}`, formData[`wt_container_wet_soil_${i}`] || '');
+      params.append(`wt_container_dry_soil_${i}`, formData[`wt_container_dry_soil_${i}`] || '');
+      params.append(`wt_water_${i}`, formData[`wt_water_${i}`] || '');
+      params.append(`wt_dry_soil_${i}`, formData[`wt_dry_soil_${i}`] || '');
+      params.append(`moisture_content_${i}`, formData[`moisture_content_${i}`] || '');
+    }
+    params.append('liquid_limit', formData.liquid_limit || '');
+    
+    // Form 5: Plastic Limit Data
+    for (let i = 1; i <= 5; i++) {
+      params.append(`plastic_container_no_${i}`, formData[`plastic_container_no_${i}`] || '');
+      params.append(`plastic_wt_container_${i}`, formData[`plastic_wt_container_${i}`] || '');
+      params.append(`plastic_wt_container_wet_soil_${i}`, formData[`plastic_wt_container_wet_soil_${i}`] || '');
+      params.append(`plastic_wt_container_dry_soil_${i}`, formData[`plastic_wt_container_dry_soil_${i}`] || '');
+      params.append(`plastic_wt_water_${i}`, formData[`plastic_wt_water_${i}`] || '');
+      params.append(`plastic_wt_dry_soil_${i}`, formData[`plastic_wt_dry_soil_${i}`] || '');
+      params.append(`plastic_moisture_content_${i}`, formData[`plastic_moisture_content_${i}`] || '');
+    }
+    params.append('plastic_limit', formData.plastic_limit || '');
+    params.append('plastic_index', formData.plastic_index || '');
+    
+    // Form 6: Water Content Data
+    params.append('water_container_no', formData.water_container_no || '');
+    params.append('water_mass_container', formData.water_mass_container || '');
+    params.append('water_mass_container_wet_soil', formData.water_mass_container_wet_soil || '');
+    params.append('water_mass_container_dry_soil', formData.water_mass_container_dry_soil || '');
+    params.append('water_mass_moisture', formData.water_mass_moisture || '');
+    params.append('water_mass_dry_soil', formData.water_mass_dry_soil || '');
+    params.append('water_content_percentage', formData.water_content_percentage || '');
+    
+    // Verification
     params.append('tested_by_name', formData.tested_by_name || '');
     params.append('tested_by_date', formData.tested_by_date || '');
     params.append('checked_by_name', formData.checked_by_name || '');
@@ -416,10 +1893,10 @@ const SoilTestingForm = () => {
     params.append('verified_by_name', formData.verified_by_name || '');
     params.append('verified_by_date', formData.verified_by_date || '');
     
-    // Remarks (for Observation Report)
+    // Remarks
     params.append('remarks', formData.remarks || '');
     
-    // Customer Information (for Test Report)
+    // Customer Information
     const customerNames = {
       '1': 'Sample Customer 1',
       '2': 'Sample Customer 2'
@@ -443,328 +1920,17 @@ const SoilTestingForm = () => {
     params.append('reviewed_by', formData.reviewed_by || 'Lalita S. Dussa - Quality Manager');
     params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
     
-    // Redirect to HTML report page
-    const reportUrl = `/SoilTestingReport.html?${params.toString()}`;
+           // Add selected tests to parameters
+           params.append('selectedTests', JSON.stringify(selectedTests));
+
+           // Build the final report URL
+           const reportUrl = `/SoilTesting/SoilTestingReport.html?${params.toString()}`;
+
+           // Open the final combined report in a new tab
     window.open(reportUrl, '_blank');
   };
 
-  const handleSaveTestDataForm2 = () => {
-    // Create URL parameters from form data for Free Swell Index Test
-    const params = new URLSearchParams();
-    
-    // General Information
-    params.append('sample_description', formData.sample_description || '');
-    params.append('date_of_receipt', formData.date_of_receipt || '');
-    params.append('sample_test_code', formData.sample_test_code || '');
-    params.append('date_of_testing', formData.date_of_testing || '');
-    params.append('quantity', formData.quantity || '');
-    params.append('sample_condition', formData.sample_condition || '');
-    params.append('test_method', formData.test_method || 'IS 2720 (PART-40)-1977');
-    
-    // Free Swell Index Test Results
-    params.append('volume_water_1', formData.volume_water_1 || '');
-    params.append('volume_water_2', formData.volume_water_2 || '');
-    params.append('volume_water_3', formData.volume_water_3 || '');
-    params.append('volume_kerosene_1', formData.volume_kerosene_1 || '');
-    params.append('volume_kerosene_2', formData.volume_kerosene_2 || '');
-    params.append('volume_kerosene_3', formData.volume_kerosene_3 || '');
-    params.append('free_swell_index_1', formData.free_swell_index_1 || '');
-    params.append('free_swell_index_2', formData.free_swell_index_2 || '');
-    params.append('free_swell_index_3', formData.free_swell_index_3 || '');
-    params.append('final_free_swell_index', formData.final_free_swell_index || '');
-    
-    // Verification
-    params.append('tested_by_name', formData.tested_by_name || '');
-    params.append('tested_by_date', formData.tested_by_date || '');
-    params.append('checked_by_name', formData.checked_by_name || '');
-    params.append('checked_by_date', formData.checked_by_date || '');
-    params.append('verified_by_name', formData.verified_by_name || '');
-    params.append('verified_by_date', formData.verified_by_date || '');
-    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
-    params.append('date_of_report', new Date().toISOString().split('T')[0]);
-    
-    // Redirect to Free Swell Index report page
-    const reportUrl = `/FreeSwellIndexReport.html?${params.toString()}`;
-    window.open(reportUrl, '_blank');
-  };
 
-  const handleSaveTestDataForm3 = () => {
-    // Create URL parameters from form data for Grain Size Analysis Test
-    const params = new URLSearchParams();
-    
-    // General Information
-    params.append('sample_description', formData.sample_description || '');
-    params.append('date_of_receipt', formData.date_of_receipt || '');
-    params.append('sample_test_code', formData.sample_test_code || '');
-    params.append('date_of_testing', formData.date_of_testing || '');
-    params.append('quantity', formData.quantity || '');
-    params.append('sample_condition', formData.sample_condition || '');
-    params.append('test_method', formData.test_method || 'IS 2720 (PART 4)-1985');
-    
-    // Observation data
-    params.append('total_oven_dried_weight', formData.total_oven_dried_weight || '');
-    params.append('quantity_retained_80mm', formData.quantity_retained_80mm || '');
-    params.append('quantity_passing_80mm', formData.quantity_passing_80mm || '');
-    params.append('particle_shape', formData.particle_shape || '');
-    params.append('quantity_taken_for_test', formData.quantity_taken_for_test || '');
-    
-    // Sieve Analysis Data
-    params.append('weight_80', formData.weight_80 || '');
-    params.append('percent_retained_80', formData.percent_retained_80 || '');
-    params.append('percent_passing_80', formData.percent_passing_80 || '');
-    params.append('remarks_80', formData.remarks_80 || '');
-    
-    params.append('weight_20', formData.weight_20 || '');
-    params.append('percent_retained_20', formData.percent_retained_20 || '');
-    params.append('percent_passing_20', formData.percent_passing_20 || '');
-    params.append('remarks_20', formData.remarks_20 || '');
-    
-    params.append('weight_475', formData.weight_475 || '');
-    params.append('percent_retained_475', formData.percent_retained_475 || '');
-    params.append('percent_passing_475', formData.percent_passing_475 || '');
-    params.append('remarks_475', formData.remarks_475 || '');
-    
-    params.append('weight_2000', formData.weight_2000 || '');
-    params.append('percent_retained_2000', formData.percent_retained_2000 || '');
-    params.append('percent_passing_2000', formData.percent_passing_2000 || '');
-    params.append('remarks_2000', formData.remarks_2000 || '');
-    
-    params.append('weight_0600', formData.weight_0600 || '');
-    params.append('percent_retained_0600', formData.percent_retained_0600 || '');
-    params.append('percent_passing_0600', formData.percent_passing_0600 || '');
-    params.append('remarks_0600', formData.remarks_0600 || '');
-    
-    params.append('weight_0425', formData.weight_0425 || '');
-    params.append('percent_retained_0425', formData.percent_retained_0425 || '');
-    params.append('percent_passing_0425', formData.percent_passing_0425 || '');
-    params.append('remarks_0425', formData.remarks_0425 || '');
-    
-    params.append('weight_0075', formData.weight_0075 || '');
-    params.append('percent_retained_0075', formData.percent_retained_0075 || '');
-    params.append('percent_passing_0075', formData.percent_passing_0075 || '');
-    params.append('remarks_0075', formData.remarks_0075 || '');
-    
-    // Percentage Summary Data
-    params.append('coarse_gravel_percent', formData.coarse_gravel_percent || '');
-    params.append('fine_gravel_percent', formData.fine_gravel_percent || '');
-    params.append('coarse_sand_percent', formData.coarse_sand_percent || '');
-    params.append('medium_sand_percent', formData.medium_sand_percent || '');
-    params.append('fine_sand_percent', formData.fine_sand_percent || '');
-    params.append('silt_clay_percent', formData.silt_clay_percent || '');
-    
-    params.append('coarse_gravel_percent_2', formData.coarse_gravel_percent_2 || '');
-    params.append('fine_gravel_percent_2', formData.fine_gravel_percent_2 || '');
-    params.append('coarse_sand_percent_2', formData.coarse_sand_percent_2 || '');
-    params.append('medium_sand_percent_2', formData.medium_sand_percent_2 || '');
-    params.append('fine_sand_percent_2', formData.fine_sand_percent_2 || '');
-    params.append('silt_clay_percent_2', formData.silt_clay_percent_2 || '');
-    
-    // Verification
-    params.append('tested_by_name', formData.tested_by_name || '');
-    params.append('tested_by_date', formData.tested_by_date || '');
-    params.append('checked_by_name', formData.checked_by_name || '');
-    params.append('checked_by_date', formData.checked_by_date || '');
-    params.append('verified_by_name', formData.verified_by_name || '');
-    params.append('verified_by_date', formData.verified_by_date || '');
-    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
-    params.append('date_of_report', new Date().toISOString().split('T')[0]);
-    
-    // Redirect to Grain Size Analysis report page
-    const reportUrl = `/GrainSizeAnalysisReport.html?${params.toString()}`;
-    window.open(reportUrl, '_blank');
-  };
-
-  const handleSaveTestDataForm4 = () => {
-    // Create URL parameters from form data for Liquid Limit Test
-    const params = new URLSearchParams();
-    
-    // General Information
-    params.append('sample_description', formData.sample_description || '');
-    params.append('date_of_receipt', formData.date_of_receipt || '');
-    params.append('sample_test_code', formData.sample_test_code || '');
-    params.append('date_of_testing', formData.date_of_testing || '');
-    params.append('quantity', formData.quantity || '');
-    params.append('sample_condition', formData.sample_condition || '');
-    params.append('test_method', formData.test_method || 'IS 2720 (PART 5)-1985');
-    
-    // Liquid Limit Determination Data
-    params.append('no_of_blows_1', formData.no_of_blows_1 || '');
-    params.append('no_of_blows_2', formData.no_of_blows_2 || '');
-    params.append('no_of_blows_3', formData.no_of_blows_3 || '');
-    params.append('no_of_blows_4', formData.no_of_blows_4 || '');
-    params.append('no_of_blows_5', formData.no_of_blows_5 || '');
-    
-    params.append('container_no_1', formData.container_no_1 || '');
-    params.append('container_no_2', formData.container_no_2 || '');
-    params.append('container_no_3', formData.container_no_3 || '');
-    params.append('container_no_4', formData.container_no_4 || '');
-    params.append('container_no_5', formData.container_no_5 || '');
-    
-    params.append('wt_container_1', formData.wt_container_1 || '');
-    params.append('wt_container_2', formData.wt_container_2 || '');
-    params.append('wt_container_3', formData.wt_container_3 || '');
-    params.append('wt_container_4', formData.wt_container_4 || '');
-    params.append('wt_container_5', formData.wt_container_5 || '');
-    
-    params.append('wt_container_wet_soil_1', formData.wt_container_wet_soil_1 || '');
-    params.append('wt_container_wet_soil_2', formData.wt_container_wet_soil_2 || '');
-    params.append('wt_container_wet_soil_3', formData.wt_container_wet_soil_3 || '');
-    params.append('wt_container_wet_soil_4', formData.wt_container_wet_soil_4 || '');
-    params.append('wt_container_wet_soil_5', formData.wt_container_wet_soil_5 || '');
-    
-    params.append('wt_container_dry_soil_1', formData.wt_container_dry_soil_1 || '');
-    params.append('wt_container_dry_soil_2', formData.wt_container_dry_soil_2 || '');
-    params.append('wt_container_dry_soil_3', formData.wt_container_dry_soil_3 || '');
-    params.append('wt_container_dry_soil_4', formData.wt_container_dry_soil_4 || '');
-    params.append('wt_container_dry_soil_5', formData.wt_container_dry_soil_5 || '');
-    
-    params.append('wt_water_1', formData.wt_water_1 || '');
-    params.append('wt_water_2', formData.wt_water_2 || '');
-    params.append('wt_water_3', formData.wt_water_3 || '');
-    params.append('wt_water_4', formData.wt_water_4 || '');
-    params.append('wt_water_5', formData.wt_water_5 || '');
-    
-    params.append('wt_dry_soil_1', formData.wt_dry_soil_1 || '');
-    params.append('wt_dry_soil_2', formData.wt_dry_soil_2 || '');
-    params.append('wt_dry_soil_3', formData.wt_dry_soil_3 || '');
-    params.append('wt_dry_soil_4', formData.wt_dry_soil_4 || '');
-    params.append('wt_dry_soil_5', formData.wt_dry_soil_5 || '');
-    
-    params.append('moisture_content_1', formData.moisture_content_1 || '');
-    params.append('moisture_content_2', formData.moisture_content_2 || '');
-    params.append('moisture_content_3', formData.moisture_content_3 || '');
-    params.append('moisture_content_4', formData.moisture_content_4 || '');
-    params.append('moisture_content_5', formData.moisture_content_5 || '');
-    
-    // Final Result
-    params.append('liquid_limit', formData.liquid_limit || '');
-    
-    // Verification
-    params.append('tested_by_name', formData.tested_by_name || '');
-    params.append('tested_by_date', formData.tested_by_date || '');
-    params.append('checked_by_name', formData.checked_by_name || '');
-    params.append('checked_by_date', formData.checked_by_date || '');
-    params.append('verified_by_name', formData.verified_by_name || '');
-    params.append('verified_by_date', formData.verified_by_date || '');
-    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
-    params.append('date_of_report', new Date().toISOString().split('T')[0]);
-    
-    // Redirect to Liquid Limit report page
-    const reportUrl = `/LiquidLimitReport.html?${params.toString()}`;
-    window.open(reportUrl, '_blank');
-  };
-
-  const handleSaveTestDataForm5 = () => {
-    // Create URL parameters from form data for Plastic Limit Test
-    const params = new URLSearchParams();
-    
-    // General Information
-    params.append('sample_description', formData.sample_description || '');
-    params.append('date_of_receipt', formData.date_of_receipt || '');
-    params.append('sample_test_code', formData.sample_test_code || '');
-    params.append('date_of_testing', formData.date_of_testing || '');
-    params.append('quantity', formData.quantity || '');
-    params.append('sample_condition', formData.sample_condition || '');
-    params.append('test_method', formData.test_method || 'IS 2720 (PART-5)-1985');
-    
-    // Plastic Limit Test Data
-    params.append('plastic_container_no_1', formData.plastic_container_no_1 || '');
-    params.append('plastic_container_no_2', formData.plastic_container_no_2 || '');
-    params.append('plastic_container_no_3', formData.plastic_container_no_3 || '');
-    params.append('plastic_container_no_4', formData.plastic_container_no_4 || '');
-    params.append('plastic_container_no_5', formData.plastic_container_no_5 || '');
-    
-    params.append('plastic_wt_container_1', formData.plastic_wt_container_1 || '');
-    params.append('plastic_wt_container_2', formData.plastic_wt_container_2 || '');
-    params.append('plastic_wt_container_3', formData.plastic_wt_container_3 || '');
-    params.append('plastic_wt_container_4', formData.plastic_wt_container_4 || '');
-    params.append('plastic_wt_container_5', formData.plastic_wt_container_5 || '');
-    
-    params.append('plastic_wt_container_wet_soil_1', formData.plastic_wt_container_wet_soil_1 || '');
-    params.append('plastic_wt_container_wet_soil_2', formData.plastic_wt_container_wet_soil_2 || '');
-    params.append('plastic_wt_container_wet_soil_3', formData.plastic_wt_container_wet_soil_3 || '');
-    params.append('plastic_wt_container_wet_soil_4', formData.plastic_wt_container_wet_soil_4 || '');
-    params.append('plastic_wt_container_wet_soil_5', formData.plastic_wt_container_wet_soil_5 || '');
-    
-    params.append('plastic_wt_container_dry_soil_1', formData.plastic_wt_container_dry_soil_1 || '');
-    params.append('plastic_wt_container_dry_soil_2', formData.plastic_wt_container_dry_soil_2 || '');
-    params.append('plastic_wt_container_dry_soil_3', formData.plastic_wt_container_dry_soil_3 || '');
-    params.append('plastic_wt_container_dry_soil_4', formData.plastic_wt_container_dry_soil_4 || '');
-    params.append('plastic_wt_container_dry_soil_5', formData.plastic_wt_container_dry_soil_5 || '');
-    
-    params.append('plastic_wt_water_1', formData.plastic_wt_water_1 || '');
-    params.append('plastic_wt_water_2', formData.plastic_wt_water_2 || '');
-    params.append('plastic_wt_water_3', formData.plastic_wt_water_3 || '');
-    params.append('plastic_wt_water_4', formData.plastic_wt_water_4 || '');
-    params.append('plastic_wt_water_5', formData.plastic_wt_water_5 || '');
-    
-    params.append('plastic_wt_dry_soil_1', formData.plastic_wt_dry_soil_1 || '');
-    params.append('plastic_wt_dry_soil_2', formData.plastic_wt_dry_soil_2 || '');
-    params.append('plastic_wt_dry_soil_3', formData.plastic_wt_dry_soil_3 || '');
-    params.append('plastic_wt_dry_soil_4', formData.plastic_wt_dry_soil_4 || '');
-    params.append('plastic_wt_dry_soil_5', formData.plastic_wt_dry_soil_5 || '');
-    
-    params.append('plastic_moisture_content_1', formData.plastic_moisture_content_1 || '');
-    params.append('plastic_moisture_content_2', formData.plastic_moisture_content_2 || '');
-    params.append('plastic_moisture_content_3', formData.plastic_moisture_content_3 || '');
-    params.append('plastic_moisture_content_4', formData.plastic_moisture_content_4 || '');
-    params.append('plastic_moisture_content_5', formData.plastic_moisture_content_5 || '');
-    
-    // Final Results
-    params.append('plastic_limit', formData.plastic_limit || '');
-    params.append('plastic_index', formData.plastic_index || '');
-    
-    // Verification
-    params.append('tested_by_name', formData.tested_by_name || '');
-    params.append('tested_by_date', formData.tested_by_date || '');
-    params.append('checked_by_name', formData.checked_by_name || '');
-    params.append('checked_by_date', formData.checked_by_date || '');
-    params.append('verified_by_name', formData.verified_by_name || '');
-    params.append('verified_by_date', formData.verified_by_date || '');
-    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
-    params.append('date_of_report', new Date().toISOString().split('T')[0]);
-    
-    // Redirect to Plastic Limit report page
-    const reportUrl = `/PlasticLimitReport.html?${params.toString()}`;
-    window.open(reportUrl, '_blank');
-  };
-
-  const handleSaveTestDataForm6 = () => {
-    // Create URL parameters from form data for Water Content Test
-    const params = new URLSearchParams();
-    
-    // General Information
-    params.append('sample_description', formData.sample_description || '');
-    params.append('date_of_receipt', formData.date_of_receipt || '');
-    params.append('sample_test_code', formData.sample_test_code || '');
-    params.append('date_of_testing', formData.date_of_testing || '');
-    params.append('quantity', formData.quantity || '');
-    params.append('sample_condition', formData.sample_condition || '');
-    params.append('test_method', formData.test_method || 'IS 2720 (PART 2)-1973');
-    
-    // Water Content Test Data
-    params.append('water_container_no', formData.water_container_no || '');
-    params.append('water_mass_container', formData.water_mass_container || '');
-    params.append('water_mass_container_wet_soil', formData.water_mass_container_wet_soil || '');
-    params.append('water_mass_container_dry_soil', formData.water_mass_container_dry_soil || '');
-    params.append('water_mass_moisture', formData.water_mass_moisture || '');
-    params.append('water_mass_dry_soil', formData.water_mass_dry_soil || '');
-    params.append('water_content_percentage', formData.water_content_percentage || '');
-    
-    // Verification
-    params.append('tested_by_name', formData.tested_by_name || '');
-    params.append('tested_by_date', formData.tested_by_date || '');
-    params.append('checked_by_name', formData.checked_by_name || '');
-    params.append('checked_by_date', formData.checked_by_date || '');
-    params.append('verified_by_name', formData.verified_by_name || '');
-    params.append('verified_by_date', formData.verified_by_date || '');
-    params.append('authorized_by', formData.authorized_by || 'Prakarsh Sangave');
-    params.append('date_of_report', new Date().toISOString().split('T')[0]);
-    
-    // Redirect to Water Content report page
-    const reportUrl = `/WaterContentReport.html?${params.toString()}`;
-    window.open(reportUrl, '_blank');
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -979,52 +2145,41 @@ const SoilTestingForm = () => {
                   <FontAwesomeIcon icon={faMagic} className="me-2" />
                   Fill Random Data
                 </Button>
-                {currentTest === 1 && selectedTests.includes('compactionTest') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestData}>
+                <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveAndNext}>
                     <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
+                  {(() => {
+                    // Create mapping from form numbers to test keys
+                    const formNumberToTest = {
+                      1: 'compactionTest',
+                      2: 'freeSwellIndex',
+                      3: 'grainSizeAnalysis',
+                      4: 'liquidLimit',
+                      5: 'plasticLimit',
+                      6: 'waterContent'
+                    };
+                    
+                    // Find the current test key
+                    const currentTestKey = formNumberToTest[currentTest];
+                    
+                    // Find the index of current test in selected tests
+                    const currentIndex = selectedTests.indexOf(currentTestKey);
+                    
+                    // If this is the last selected test, show "Save and Generate Report"
+                    return currentIndex === selectedTests.length - 1 ? 'Save and Generate Report' : 'Save and Next';
+                  })()}
                   </Button>
-                ) : currentTest === 2 && selectedTests.includes('freeSwellIndex') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestDataForm2}>
-                    <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : currentTest === 3 && selectedTests.includes('grainSizeAnalysis') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestDataForm3}>
-                    <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : currentTest === 4 && selectedTests.includes('liquidLimit') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestDataForm4}>
-                    <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : currentTest === 5 && selectedTests.includes('plasticLimit') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestDataForm5}>
-                    <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : currentTest === 6 && selectedTests.includes('waterContent') ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveTestDataForm6}>
-                    <FontAwesomeIcon icon={faEye} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : currentTest < 6 ? (
-                  <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={() => setCurrentTest(currentTest + 1)}>
-                    <FontAwesomeIcon icon={faSave} className="me-2" />
-                    Save and Next
-                  </Button>
-                ) : (
-                  <Button variant="success" type="submit" className="btn-lg btn-vitrag-primary">
-                    <FontAwesomeIcon icon={faSave} className="me-2" />
-                    Save Test Data
-                  </Button>
-                )}
               </div>
             </Col>
           </Row>
         </Form>
       </Container>
+
+      {/* Soil Testing Selection Popup */}
+      <SoilTestingSelection
+        show={showSelectionPopup}
+        onHide={handleSelectionHide}
+        onProceed={handleSelectionProceed}
+      />
     </div>
   );
 };

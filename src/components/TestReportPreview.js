@@ -115,8 +115,97 @@ const TestReportPreview = () => {
 
 
   const handleViewPDF = () => {
-    // Navigate to the existing HTML PDF file
-    window.open('/cubeTestingReport.html', '_blank');
+    // Build URL parameters from testData
+    const params = new URLSearchParams();
+    
+    console.log('Full testData:', testData); // Debug log
+    
+    // Get cube test data - handle both old and new data structure
+    const cubeTest = testData.cubeTests ? testData.cubeTests[0] : testData;
+    
+    // Customer Information (Page 1 & Page 2)
+    params.append('customer_name', testData.customerName || '');
+    params.append('site_name', testData.siteName || '');
+    params.append('site_address', testData.siteAddress || '');
+    params.append('job_code_number', testData.jobNumber || '');
+    params.append('ulr_number', cubeTest.ulrNumber || testData.ulrNumber || '');
+    params.append('reference_number', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    
+    // Dates
+    params.append('date_of_report', new Date().toISOString().split('T')[0]);
+    params.append('date_of_receipt', testData.receiptDate || '');
+    params.append('date_of_material_receipt', testData.receiptDate || '');
+    params.append('date_of_casting', cubeTest.castingDate || testData.castingDate || '');
+    params.append('date_of_testing', cubeTest.testingDate || testData.testingDate || '');
+    
+    // Test Information (Page 1 - from TestObservations)
+    params.append('sample_test_code', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    params.append('sample_description', testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('material_description', testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('quantity_of_blocks', cubeTest.quantity || testData.quantity || '');
+    params.append('grade_of_blocks', cubeTest.grade || testData.grade || '');
+    params.append('blocks_condition', testData.cubeCondition || cubeTest.cubeCondition || 'Acceptable');
+    params.append('condition_of_sample', testData.cubeCondition || cubeTest.cubeCondition || 'Acceptable');
+    params.append('manufacture_of_blocks', `${cubeTest.ageInDays || testData.ageInDays || ''} Days`);
+    params.append('curing_condition', testData.curingCondition || cubeTest.curingCondition || '');
+    params.append('machine_used_for_testing', testData.machineUsed || cubeTest.machineUsed || '');
+    params.append('location_of_testing', 'Permanent');
+    params.append('environmental_conditions', 'Laboratory Conditions');
+    
+    // Test Results - from TestObservations rows data
+    const testResults = cubeTest.testResults || testData.testResults || testData.rows || [];
+    console.log('Test Results:', testResults); // Debug log
+    
+    testResults.forEach((result, index) => {
+      const i = index + 1;
+      params.append(`block_id_${i}`, result.cubeId || result.idMark || '');
+      params.append(`length_${i}`, result.length || result.dimensionLength || '');
+      params.append(`breadth_${i}`, result.breadth || result.dimensionWidth || '');
+      params.append(`height_${i}`, result.height || result.dimensionHeight || '');
+      params.append(`area_${i}`, result.area || '');
+      params.append(`weight_${i}`, result.weight || '');
+      params.append(`load_max_${i}`, result.crushingLoad || '');
+      params.append(`density_${i}`, result.density || '');
+      params.append(`compressive_strength_${i}`, result.compressiveStrength || '');
+      params.append(`failure_type_${i}`, result.failureType || '-');
+    });
+    
+    // Remarks - from TestObservations
+    params.append('remarks', testData.testRemarks || testData.remarks || '');
+    
+    // Verification/Authorization - from TestObservations
+    params.append('tested_by_name', testData.testedBy || 'John Doe');
+    params.append('tested_by_date', testData.testedDate || new Date().toLocaleDateString('en-GB'));
+    params.append('checked_by_name', testData.checkedBy || 'Jane Smith');
+    params.append('checked_by_date', testData.checkedDate || new Date().toLocaleDateString('en-GB'));
+    params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name || 'Prakarsh A Sangave');
+    params.append('verified_by_date', testData.verifiedDate || new Date().toLocaleDateString('en-GB'));
+    
+    // Strength Graph Data - from StrengthGraph
+    console.log('testData.strengthData:', testData.strengthData);
+    if (testData.strengthData) {
+      params.append('required_7', testData.strengthData.required_7 || '15.0');
+      params.append('actual_7', testData.strengthData.actual_7 || '0');
+      params.append('required_14', testData.strengthData.required_14 || '22.5');
+      params.append('actual_14', testData.strengthData.actual_14 || '0');
+      params.append('required_28', testData.strengthData.required_28 || '30.0');
+      params.append('actual_28', testData.strengthData.actual_28 || '0');
+      console.log('Strength params:', {
+        required_7: testData.strengthData.required_7,
+        actual_7: testData.strengthData.actual_7,
+        required_14: testData.strengthData.required_14,
+        actual_14: testData.strengthData.actual_14,
+        required_28: testData.strengthData.required_28,
+        actual_28: testData.strengthData.actual_28
+      });
+    } else {
+      console.warn('No strengthData found in testData!');
+    }
+    
+    // Navigate to the existing HTML PDF file with parameters
+    const reportUrl = `/cubeTestingReport.html?${params.toString()}`;
+    console.log('Opening report with URL:', reportUrl); // Debug log
+    window.open(reportUrl, '_blank');
   };
 
   return (

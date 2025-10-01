@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="timestamp" content="2025-01-27-v8">
+  <title>Vitrag Associates LLP - Bulk Density & Moisture Content Report (A4)</title>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script>
+    // Test jsPDF availability
+    window.addEventListener('load', function() {
+      console.log('Page loaded, checking libraries...');
+      console.log('jsPDF available:', typeof window.jsPDF !== 'undefined');
+      
+      if (typeof window.jsPDF !== 'undefined') {
+        console.log('jsPDF library loaded successfully');
+      } else {
+        console.error('jsPDF library failed to load, trying alternative...');
+        // Try alternative CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = function() {
+          console.log('Alternative jsPDF loaded');
+        };
+        script.onerror = function() {
+          console.error('All jsPDF sources failed');
+        };
+        document.head.appendChild(script);
+      }
+    });
+    
+    function loadAlternativePDF() {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.onload = function() {
+        if (typeof window.jsPDF !== 'undefined') {
+          console.log('Alternative jsPDF library loaded successfully');
+        } else {
+          console.error('All jsPDF libraries failed to load');
+        }
+      };
+      script.onerror = function() {
+        console.error('Alternative jsPDF library also failed');
+        // Create a fallback PDF generation method
+        createFallbackPDF();
+      };
+      document.head.appendChild(script);
+    }
+    
+    function createFallbackPDF() {
+      // Fallback: Use browser's print to PDF
+      window.fallbackPDF = function() {
+        console.log('Using fallback PDF method (browser print)');
+        window.print();
+      };
+      
+      // Also create a simple PDF generation method using data URLs
+      window.simplePDF = function() {
+        console.log('Creating simple PDF using data URL method');
+        createSimplePDFDataURL();
+      };
+      
+      console.log('Fallback PDF methods created (browser print + data URL)');
+    }
+    
+    // Create fallback methods immediately
+    createFallbackPDF();
+    
+    // Debug: Check if functions were created
+    setTimeout(() => {
+      console.log('Fallback functions check:');
+      console.log('window.fallbackPDF:', typeof window.fallbackPDF);
+      console.log('window.simplePDF:', typeof window.simplePDF);
+    }, 1000);
+    
+    function createSimplePDFDataURL() {
+      // Create a simple HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Liquid Admixture Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .subtitle { font-size: 16px; color: #666; }
+            .section { margin: 20px 0; }
+            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; }
+            .info-row { margin: 5px 0; }
+            .label { font-weight: bold; display: inline-block; width: 200px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+            th { background-color: #f0f0f0; }
+            .footer { margin-top: 50px; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">VITRAG ASSOCIATES LLP</div>
+            <div class="subtitle">(CONSTRUCTION MATERIAL TESTING LABORATORY)</div>
+            <div class="title" style="margin-top: 20px; font-size:21px; height:1cm; display:flex; align-items:center; justify-content:center;">Determination of Bulk Density & Moisture Content of AAC Block</div>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">GENERAL INFORMATION</div>
+            <div class="info-row"><span class="label">Sample Description:</span> ${getURLParam('sample_description') || 'Liquid Admixture for concrete - Superplasticizer type'}</div>
+            <div class="info-row"><span class="label">Date of Receipt:</span> ${getURLParam('date_of_receipt') || '2025-09-18'}</div>
+            <div class="info-row"><span class="label">Sample Test Code:</span> ${getURLParam('sample_test_code') || 'LA-2024-001'}</div>
+            <div class="info-row"><span class="label">Date of Testing:</span> ${getURLParam('date_of_testing') || '2025-09-18'}</div>
+            <div class="info-row"><span class="label">Test Method:</span> IS 9103:1999</div>
+            <div class="info-row"><span class="label">Environmental Conditions:</span> Laboratory Conditions: 27°C ± 2°C, 65% ± 5% RH</div>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">TEST RESULT</div>
+            <table>
+              <tr>
+                <th rowspan="2">Sr. No.</th>
+                <th rowspan="2">Weight of Sample before oven drying (kg)</th>
+                <th rowspan="2">Weight of Sample after oven drying (kg)</th>
+                <th colspan="3" style="text-align: center;">Size of Sample</th>
+                <th rowspan="2">Volume of Sample (m³)</th>
+                <th rowspan="2">Bulk Density (kg/m³)</th>
+                <th rowspan="2">Moisture Content (%)</th>
+              </tr>
+              <tr>
+                <th style="text-align: center;">L<br>(mm)</th>
+                <th style="text-align: center;">B<br>(mm)</th>
+                <th style="text-align: center;">D<br>(mm)</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td id="weight-before-1"></td>
+                <td id="weight-after-1"></td>
+                <td id="length-1" style="text-align: center;"></td>
+                <td id="breadth-1" style="text-align: center;"></td>
+                <td id="depth-1" style="text-align: center;"></td>
+                <td id="volume-1"></td>
+                <td id="bulk-density-1"></td>
+                <td id="moisture-content-1"></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td id="weight-before-2"></td>
+                <td id="weight-after-2"></td>
+                <td id="length-2" style="text-align: center;"></td>
+                <td id="breadth-2" style="text-align: center;"></td>
+                <td id="depth-2" style="text-align: center;"></td>
+                <td id="volume-2"></td>
+                <td id="bulk-density-2"></td>
+                <td id="moisture-content-2"></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td id="weight-before-3"></td>
+                <td id="weight-after-3"></td>
+                <td id="length-3" style="text-align: center;"></td>
+                <td id="breadth-3" style="text-align: center;"></td>
+                <td id="depth-3" style="text-align: center;"></td>
+                <td id="volume-3"></td>
+                <td id="bulk-density-3"></td>
+                <td id="moisture-content-3"></td>
+              </tr>
+              <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="3" style="text-align: right; padding-right: 10px;">Average</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">REMARKS</div>
+            <div>${getURLParam('remarks') || 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'}</div>
+          </div>
+          
+          <div class="section">
+            <div class="info-row"><strong>Tested By:</strong> ${getURLParam('tested_by_name') || 'John Doe'}</div>
+            <div class="info-row"><strong>Reviewed By:</strong> ${getURLParam('checked_by_name') || 'Jane Smith'}</div>
+            <div class="info-row"><strong>Authorized By:</strong> Dr. Michael Johnson</div>
+          </div>
+          
+          <div class="footer">
+            Document No- VA/QF/04/05/01, Rev/Issue No- 00/00, Date - 18/09/2025
+          </div>
+        </body>
+        </html>
+      `;
+      
+      // Create a new window with the HTML content
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+      
+      // Wait for content to load, then trigger print
+      newWindow.onload = function() {
+        setTimeout(() => {
+          newWindow.print();
+          // Close the window after a delay
+          setTimeout(() => {
+            newWindow.close();
+          }, 1000);
+        }, 500);
+      };
+    }
+    
+    function getURLParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    function calculateAverage() {
+      const values = [];
+      for (let i = 1; i <= 3; i++) {
+        const value = parseFloat(getURLParam('relative_density_' + i));
+        if (!isNaN(value)) {
+          values.push(value);
+        }
+      }
+      if (values.length > 0) {
+        const sum = values.reduce((a, b) => a + b, 0);
+        return (sum / values.length).toFixed(4);
+      }
+      return '1.2274';
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="timestamp" content="2025-01-27-v3">
+    <style>
+    :root{
+      --paper-width:210mm;
+      --paper-height:297mm;
+      --page-padding:14mm;
+      --title-color:#b30000;
+      --subtitle-color:#063a6c;
+      --inner-border:1px solid #222;
+      --muted:#666;
+      --header-font:'Times New Roman', Times, serif;
+      --base-font-size:16px;
+    }
+
+    @page { size: A4; margin: 10mm; }
+    html,body{height:100%; margin:0; padding:0;}
+    body{
+      font-family:var(--header-font);
+      -webkit-print-color-adjust:exact;
+      background:#ffffff;
+      margin:0;
+      padding:0;
+      color:#111;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    .page{
+      width:var(--paper-width);
+      min-height:var(--paper-height);
+      background:#fff;
+      box-shadow:0 0 20px rgba(0,0,0,0.1);
+      padding:var(--page-padding);
+      box-sizing:border-box;
+      position:relative;
+      font-size:var(--base-font-size);
+      line-height:1.15;
+      margin:20px 0;
+      border:1px solid #ddd;
+    }
+
+     /* Header */
+     .header{ width:100%; border-collapse:collapse; table-layout:fixed; }
+     .header td{ border:1px solid #111; vertical-align:middle; padding:12px 16px; }
+     .logo-cell{ width:3.26cm; text-align:center; }
+     .logo-cell img{ width:3.26cm; height:auto; object-fit:contain; }
+     .title-cell{ text-align:center; font-weight:700; }
+     .title-cell h1{ margin:0; font-size:33px; font-weight:700; color:var(--title-color); text-transform:uppercase; line-height:1.0; }
+     .title-cell .subtitle{ display:block; margin-top:8px; font-size:19px; font-weight:700; color:var(--subtitle-color); line-height:1.0; white-space:nowrap; }
+
+     /* Title box */
+     .box{ margin-top:10px; border:1px solid #111; font-weight:700; font-size:16px; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; height:1cm; width:100%; display:flex; align-items:center; justify-content:center; }
+
+    /* Metadata table */
+    .meta-wrap{ margin-top:10px; }
+    table.meta{ width:100%; border-collapse:collapse; table-layout:fixed; }
+    table.meta td{ border:1px solid #111; padding:0 6px; height:0.7cm; vertical-align:middle; font-size:16px; }
+
+    /* Test result */
+    .test-result{ margin-top:24px; padding:0; }
+     .test-result h3{ margin:0; text-align:center; font-size:16px; font-weight:700; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; border:none; }
+
+    table.results{ width:100%; border-collapse:collapse; margin-top:8px; font-size:16px; table-layout:fixed !important; }
+    
+    table.results th, table.results td{ border:1px solid #111; text-align:center; vertical-align:middle; }
+    table.results thead th{ background:#f7f2f2; font-weight:700; font-size:12pt; padding:4px; }
+    table.results tbody tr{ height:45px; }
+    
+    /* First header row heights (after TEST RESULT title) */
+    table.results thead tr:nth-child(2) th:nth-child(1){ height:25px !important; width:3% !important; } /* Sr. No. - 3% */
+    table.results thead tr:nth-child(2) th:nth-child(2){ height:25px !important; width:50% !important; } /* Weight before - 50% */
+    table.results thead tr:nth-child(2) th:nth-child(3){ height:25px !important; width:40% !important; } /* Weight after - 40% */
+    table.results thead tr:nth-child(2) th:nth-child(4){ height:2px !important; } /* Size of Sample - further decreased height */
+    table.results thead tr:nth-child(2) th:nth-child(7){ height:25px !important; width:8% !important; } /* Volume - percentage width */
+    table.results thead tr:nth-child(2) th:nth-child(8){ height:25px !important; width:5% !important; } /* Bulk Density - percentage width */
+    table.results thead tr:nth-child(2) th:nth-child(9){ height:25px !important; width:5% !important; } /* Moisture Content - percentage width */
+    
+    /* Second header row heights (sub-headers) */
+    table.results thead tr:nth-child(3) th:nth-child(1){ height:5px !important; width:0.1% !important; } /* L (mm) - compact */
+    table.results thead tr:nth-child(3) th:nth-child(2){ height:5px !important; width:0.1% !important; } /* B (mm) - compact */
+    table.results thead tr:nth-child(3) th:nth-child(3){ height:5px !important; width:0.1% !important; } /* D (mm) - compact */
+    
+    /* Additional height enforcement */
+    table.results thead tr:nth-child(2){ height: 12px !important; }
+    table.results thead tr:nth-child(3){ height: 3px !important; }
+    
+    /* Override any conflicting padding/margin */
+    table.results thead th{ padding: 2px !important; margin: 0 !important; }
+    
+    /* Force column widths using percentages */
+    table.results th:nth-child(1), table.results td:nth-child(1){ width: 3% !important; min-width: 3% !important; max-width: 3% !important; padding: 1px !important; }
+    
+    table.results th:nth-child(2), table.results td:nth-child(2){ width: 50% !important; min-width: 50% !important; max-width: 50% !important; }
+    
+    /* ULTRA-AGGRESSIVE overrides - should override everything */
+    table.results thead tr:nth-child(2) th:nth-child(1),
+    table.results thead tr:nth-child(3) th:nth-child(1),
+    table.results tbody tr td:nth-child(1),
+    table.results tfoot tr td:nth-child(1) {
+        width: 3% !important;
+        min-width: 3% !important;
+        max-width: 3% !important;
+        max-width: 30px !important;
+    }
+    
+    table.results thead tr:nth-child(2) th:nth-child(2),
+    table.results thead tr:nth-child(3) th:nth-child(2),
+    table.results tbody tr td:nth-child(2),
+    table.results tfoot tr td:nth-child(2) {
+        width: 50% !important;
+        min-width: 50% !important;
+        max-width: 50% !important;
+    }
+    
+    /* Force table layout to respect our widths */
+    table.results {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+    table.results th:nth-child(3), table.results td:nth-child(3){ width: 40% !important; min-width: 40% !important; max-width: 40% !important; }
+    table.results th:nth-child(4), table.results td:nth-child(4){ width: 0.1% !important; min-width: 0.1% !important; max-width: 0.1% !important; } /* L (mm) - compact */
+    table.results th:nth-child(5), table.results td:nth-child(5){ width: 0.1% !important; min-width: 0.1% !important; max-width: 0.1% !important; } /* B (mm) - compact */
+    table.results th:nth-child(6), table.results td:nth-child(6){ width: 0.1% !important; min-width: 0.1% !important; max-width: 0.1% !important; } /* D (mm) - compact */
+    table.results th:nth-child(7), table.results td:nth-child(7){ width: 8% !important; min-width: 8% !important; max-width: 8% !important; }
+    table.results th:nth-child(8), table.results td:nth-child(8){ width: 5% !important; min-width: 5% !important; max-width: 5% !important; }
+    table.results th:nth-child(9), table.results td:nth-child(9){ width: 5% !important; min-width: 5% !important; max-width: 5% !important; }
+    table.results tfoot td{ border:1px solid #111; height:1.2cm; font-weight:700; text-align:left; padding-left:6px; }
+    table.results tfoot td:first-child{ text-align:right; padding-right:6px; }
+    table.results tfoot td:last-child{ text-align:center; }
+    table.results tfoot tr:nth-child(2) td{ height:60mm; vertical-align:top; text-align:left; padding:8px; font-weight:normal; }
+    table.results tfoot tr:nth-child(3) td, table.results tfoot tr:nth-child(4) td, table.results tfoot tr:nth-child(5) td{ height:0.7cm; font-weight:700; padding:4px; text-align:left; }
+    
+    /* Force column widths for signature table */
+    table.results tfoot tr:nth-child(3) td:first-child{ width:18% !important; }
+    table.results tfoot tr:nth-child(3) td:nth-child(2){ width:18% !important; }
+    table.results tfoot tr:nth-child(3) td:last-child{ width:64% !important; white-space:nowrap !important; }
+    table.results tfoot tr:nth-child(4) td:first-child{ width:18% !important; }
+    table.results tfoot tr:nth-child(4) td:nth-child(2){ width:18% !important; }
+    table.results tfoot tr:nth-child(4) td:last-child{ width:64% !important; }
+    table.results tfoot tr:nth-child(5) td:first-child{ width:18% !important; }
+    table.results tfoot tr:nth-child(5) td:nth-child(2){ width:18% !important; }
+    table.results tfoot tr:nth-child(5) td:last-child{ width:64% !important; }
+
+    .sig-title{ font-weight:700; }
+
+     .doc-footer{ position:absolute; bottom:2mm; left:var(--page-padding); right:var(--page-padding); text-align:center; font-size:16px; color:var(--muted); }
+
+    /* Second Page Styles */
+    .title-table{ width:100%; border-collapse:collapse; margin-bottom:12px; position:relative; }
+    .title-table td{ border:none; text-align:center; vertical-align:middle; padding:8px; }
+    .title-table .logo-cell{ width:auto; }
+    .title-table .center-cell{ width:auto; min-width:300px; }
+    .logo-left{ position:absolute; left:5mm; top:10mm; z-index:10; }
+    .logo-right{ position:absolute; right:5mm; top:5mm; z-index:10; }
+    .logo-left img{ width:4.19cm; height:2.59cm; border:1px solid #666; }
+    .logo-right img{ width:3.16cm; height:3.7cm; }
+    .title-table .main{ font-size:33px; font-weight:bold; color:#C00000; text-transform:uppercase; }
+    .title-table .sub{ font-size:19px; font-weight:bold; color:#1F4E79; }
+    .separator-line{ width:11.6cm; height:0.05cm; background-color:#000; margin:-8px auto 10px auto; margin-left:3.9cm; box-shadow:2px 2px 4px rgba(0,0,0,0.3); }
+
+    .section-title{ text-align:center; font-weight:700; text-transform:uppercase; margin:10px 0; text-decoration:underline; font-size:19px; }
+
+    .terms{ font-size:14.67px; margin-top:40px; font-weight:normal; }
+    .terms ol{ margin:0; padding-left:16px; }
+    .terms li{ margin-bottom:4px; font-weight:normal; }
+    .terms li:before{ content: counter(item) ") "; counter-increment: item; font-weight:normal; }
+    .terms ol{ counter-reset: item; }
+    .terms li{ display: block; }
+    .terms h4{ margin-bottom:12px; }
+    .terms-table{ width:100%; border-collapse:collapse; margin-top:12px; }
+    .terms-table td{ border:none; vertical-align:top; padding:2px 0; }
+    .terms-table .number-col{ width:15px; font-weight:normal; }
+    .terms-table .content-col{ padding-left:10px; font-weight:normal; }
+
+    .subsection-title{ text-align:center; font-weight:700; text-transform:none; margin:10px 0 12px 0; text-decoration:underline; font-size:17px; }
+
+    .test-witnessed{ font-weight:bold; text-decoration:underline; color:rgb(0, 32, 96); font-size:16px; margin:8px 0 4px 0; }
+
+    .signatories{ margin-top:20px; font-size:15px; }
+    .signatories-table{ width:100%; border-collapse:collapse; }
+    .signatories-table td{ border:none; vertical-align:top; padding:0; }
+    .signatories-table .left-col{ width:50%; font-weight:bold; color:#1F4E79; padding-right:20px; }
+    .signatories-table .right-col{ width:50%; font-weight:bold; color:#1F4E79; padding-left:40px; }
+    .signatories-table .label{ font-weight:bold; color:#1F4E79; }
+    .signatories-table .details-col{ padding-left:60px; font-weight:bold; color:#1F4E79; line-height:1.4; }
+    .signatories-table .right-col .details-col{ white-space: nowrap; }
+    .terms h4{ margin-bottom:12px; }
+
+    .footer{ margin-top:16px; font-size:16px; color:#333; }
+    .footer .end-report{ font-weight:bold; font-size:16px; text-align:center; white-space:nowrap; overflow:hidden; color:#000; margin:0 -14mm; }
+    .footer .contact-info{ color:red; font-size:16px; text-align:center; margin-top:16px; }
+    .footer .page-info{ position:absolute; bottom:5mm; right:10mm; font-size:16px; color:black; text-align:right; line-height:1.2; }
+
+    /* Customer Info Table */
+    .customer-table{ width:100%; border-collapse:collapse; margin-bottom:12px; font-size:11pt; table-layout:auto; }
+    .customer-table td{ border:1px solid #111; padding:2px; height:0.35cm; vertical-align:middle; }
+    .customer-table td:first-child{ font-weight:normal; width:25%; }
+    .customer-table td:nth-child(2){ width:30%; }
+    .customer-table td:nth-child(3){ width:10%; }
+    .customer-table td:nth-child(4){ width:33%; }
+    
+    /* Specific column width adjustments */
+    .customer-table tr:nth-child(2) td:nth-child(3){ width:10% !important; white-space:nowrap; } /* ULR Number - 10% */
+    .customer-table tr:nth-child(3) td:nth-child(3){ width:10% !important; white-space:nowrap; } /* Job Code Number - 10% */
+    .customer-table tr:nth-child(4) td:nth-child(3){ width:10% !important; white-space:nowrap; } /* Period of Testing - 10% */
+    .customer-table tr:nth-child(5) td:nth-child(3){ width:10% !important; white-space:nowrap; } /* Condition of Sample - 10% */
+
+    /* Test Results Table */
+    .test-results-table{ width:100%; border-collapse:collapse; margin:12px auto; font-size:14px; table-layout:fixed; }
+    .test-results-table th, .test-results-table td{ border:1px solid #111; padding:2px; text-align:center; vertical-align:middle; }
+    .test-results-table th{ background-color:transparent; font-weight:bold; height:0.4cm; }
+    .test-results-table tbody tr{ height:0.35cm; }
+    
+    /* Column widths */
+    .test-results-table th:nth-child(1), .test-results-table td:nth-child(1){ width:5%; } /* Sr. No. - minimum width */
+    .test-results-table th:nth-child(2), .test-results-table td:nth-child(2){ width:12%; } /* ID Mark */
+    .test-results-table th:nth-child(3), .test-results-table td:nth-child(3){ width:25%; } /* Dimensions (L x B x H) */
+    .test-results-table th:nth-child(4), .test-results-table td:nth-child(4){ width:20%; } /* Weight Before */
+    .test-results-table th:nth-child(5), .test-results-table td:nth-child(5){ width:20%; } /* Weight After */
+    .test-results-table th:nth-child(6), .test-results-table td:nth-child(6){ width:15%; } /* Volume */
+
+    /* Bulk Density Results Table */
+    .bulk-density-results-table{ width:60%; border-collapse:collapse; margin:12px auto; font-size:14px; table-layout:fixed; }
+    .bulk-density-results-table th, .bulk-density-results-table td{ border:1px solid #111; padding:2px; text-align:center; vertical-align:middle; }
+    .bulk-density-results-table th{ background-color:transparent; font-weight:bold; height:0.4cm; }
+    .bulk-density-results-table tbody tr{ height:0.35cm; }
+    
+    /* Column widths for bulk density results table */
+    .bulk-density-results-table th:nth-child(1), .bulk-density-results-table td:nth-child(1){ width:8%; } /* Sr. No. - minimum width */
+    .bulk-density-results-table th:nth-child(2), .bulk-density-results-table td:nth-child(2){ width:20%; } /* ID Mark - increased width */
+    .bulk-density-results-table th:nth-child(3), .bulk-density-results-table td:nth-child(3){ width:15%; } /* Bulk Density - decreased width */
+    .bulk-density-results-table th:nth-child(4), .bulk-density-results-table td:nth-child(4){ width:18%; } /* Moisture Content - increased width */
+
+    /* Utility Classes */
+    .text-center{ text-align: center; }
+    .text-right{ text-align: right; }
+    .pr-2{ padding-right: 10px; }
+
+    /* Download PDF Button */
+    .download-btn{ 
+      position:fixed; 
+      top:20px; 
+      right:20px; 
+      background:#28a745; 
+      color:white; 
+      border:none; 
+      padding:12px 20px; 
+      border-radius:6px; 
+      font-size:14px; 
+      font-weight:bold; 
+      cursor:pointer; 
+      box-shadow:0 2px 8px rgba(0,0,0,0.2);
+      z-index:1000;
+    }
+    .download-btn:hover{ background:#218838; }
+
+    @media print{ 
+      body{ 
+        background:white; 
+        margin: 0;
+                padding: 0;
+            }
+      .page{ 
+        box-shadow:none; 
+        margin: 0;
+        padding: 14mm;
+        width: 210mm;
+        min-height: 297mm;
+        max-height: 297mm;
+        overflow: hidden;
+      } 
+      .download-btn{ display:none !important; }
+      
+      /* Ensure exact A4 dimensions */
+      @page {
+        size: A4;
+                margin: 0;
+            }
+            
+      /* Hide any elements that might cause page breaks */
+      .page * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="page">
+
+             <table class="header">
+        <tr>
+          <td class="logo-cell"><img src="../logo.png" alt="Vitrag Associates logo"></td>
+          <td class="title-cell">
+            <h1>VITRAG ASSOCIATES LLP</h1>
+            <div class="subtitle">(CONSTRUCTION MATERIAL TESTING LABORATORY)</div>
+          </td>
+        </tr>
+             </table>
+
+    <div class="meta-wrap">
+      <table class="meta">
+        <tr>
+          <td colspan="4" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21px; height:1cm;">Determination of Bulk Density & Moisture Content of AAC Block</td>
+        </tr>
+        <tr>
+          <td><strong>Sample Description</strong></td>
+          <td id="sample-description"></td>
+          <td><strong>Sample Test Code Number</strong></td>
+          <td id="sample-test-code"></td>
+        </tr>
+        <tr>
+          <td><strong>Date of Receipt</strong></td>
+          <td id="date-of-receipt"></td>
+          <td><strong>Date of Testing</strong></td>
+          <td id="date-of-testing"></td>
+        </tr>
+        <tr>
+          <td><strong>Test Method</strong></td>
+          <td>IS 9103:1999</td>
+          <td><strong>Environmental Conditions</strong></td>
+          <td id="environmental-conditions">Laboratory Conditions</td>
+        </tr>
+      </table>
+            </div>
+
+            <div class="test-result">
+      <table class="results">
+                    <thead>
+                        <tr>
+                            <td colspan="9" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21px; height:1cm;">TEST RESULT</td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2">Sr. No.</th>
+                            <th rowspan="2">Weight of Sample before oven drying (kg)</th>
+                            <th rowspan="2">Weight of Sample after oven drying (kg)</th>
+                            <th colspan="3" class="text-center">Size of Sample</th>
+                            <th rowspan="2">Volume of Sample (m³)</th>
+                            <th rowspan="2">Bulk Density (kg/m³)</th>
+                            <th rowspan="2">Moisture Content (%)</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center">L<br>(mm)</th>
+                            <th class="text-center">B<br>(mm)</th>
+                            <th class="text-center">D<br>(mm)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td id="weight-before-1"></td>
+                            <td id="weight-after-1"></td>
+                            <td id="length-1" class="text-center"></td>
+                            <td id="breadth-1" class="text-center"></td>
+                            <td id="depth-1" class="text-center"></td>
+                            <td id="volume-1"></td>
+                            <td id="bulk-density-1"></td>
+                            <td id="moisture-content-1"></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td id="weight-before-2"></td>
+                            <td id="weight-after-2"></td>
+                            <td id="length-2" class="text-center"></td>
+                            <td id="breadth-2" class="text-center"></td>
+                            <td id="depth-2" class="text-center"></td>
+                            <td id="volume-2"></td>
+                            <td id="bulk-density-2"></td>
+                            <td id="moisture-content-2"></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td id="weight-before-3"></td>
+                            <td id="weight-after-3"></td>
+                            <td id="length-3" class="text-center"></td>
+                            <td id="breadth-3" class="text-center"></td>
+                            <td id="depth-3" class="text-center"></td>
+                            <td id="volume-3"></td>
+                            <td id="bulk-density-3"></td>
+                            <td id="moisture-content-3"></td>
+                        </tr>
+                    </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="7" class="text-right pr-2">Average</td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td colspan="9">
+              <div><strong>Remarks:</strong></div>
+              <div id="remarks-content"></div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">Tested By: <span id="tested-by-name">John Doe</span></td>
+            <td colspan="3">Checked By: <span id="checked-by-name">Jane Smith</span></td>
+            <td colspan="3">Verified By: <span id="verified-by-name">Prakarsh A Sangave</span></td>
+          </tr>
+          <tr>
+            <td colspan="3">Date: <span id="tested-by-date"></span></td>
+            <td colspan="3">Date: <span id="checked-by-date"></span></td>
+            <td colspan="3">Date: <span id="verified-by-date"></span></td>
+          </tr>
+          <tr>
+            <td colspan="3">Sign:</td>
+            <td colspan="3">Sign:</td>
+            <td colspan="3">Sign:</td>
+          </tr>
+        </tfoot>
+                </table>
+            </div>
+
+    <div class="doc-footer">Document No- VA/QF/04/05/01, Rev/Issue No- 00/00, Date - <span id="current-date"></span></div>
+
+            </div>
+
+  <!-- PAGE 2: TEST REPORT -->
+  <div class="page">
+    <table class="title-table">
+      <tr>
+        <td class="center-cell">
+          <div class="main">VITRAG ASSOCIATES LLP</div>
+          <div class="sub">(Construction Material Testing Laboratory)</div>
+        </td>
+      </tr>
+    </table>
+    <div class="logo-left">
+      <img src="../logo.png" alt="Vitrag Associates logo">
+    </div>
+    <div class="logo-right">
+      <img src="../nabl_logo_final.png" alt="NABL Logo">
+            </div>
+    <div class="separator-line"></div>
+
+    <div class="section-title">TEST REPORT</div>
+
+    <table class="customer-table">
+      <tr><td rowspan="2">Customer/Site Name & Address</td><td rowspan="2"></td><td>Date of Report</td><td></td></tr>
+      <tr><td>ULR Number</td><td></td></tr>
+      <tr><td>Reference Number</td><td></td><td>Job Code Number</td><td></td></tr>
+      <tr><td>Date of Receipt</td><td></td><td>Manufacturer</td><td></td></tr>
+      <tr><td>Date of Manufacturer</td><td></td><td>Date of Testing</td><td></td></tr>
+      <tr><td>Type of Specimen</td><td></td><td>Condition of Specimen</td><td></td></tr>
+      <tr><td>Machine used for Testing</td><td colspan="3"></td></tr>
+      <tr><td>Location of Test</td><td colspan="3"></td></tr>
+      <tr><td>Capacity/Range</td><td></td><td>Calibration Due Date</td><td></td></tr>
+      <tr><td>Test Method</td><td></td><td>Environmental condition</td><td></td></tr>
+    </table>
+
+    <div class="subsection-title">DESCRIPTION OF TEST SAMPLE</div>
+
+    <table class="test-results-table">
+      <thead>
+        <tr>
+          <th>Sr.<br>No.</th>
+          <th>ID Mark</th>
+          <th>Dimensions of Specimen (cm) (L x B x H)</th>
+          <th>Weight of Sample Before Oven Drying (gm)</th>
+          <th>Weight of Sample After Oven Drying (gm)</th>
+          <th>Volume of Sample (cm³)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>---</td>
+          <td id="dimensions-1"></td>
+          <td id="weight-before-1"></td>
+          <td id="weight-after-1"></td>
+          <td id="volume-1"></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>---</td>
+          <td id="dimensions-2"></td>
+          <td id="weight-before-2"></td>
+          <td id="weight-after-2"></td>
+          <td id="volume-2"></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>---</td>
+          <td id="dimensions-3"></td>
+          <td id="weight-before-3"></td>
+          <td id="weight-after-3"></td>
+          <td id="volume-3"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="subsection-title">Test Result for Bulk Density & Moisture Content of AAC Blocks</div>
+
+    <table class="bulk-density-results-table">
+      <thead>
+        <tr>
+          <th>Sr. No.</th>
+          <th>ID Mark</th>
+          <th>Bulk Density<br>Gm/cm³</th>
+          <th>Moisture Content<br>(%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>---</td>
+          <td id="bulk-density-result-1">0.621</td>
+          <td id="moisture-content-result-1">11.67</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>---</td>
+          <td id="bulk-density-result-2">0.671</td>
+          <td id="moisture-content-result-2">15.91</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>---</td>
+          <td id="bulk-density-result-3">0.571</td>
+          <td id="moisture-content-result-3">12.01</td>
+        </tr>
+        <tr style="font-weight: bold;">
+          <td colspan="2" style="text-align: center;">Average</td>
+          <td>0.621</td>
+          <td>13.19</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="test-witnessed">TEST WITNESSED: </div>
+
+    <div class="terms">
+      <h4>Terms & Conditions –</h4>
+      <table class="terms-table">
+        <tr>
+          <td class="number-col">1)</td>
+          <td class="content-col">Samples were not drawn by Vitrag Associates LLP lab.</td>
+        </tr>
+        <tr>
+          <td class="number-col">2)</td>
+          <td class="content-col">The Test Reports & Results pertain to Sample/ Samples of material received by Vitrag Associates LLP.</td>
+        </tr>
+        <tr>
+          <td class="number-col">3)</td>
+          <td class="content-col">The Test Report cannot be reproduced without the written approval of CEO/QM of Vitrag Associates LLP.</td>
+        </tr>
+        <tr>
+          <td class="number-col">4)</td>
+          <td class="content-col">Any change/ correction/ alteration to the Test Report shall be invalid.</td>
+        </tr>
+        <tr>
+          <td class="number-col">5)</td>
+          <td class="content-col">The role Vitrag Associates LLP is restricted to testing of the material sample as received in the laboratory. Vitrag Associates LLP or any of its employees shall not be liable for any dispute/ litigation arising between the customer & Third Party on account of test results. Vitrag Associates LLP shall not interact with any Third Party in this regard.</td>
+        </tr>
+        <tr>
+          <td class="number-col">6)</td>
+          <td class="content-col">The CEO of Vitrag Associates LLP may make necessary changes to the terms & conditions without any prior notice.</td>
+        </tr>
+      </table>
+                                </div>
+
+    <!-- <div class="signatories">
+      <table class="signatories-table">
+        <tr>
+          <td class="left-col">
+            <div class="label">Reviewed by –</div>
+            <div class="details-col">
+              Lalita S. Dussa<br>
+              (Quality Manager.)<br>
+              B.Tech.(Civil)
+                                </div>
+                            </td>
+          <td class="right-col">
+            <div class="label">Authorized by –</div>
+            <div class="details-col">
+              Mr. Sangave P. A<br>
+              (Chief Executive Officer)<br>
+              M.E (Civil-Structures)<br>
+              MTech (Civil-Geotechnical), M.I.E, F.I.E.
+                                </div>
+                            </td>
+                        </tr>
+                </table>
+            </div> -->
+
+            <div class="footer">
+      <div class="end-report">X----------X ----------X----------X----------END OF REPORT----------X----------X----------X----------X</div>
+      <div class="contact-info">34A/26 West, New Pachha Peth, Ashok Chowk, Solapur<br>
+      Mob. No.-9552529235, 8767420940. &nbsp; E-mail: vitragassociates3@gmail.com</div>
+      <div class="page-info">Page No 1 of 1<br>Issue No. 01</div>
+        </div>
+    </div>
+
+  <!-- Download PDF Button -->
+  <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
+
+    <script>
+        // Function to populate form data from URL parameters
+        function populateFormData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Populate bulk density test results
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`weight-before-${i}`).textContent = urlParams.get(`weight_before_${i}`) || '';
+                document.getElementById(`weight-after-${i}`).textContent = urlParams.get(`weight_after_${i}`) || '';
+                document.getElementById(`length-${i}`).textContent = urlParams.get(`length_${i}`) || '';
+                document.getElementById(`breadth-${i}`).textContent = urlParams.get(`breadth_${i}`) || '';
+                document.getElementById(`depth-${i}`).textContent = urlParams.get(`depth_${i}`) || '';
+                document.getElementById(`volume-${i}`).textContent = urlParams.get(`volume_${i}`) || '';
+                document.getElementById(`bulk-density-${i}`).textContent = urlParams.get(`bulk_density_${i}`) || '';
+                document.getElementById(`moisture-content-${i}`).textContent = urlParams.get(`moisture_content_${i}`) || '';
+            }
+            
+            // Calculate and display averages
+            let weightBeforeSum = 0, weightAfterSum = 0, lengthSum = 0, breadthSum = 0, depthSum = 0;
+            let volumeSum = 0, bulkDensitySum = 0, moistureContentSum = 0;
+            let count = 0;
+            
+            for (let i = 1; i <= 3; i++) {
+                const weightBefore = parseFloat(urlParams.get(`weight_before_${i}`)) || 0;
+                const weightAfter = parseFloat(urlParams.get(`weight_after_${i}`)) || 0;
+                const length = parseFloat(urlParams.get(`length_${i}`)) || 0;
+                const breadth = parseFloat(urlParams.get(`breadth_${i}`)) || 0;
+                const depth = parseFloat(urlParams.get(`depth_${i}`)) || 0;
+                const volume = parseFloat(urlParams.get(`volume_${i}`)) || 0;
+                const bulkDensity = parseFloat(urlParams.get(`bulk_density_${i}`)) || 0;
+                const moistureContent = parseFloat(urlParams.get(`moisture_content_${i}`)) || 0;
+                
+                if (weightBefore > 0) {
+                    weightBeforeSum += weightBefore;
+                    weightAfterSum += weightAfter;
+                    lengthSum += length;
+                    breadthSum += breadth;
+                    depthSum += depth;
+                    volumeSum += volume;
+                    bulkDensitySum += bulkDensity;
+                    moistureContentSum += moistureContent;
+                    count++;
+                }
+            }
+            
+            // Note: Average calculation removed as the new table structure 
+            // displays "Average" in the Volume column footer row as per the image
+            
+            // Populate Test Report Customer Information Table
+            populateTestReportData(urlParams);
+        }
+        
+        // Function to populate Test Report data
+        function populateTestReportData(urlParams) {
+            // Customer Information Table
+            const customerName = urlParams.get('customer_name') || '';
+            const siteName = urlParams.get('site_name') || '';
+            const siteAddress = urlParams.get('site_address') || '';
+            const dateOfReport = urlParams.get('date_of_report') || new Date().toISOString().split('T')[0];
+            const ulrNumber = urlParams.get('ulr_number') || '';
+            const referenceNumber = urlParams.get('reference_number') || '';
+            const jobCodeNumber = urlParams.get('job_code_number') || '';
+            const dateOfMaterialReceipt = urlParams.get('date_of_material_receipt') || '';
+            const materialDescription = urlParams.get('material_description') || '';
+            const conditionOfSample = urlParams.get('condition_of_sample') || 'Acceptable';
+            const locationOfTesting = urlParams.get('location_of_testing') || 'Lab';
+            
+            // Update customer information table cells
+            const customerTableRows = document.querySelectorAll('.customer-table tr');
+            if (customerTableRows.length >= 7) {
+                // Customer Name
+                customerTableRows[0].cells[0].innerHTML = `Customer/Site Name<br>& Address : ${customerName}`;
+                // Site Name & Address
+                customerTableRows[1].cells[0].textContent = `Site Name & Address : ${siteName} ${siteAddress}`;
+                // Date of Report and ULR Number
+                customerTableRows[2].cells[1].textContent = dateOfReport;
+                customerTableRows[2].cells[3].textContent = ulrNumber;
+                // Reference Number and Job Code Number
+                customerTableRows[3].cells[1].textContent = referenceNumber;
+                customerTableRows[3].cells[3].textContent = jobCodeNumber;
+                // Date of Material Receipt and Period of Testing
+                customerTableRows[4].cells[1].textContent = dateOfMaterialReceipt;
+                customerTableRows[4].cells[3].textContent = urlParams.get('date_of_testing') || '';
+                // Material Description and Condition of Sample
+                customerTableRows[5].cells[1].textContent = materialDescription;
+                customerTableRows[5].cells[3].textContent = conditionOfSample;
+                // Location of Testing
+                customerTableRows[6].cells[1].textContent = locationOfTesting;
+            }
+            
+            // Update Test Results Summary with calculated average
+            const averageElement = document.getElementById('average-density');
+            const calculatedAverage = averageElement ? averageElement.textContent : '0.0000';
+            const urlSpecificGravity = urlParams.get('specific_gravity_result');
+            
+            // Use URL parameter if it's a valid number, otherwise use calculated average
+            const specificGravityResult = (urlSpecificGravity && urlSpecificGravity !== '0.0000') ? urlSpecificGravity : calculatedAverage;
+            
+            const specificGravityElement = document.getElementById('specific-gravity-result');
+            if (specificGravityElement) {
+                specificGravityElement.textContent = specificGravityResult;
+                console.log('Updated specific gravity result:', specificGravityResult, 'from calculated average:', calculatedAverage);
+            }
+        }
+
+        // Populate form data when page loads
+        window.onload = function() {
+            populateFormData();
+            
+                // Force column widths via JavaScript as backup
+                console.log('Forcing column widths via JavaScript');
+                
+                // Force Sr. No. column to be narrow
+                const srNoCells = document.querySelectorAll('table.results th:nth-child(1), table.results td:nth-child(1)');
+                srNoCells.forEach(cell => {
+                    cell.style.width = '3%';
+                    cell.style.minWidth = '3%';
+                    cell.style.maxWidth = '3%';
+                    cell.style.maxWidth = '30px';
+                });
+                
+                // Force Weight before column to be wider
+                const weightBeforeCells = document.querySelectorAll('table.results th:nth-child(2), table.results td:nth-child(2)');
+                weightBeforeCells.forEach(cell => {
+                    cell.style.width = '50%';
+                    cell.style.minWidth = '50%';
+                    cell.style.maxWidth = '50%';
+                });
+                
+                // Force wider width for signature table Verified By column
+                const verifiedByCells = document.querySelectorAll('table.results tfoot tr:nth-child(3) td:last-child, table.results tfoot tr:nth-child(4) td:last-child, table.results tfoot tr:nth-child(5) td:last-child');
+                verifiedByCells.forEach(cell => {
+                    cell.style.width = '70%';
+                    cell.style.minWidth = '200px';
+                    cell.setAttribute('style', cell.getAttribute('style') + '; width: 70% !important; min-width: 200px !important; white-space: nowrap !important;');
+                });
+                
+                // Force customer table column widths
+                const customerTable = document.querySelector('.customer-table');
+                if (customerTable) {
+                    // Apply auto-fit to all cells in 1st, 3rd, and 4th columns
+                    for (let row = 0; row < customerTable.rows.length; row++) {
+                        const cells = customerTable.rows[row].cells;
+                        
+                        // 1st column (labels) - Auto fit
+                        if (cells[0]) {
+                            cells[0].style.width = 'auto';
+                            cells[0].style.whiteSpace = 'nowrap';
+                            cells[0].setAttribute('style', cells[0].getAttribute('style') + '; width: auto !important; white-space: nowrap !important;');
+                        }
+                        
+                        // 3rd column (ULR Number, Job Code, etc.) - 10% width
+                        if (cells[2]) {
+                            cells[2].style.width = '10%';
+                            cells[2].style.whiteSpace = 'nowrap';
+                            cells[2].setAttribute('style', cells[2].getAttribute('style') + '; width: 10% !important; white-space: nowrap !important;');
+                        }
+                        
+                        // 4th column (values) - 33% width
+                        if (cells[3]) {
+                            cells[3].style.width = '33%';
+                            cells[3].style.whiteSpace = 'nowrap';
+                            cells[3].setAttribute('style', cells[3].getAttribute('style') + '; width: 33% !important; white-space: nowrap !important;');
+                        }
+                    }
+                }
+                
+                console.log('Column widths forced via JavaScript - aggressive mode with customer table');
+            }, 200);
+        };
+
+        // Print function
+        function printReport() {
+            window.print();
+        }
+
+        // Clean up empty fields for professional PDF
+        function cleanupEmptyFields() {
+            // Don't hide empty fields - keep them as they are for exact HTML appearance
+            // Just ensure all styling is preserved
+            console.log('Preserving exact HTML appearance for PDF generation');
+        }
+
+          // Download PDF function - Opens print dialog with custom filename
+        function downloadPDF() {
+            console.log('Download PDF clicked');
+            
+            // Get customer name for default filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerName = urlParams.get('customer_name') || 'Customer';
+            const referenceNumber = urlParams.get('reference_number') || 'REF-001';
+            const dateOfTesting = urlParams.get('date_of_testing') || new Date().toISOString().split('T')[0];
+            
+            // Create default filename
+            const cleanCustomerName = customerName.replace(/\s+/g, '_');
+            const defaultFilename = `Bulk_Density_Report_${cleanCustomerName}_${referenceNumber}_${dateOfTesting}.pdf`;
+            
+            // Set the document title for print dialog
+            document.title = defaultFilename;
+            
+            // Add print-specific CSS
+            const printStyle = document.createElement('style');
+            printStyle.textContent = `
+              @media print {
+                body { margin: 0; padding: 0; }
+                .page { box-shadow: none; margin: 0; }
+                .no-print { display: none !important; }
+              }
+            `;
+            document.head.appendChild(printStyle);
+            
+            // Hide the download button during print
+            const downloadBtn = document.querySelector('button[onclick="downloadPDF()"]');
+            if (downloadBtn) {
+              downloadBtn.classList.add('no-print');
+            }
+            
+            // Show instructions
+            alert('Print dialog will open. Please select "Save as PDF" and use the suggested filename: ' + defaultFilename);
+            
+            // Open print dialog
+            window.print();
+            
+            // Clean up after print
+            setTimeout(() => {
+              if (downloadBtn) {
+                downloadBtn.classList.remove('no-print');
+              }
+              document.head.removeChild(printStyle);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

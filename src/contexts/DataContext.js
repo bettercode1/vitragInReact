@@ -40,9 +40,10 @@ export const DataProvider = ({ children }) => {
       setSamples(samplesData);
     } catch (err) {
       console.error('Error loading data:', err);
-      setError(err.message);
+      setError(err.message || 'Failed to load data');
       
       // Fallback to mock data if database connection fails
+      console.log('Using mock data as fallback');
       setTestRequests(getMockTestRequests());
       setCustomers(getMockCustomers());
       setSamples(getMockSamples());

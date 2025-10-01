@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faEdit, faPrint } from '@fortawesome/free-solid-svg-icons';
 import './LiquidAdmixturePreview.css';
 
-const LiquidAdmixturePreview = ({ formData, onEdit, onDownloadPDF }) => {
+const LiquidAdmixturePreview = ({ formData, onEdit, onDownloadPDF, onConfirmSave }) => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -35,11 +35,12 @@ const LiquidAdmixturePreview = ({ formData, onEdit, onDownloadPDF }) => {
       <div className="preview-actions mb-4">
         <Button 
           variant="success" 
-          onClick={onDownloadPDF}
+          onClick={onConfirmSave}
           className="me-3"
+          size="lg"
         >
           <FontAwesomeIcon icon={faDownload} className="me-2" />
-          Download PDF
+          Confirm & Save
         </Button>
         <Button 
           variant="primary" 
