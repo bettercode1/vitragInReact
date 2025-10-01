@@ -822,6 +822,7 @@ def login():
     """User login endpoint"""
     try:
         from models import User
+        from datetime import datetime
         
         data = request.get_json()
         email = data.get('email')
@@ -839,8 +840,8 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Account is disabled'}), 403
         
-        # Check password
-        if not user.check_password(password):
+        # Check password (plain text comparison - SIMPLE VERSION)
+        if user.password != password:
             return jsonify({'error': 'Invalid email or password'}), 401
         
         # Update last login

@@ -32,14 +32,14 @@ def add_user(email, password, full_name, role='user'):
                 print(f"User {email} already exists!")
                 return
             
-            # Create new user
+            # Create new user with plain password
             user = User(
                 email=email,
+                password=password,  # Plain password (not hashed)
                 full_name=full_name,
                 role=role,
                 is_active=True
             )
-            user.set_password(password)  # This will hash the password automatically
             
             db.session.add(user)
             db.session.commit()
@@ -48,7 +48,7 @@ def add_user(email, password, full_name, role='user'):
             print(f"  Email: {email}")
             print(f"  Name: {full_name}")
             print(f"  Role: {role}")
-            print(f"  Password: (hashed securely)")
+            print(f"  Password: {password}")
             
         except Exception as e:
             db.session.rollback()

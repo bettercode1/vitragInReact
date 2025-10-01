@@ -525,25 +525,17 @@ class AACBlockTest(db.Model):
 
 
 class User(db.Model):
-    """Model for user authentication"""
+    """Model for user authentication - SIMPLE VERSION WITH PLAIN PASSWORD"""
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)  # Plain password (not secure for production!)
     full_name = db.Column(db.String(255))
     role = db.Column(db.String(50), default='user')  # 'admin', 'user', 'technician'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
-    
-    def set_password(self, password):
-        """Hash and set the password"""
-        self.password_hash = generate_password_hash(password)
-    
-    def check_password(self, password):
-        """Check if provided password matches the hash"""
-        return check_password_hash(self.password_hash, password)
     
     def __repr__(self):
         return f'<User {self.email}>'

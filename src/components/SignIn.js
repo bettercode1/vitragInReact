@@ -39,8 +39,8 @@ const SignIn = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('isAuthenticated', 'true');
       
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate to root/homepage
+      window.location.href = 'http://localhost:3000/';
       
     } catch (err) {
       console.error('Login error:', err);

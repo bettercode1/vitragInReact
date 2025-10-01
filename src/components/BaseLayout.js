@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, Dropdown } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 import SignOutConfirmation from './SignOutConfirmation';
 
 const BaseLayout = ({ children }) => {
@@ -24,6 +24,9 @@ const BaseLayout = ({ children }) => {
   const handleSignOutCancel = () => {
     setShowSignOutModal(false);
   };
+  
+  // Get logged in user info
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
     <>
@@ -131,8 +134,42 @@ const BaseLayout = ({ children }) => {
               </li>
             </ul>
             
-            {/* Sign Out Button */}
-            <div className="d-flex align-items-center ms-3">
+            {/* User Profile & Sign Out */}
+            <div className="d-flex align-items-center ms-3 gap-2">
+              {/* Profile Dropdown */}
+              <Dropdown>
+                <Dropdown.Toggle 
+                  variant="outline-info" 
+                  size="sm"
+                  className="d-flex align-items-center px-3 py-2"
+                  style={{
+                    borderColor: '#0dcaf0',
+                    color: '#0dcaf0',
+                    backgroundColor: 'transparent',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <FontAwesomeIcon icon={faUser} className="me-2" />
+                  <span className="d-none d-lg-inline">Profile</span>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu align="end" style={{ backgroundColor: '#2c3e50', border: '1px solid #0dcaf0' }}>
+                  <Dropdown.Item disabled style={{ color: '#0dcaf0', fontWeight: 'bold' }}>
+                    {user.role === 'quality-manager' ? 'Quality Manager' : user.full_name || 'User'}
+                  </Dropdown.Item>
+                  <Dropdown.Divider style={{ borderColor: '#0dcaf0' }} />
+                  <Dropdown.Item disabled style={{ color: '#fff', fontSize: '0.85rem' }}>
+                    <i className="fas fa-envelope me-2"></i>{user.email || 'N/A'}
+                  </Dropdown.Item>
+                  <Dropdown.Item disabled style={{ color: '#fff', fontSize: '0.85rem' }}>
+                    <i className="fas fa-user-tag me-2"></i>Role: {user.role || 'N/A'}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+
+              {/* Sign Out Button */}
               <Button
                 variant="outline-danger"
                 size="sm"
