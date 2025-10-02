@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getErrorMessage, handleApiError } from "../utils/errorHandler";
+import API_BASE_URL from "../config/api";
 
 // Base URL for your Flask backend
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const BASE_URL = API_BASE_URL;
 
 // Create a new test request
 export const createTestRequest = async (testRequestData) => {

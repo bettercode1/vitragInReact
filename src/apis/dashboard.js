@@ -1,7 +1,8 @@
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 
 // Base URL for your Flask backend
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const BASE_URL = API_BASE_URL;
 
 // Fetch dashboard statistics
 export const getDashboardStats = async () => {

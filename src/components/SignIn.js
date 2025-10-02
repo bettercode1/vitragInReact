@@ -3,6 +3,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-b
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 import './SignIn.css';
 
 const SignIn = () => {
@@ -30,7 +31,7 @@ const SignIn = () => {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post(`${API_BASE_URL}/login`, {
         email: formData.email,
         password: formData.password
       });

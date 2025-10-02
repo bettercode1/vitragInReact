@@ -13,6 +13,7 @@ import {
   faFlask
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
 const TestReportPreview = () => {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const TestReportPreview = () => {
       
       try {
         console.log('🔍 Fetching test data for ID:', testRequestId);
-        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const response = await axios.get(`${API_BASE_URL}/test-requests/${testRequestId}/details`);
         const data = response.data;
         
         console.log('✅ Fetched data:', data);

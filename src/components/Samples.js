@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Button, Table, Badge, Form, InputGroup, Aler
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 import { 
   faEdit, 
   faChartLine, 
@@ -57,7 +58,7 @@ const Samples = () => {
       console.log(`🔍 Fetching page ${page} (${recordsPerPage} records per page)...`);
       
       // Call API with pagination parameters
-      const response = await axios.get(`http://localhost:5000/api/test-requests?page=${page}&per_page=${recordsPerPage}`);
+      const response = await axios.get(`${API_BASE_URL}/test-requests?page=${page}&per_page=${recordsPerPage}`);
       
       console.log('📊 API Response:', response.data);
       const testRequestsArray = response.data.test_requests || [];
@@ -83,7 +84,7 @@ const Samples = () => {
     try {
       setLoadingDetails(prev => ({ ...prev, [testRequestId]: true }));
       
-      const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+      const response = await axios.get(`${API_BASE_URL}/test-requests/${testRequestId}/details`);
       
       const detailsData = {
         concrete_tests: response.data.concrete_tests,
@@ -583,7 +584,7 @@ const Samples = () => {
         <Alert variant="danger">
           <Alert.Heading>Backend Connection Error</Alert.Heading>
           <p><strong>Error:</strong> {apiError}</p>
-          <p><strong>Solution:</strong> Make sure the backend server is running at http://localhost:5000</p>
+          <p><strong>Solution:</strong> Make sure the backend server is running at {API_BASE_URL.replace('/api', '')}</p>
           <Button variant="outline-danger" onClick={fetchTestRequests} className="mt-2">
             <FontAwesomeIcon icon={faSyncAlt} className="me-2" />
             Retry Connection
