@@ -14,8 +14,8 @@ const getApiUrl = () => {
     return 'http://localhost:5000/api';
   }
   
-  // Production - use same host with port 5000
-  return `${protocol}//${hostname}:5000/api`;
+  // Production - use nginx reverse proxy (no port needed)
+  return `${protocol}//${hostname}/api`;
 };
 
 export const API_BASE_URL = getApiUrl();
