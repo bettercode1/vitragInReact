@@ -1119,5 +1119,5 @@ if __name__ == '__main__':
     print("Starting Vitrag Associates Testing Lab Backend...")
     print("SUCCESS: Database connection: WORKING")
     print("SUCCESS: Flask app: READY")
-    print("INFO: Server will be available at: https://testinglab.vitragassollp.com")
+    print("INFO: Server will be available at: http://localhost:5000")
     app.run(host='0.0.0.0', port=5000, debug=False)

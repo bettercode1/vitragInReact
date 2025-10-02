@@ -10,7 +10,7 @@ def test_customers_api():
     """Test the /api/customers endpoint"""
     try:
         # Test the API endpoint
-        response = requests.get('https://testinglab.vitragassollp.com/api/customers')
+        response = requests.get('http://localhost:5000/api/customers')
         
         print(f"Status Code: {response.status_code}")
         print(f"Response Headers: {dict(response.headers)}")
@@ -26,7 +26,7 @@ def test_customers_api():
             print(f"Response: {response.text}")
             
     except requests.exceptions.ConnectionError:
-        print("❌ Could not connect to Flask server. Make sure it's running on https://testinglab.vitragassollp.com")
+        print("❌ Could not connect to Flask server. Make sure it's running on localhost:5000")
     except Exception as e:
         print(f"❌ Error testing API: {str(e)}")
 

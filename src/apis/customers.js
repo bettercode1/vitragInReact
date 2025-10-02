@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL for your Flask backend
-const BASE_URL = process.env.REACT_APP_API_URL || "https://testinglab.vitragassollp.com/api";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 // Fetch all customers
 export const getCustomers = async () => {

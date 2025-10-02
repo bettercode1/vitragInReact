@@ -15,11 +15,11 @@ This document explains how to set up and test the React frontend with Flask back
    cd vitrag/backend
    python app.py
    ```
-   The server will run on `https://testinglab.vitragassollp.com`
+   The server will run on `http://localhost:5000`
 
 3. **Test the API endpoint:**
    ```bash
-   curl https://testinglab.vitragassollp.com/api/customers
+   curl http://localhost:5000/api/customers
    ```
    Or use the test script:
    ```bash
@@ -46,7 +46,7 @@ This document explains how to set up and test the React frontend with Flask back
 
 ## API Endpoint Details
 
-- **URL:** `https://testinglab.vitragassollp.com/api/customers`
+- **URL:** `http://localhost:5000/api/customers`
 - **Method:** GET
 - **Response Format:**
   ```json
@@ -75,7 +75,7 @@ The Flask app is configured with CORS to allow requests from `http://localhost:3
 2. **React can't fetch data:**
    - Ensure Flask server is running on port 5000
    - Check browser console for CORS errors
-   - Verify the API endpoint is accessible: `https://testinglab.vitragassollp.com/api/customers`
+   - Verify the API endpoint is accessible: `http://localhost:5000/api/customers`
 
 3. **Database connection issues:**
    - Check PostgreSQL is running
