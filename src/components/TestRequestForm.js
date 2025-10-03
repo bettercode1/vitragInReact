@@ -320,46 +320,6 @@ const TestRequestForm = () => {
     }
   };
 
-  const fillRandomData = () => {
-    setFormData({
-      // Customer Information
-      customerName: 'Lords Developers',
-      contactPerson: 'John Smith',
-      phone: '+91 9876543210',
-      email: 'john@lordsdevelopers.com',
-      siteName: 'Shivyogi Residency',
-      siteAddress: 'Shelgi, Solapur, Maharashtra',
-      
-      // Test Specifications
-      testType: 'CC',
-      receiptDate: '2024-01-15',
-      ulrNumber: 'TC-1575625000001840F',
-      referenceNumber: 'REF-2024-001',
-      jobNumber: 'T-2501690',
-      
-      // Building Materials
-      materials: ['Cement', 'Sand', 'Aggregate', 'Water'],
-      
-      // Concrete Cube Tests
-      cubeTests: [{
-        id: 1,
-        idMark: 'CC-001',
-        locationNature: 'Column - Ground Floor',
-        grade: 'M25',
-        castingDate: '2024-01-10',
-        testingDate: '2024-02-07',
-        quantity: 3,
-        testMethod: 'IS 516 (Part1/Sec1):2021'
-      }],
-      
-      // Office Use
-      reviewRemarks: 'Test approved for standard testing',
-      labRepresentative: 'Dr. Rajesh Kumar',
-      customerRepresentative: 'John Smith',
-      qualityManager: 'Ms. Priya Sharma',
-      termsAccepted: true
-    });
-  };
 
   const buildingMaterials = [
     'Cement', 'Sand', 'Aggregate', 'Water', 'Admixture', 'Fly Ash',
@@ -929,16 +889,6 @@ const TestRequestForm = () => {
 
         {/* Action Buttons */}
         <div className="text-center mb-4">
-          <Button 
-            type="button" 
-            variant="warning" 
-            size="lg" 
-            className="me-3" 
-            onClick={fillRandomData}
-            disabled={isSubmitting}
-          >
-            <i className="fas fa-magic me-2"></i>Fill Random Data
-          </Button>
           <Button 
             type="submit" 
             variant="primary" 

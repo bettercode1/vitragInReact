@@ -15,37 +15,19 @@ const GeneratePDF = () => {
     setLoading(true);
 
     try {
-      // Use mock data for faster generation (no API call)
-      const testData = {
-        test_request: {
-          id: testRequestId || '1',
-          job_number: 'T-2501690',
-          customer_name: 'Lords Developers',
-          site_name: 'Shivyogi Residency, shelgi solapur',
-          receipt_date: '25/08/2025',
-          ulr_number: 'TC-1575625000001840F',
-          test_type: 'CC'
-        },
-        customer: {
-          name: 'Lords Developers',
-          address: 'Shivyogi Residency, shelgi solapur'
-        },
-        main_test: {
-          id: 1,
-          sample_code_number: 'SC-2024-001',
-          location_nature: 'column',
-          age_in_days: 28,
-          casting_date: '11/08/2025',
-          testing_date: '08/09/2025',
-          grade: 'M-25',
-          cube_condition: 'Acceptable',
-          curing_condition: '28.0',
-          machine_used: 'Fully automatic Digital Compression Testing Machine',
-          test_method: 'IS 516 (Part1/Sec1):2021'
-        }
-      };
+      console.log(`📄 GeneratePDF: Starting PDF generation for test request ${testRequestId}`);
       
-      // Generate PDF using react-pdf
+      // Fetch real data from database using the new API endpoint
+      const testData = await getTestRequestForPDF(testRequestId);
+      
+      console.log('✅ GeneratePDF: Real data fetched from database:', testData);
+      
+      // Validate that we have the required data
+      if (!testData.test_request || !testData.customer || !testData.main_test) {
+        throw new Error('Incomplete data received from database');
+      }
+      
+      // Generate PDF using react-pdf with real data
       const blob = await pdf(<ConcreteCubeFinalTest testData={testData} />).toBlob();
       
       // Create URL for the PDF blob

@@ -199,44 +199,6 @@ const LiquidAdmixtureForm = () => {
     }
   };
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const randomData = {
-        url_number: 'URL-2024-001',
-        job_code_number: 'JOB-2024-001',
-        reference_number: 'REF-2024-001',
-        sample_description: 'Liquid Admixture for concrete - Superplasticizer type, manufactured by ABC Chemicals Ltd.',
-        date_of_receipt: today.toISOString().split('T')[0],
-        sample_test_code: 'LA-2024-001',
-        date_of_testing: today.toISOString().split('T')[0],
-        environmental_conditions: 'Laboratory Conditions: 27°C ± 2°C, 65% ± 5% RH',
-        tested_by_name: 'John Doe',
-        checked_by_name: 'Jane Smith',
-        remarks: 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'
-      };
-      
-      // Fill test results with random data
-      for (let row = 1; row <= 3; row++) {
-        randomData[`colour_texture_${row}`] = row === 1 ? 'Light Brown, Viscous' : row === 2 ? 'Dark Brown, Thick' : 'Medium Brown, Smooth';
-        randomData[`temperature_c_${row}`] = (25 + Math.random() * 2).toFixed(1);
-        randomData[`hydrometer_reading_${row}`] = (1.15 + Math.random() * 0.1).toFixed(4);
-        randomData[`relative_density_${row}`] = (1.15 + Math.random() * 0.1).toFixed(4);
-      }
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-      
-      // Trigger calculation
-      setTimeout(() => {
-        calculateAverage();
-      }, 100);
-      
-      alert('Random data filled successfully! Please review and modify as needed before submitting.');
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -935,16 +897,6 @@ const LiquidAdmixtureForm = () => {
           {/* Action Buttons */}
           <Row>
             <Col className="text-center">
-              <Button 
-                type="button" 
-                variant="info" 
-                size="lg" 
-                className="me-3"
-                onClick={fillRandomData}
-              >
-                <FontAwesomeIcon icon={faMagic} className="me-2" />
-                Fill Random Data
-              </Button>
               <Button 
                 onClick={handleSaveTestData}
                 variant="primary" 

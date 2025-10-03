@@ -247,51 +247,73 @@ const TestObservations = () => {
   };
 
   const handleRowChange = (rowIndex, field, value) => {
-    setTestRows(prev => prev.map((row, index) => {
-      if (index === rowIndex) {
-        const updatedRow = { ...row, [field]: value };
-        
-        // Validate weight field
-        if (field === 'weight') {
-          const weightError = validateWeight(value);
-          setValidationErrors(prev => ({
-            ...prev,
-            [`weight_${rowIndex}`]: weightError
-          }));
-        }
-        
-        // Calculate area if length and breadth are provided
-        if (field === 'length' || field === 'breadth') {
-          const length = field === 'length' ? parseFloat(value) : parseFloat(row.length);
-          const breadth = field === 'breadth' ? parseFloat(value) : parseFloat(row.breadth);
+    setTestRows(prev => {
+      const updatedRows = prev.map((row, index) => {
+        if (index === rowIndex) {
+          const updatedRow = { ...row, [field]: value };
           
-          if (length && breadth && length > 0 && breadth > 0) {
-            updatedRow.area = (length * breadth).toFixed(1);
+          // Validate weight field
+          if (field === 'weight') {
+            const weightError = validateWeight(value);
+            setValidationErrors(prev => ({
+              ...prev,
+              [`weight_${rowIndex}`]: weightError
+            }));
           }
-        }
-        
-        // Calculate density if all dimensions and weight are provided
-        if (['length', 'breadth', 'height', 'weight'].includes(field)) {
-          const length = field === 'length' ? parseFloat(value) : parseFloat(row.length);
-          const breadth = field === 'breadth' ? parseFloat(value) : parseFloat(row.breadth);
-          const height = field === 'height' ? parseFloat(value) : parseFloat(row.height);
-          const weight = field === 'weight' ? parseFloat(value) : parseFloat(row.weight);
           
-          if (length && breadth && height && weight && 
-              length > 0 && breadth > 0 && height > 0 && weight > 0) {
-            const lengthInMeters = length / 1000;
-            const breadthInMeters = breadth / 1000;
-            const heightInMeters = height / 1000;
-            const volumeInCubicMeters = lengthInMeters * breadthInMeters * heightInMeters;
-            const density = weight / volumeInCubicMeters;
-            updatedRow.density = density.toFixed(1);
+          // Calculate area if length and breadth are provided
+          if (field === 'length' || field === 'breadth') {
+            const length = field === 'length' ? parseFloat(value) : parseFloat(row.length);
+            const breadth = field === 'breadth' ? parseFloat(value) : parseFloat(row.breadth);
+            
+            if (length && breadth && length > 0 && breadth > 0) {
+              updatedRow.area = (length * breadth).toFixed(1);
+            }
           }
+          
+          // Calculate density if all dimensions and weight are provided
+          if (['length', 'breadth', 'height', 'weight'].includes(field)) {
+            const length = field === 'length' ? parseFloat(value) : parseFloat(row.length);
+            const breadth = field === 'breadth' ? parseFloat(value) : parseFloat(row.breadth);
+            const height = field === 'height' ? parseFloat(value) : parseFloat(row.height);
+            const weight = field === 'weight' ? parseFloat(value) : parseFloat(row.weight);
+            
+            if (length && breadth && height && weight && 
+                length > 0 && breadth > 0 && height > 0 && weight > 0) {
+              const lengthInMeters = length / 1000;
+              const breadthInMeters = breadth / 1000;
+              const heightInMeters = height / 1000;
+              const volumeInCubicMeters = lengthInMeters * breadthInMeters * heightInMeters;
+              const density = weight / volumeInCubicMeters;
+              updatedRow.density = density.toFixed(1);
+            }
+          }
+          
+          return updatedRow;
         }
-        
-        return updatedRow;
+        return row;
+      });
+
+      // Auto-calculate average compressive strength
+      const validStrengths = updatedRows
+        .map(row => parseFloat(row.compressiveStrength))
+        .filter(strength => !isNaN(strength) && strength > 0);
+      
+      if (validStrengths.length > 0) {
+        const averageStrength = (validStrengths.reduce((sum, strength) => sum + strength, 0) / validStrengths.length).toFixed(4);
+        setFormData(prev => ({
+          ...prev,
+          averageStrength: averageStrength
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          averageStrength: ''
+        }));
       }
-      return row;
-    }));
+
+      return updatedRows;
+    });
   };
 
   // Rows are automatically generated based on number of cubes from test request
@@ -409,7 +431,7 @@ const TestObservations = () => {
           testRows: testRows
         },
         testRows: testRows,
-        capturedImages: capturedImages,
+        capturedImages: capturedImages, // Send images to backend
         testRequestId: testRequestId,
         timestamp: new Date().toISOString()
       };
@@ -437,10 +459,14 @@ const TestObservations = () => {
       } catch (dbError) {
         console.warn('Database save failed, using localStorage fallback:', dbError);
         
-        // Fallback to localStorage
+        // Fallback to localStorage (without images to avoid quota issues)
         setSaveProgress(60);
         const storageKey = `test_observations_${testRequestId || 'temp'}`;
-        localStorage.setItem(storageKey, JSON.stringify(observationsData));
+        const dataWithoutImages = {
+          ...observationsData,
+          capturedImages: {} // Don't save images to localStorage
+        };
+        localStorage.setItem(storageKey, JSON.stringify(dataWithoutImages));
         setSaveProgress(80);
         
         setSubmitMessage({ type: 'success', text: 'Test observations saved locally!' });
@@ -550,65 +576,6 @@ const TestObservations = () => {
     }
   };
 
-  // Fill random data function
-  const fillRandomData = () => {
-    // Fill form data
-    setFormData(prev => ({
-      ...prev,
-      curingCondition: 'Water curing at 27°C ± 2°C',
-      averageStrength: '28.5',
-      testedBy: 'Dr. Rajesh Kumar',
-      checkedBy: 'Ms. Priya Sharma',
-      testRemarks: 'All specimens tested as per IS 516 standards. Results within acceptable limits.'
-    }));
-
-    // Fill test rows with random data
-    const randomRows = testRows.map((row, index) => ({
-      ...row,
-      cubeId: `C${index + 1}`,
-      length: (150 + Math.random() * 2).toFixed(1),
-      breadth: (150 + Math.random() * 2).toFixed(1),
-      height: (150 + Math.random() * 2).toFixed(1),
-      weight: (8.3 + Math.random() * 0.1).toFixed(3),
-      crushingLoad: (650 + Math.random() * 100).toFixed(1),
-      compressiveStrength: (28.5 + Math.random() * 5).toFixed(1),
-      failureType: Math.floor(Math.random() * 3) + 1
-    }));
-
-    // Calculate area and density for each row
-    const updatedRows = randomRows.map(row => {
-      const length = parseFloat(row.length);
-      const breadth = parseFloat(row.breadth);
-      const height = parseFloat(row.height);
-      const weight = parseFloat(row.weight);
-      
-      const area = (length * breadth).toFixed(1);
-      
-      let density = '';
-      if (length && breadth && height && weight) {
-        const lengthInMeters = length / 1000;
-        const breadthInMeters = breadth / 1000;
-        const heightInMeters = height / 1000;
-        const volumeInCubicMeters = lengthInMeters * breadthInMeters * heightInMeters;
-        density = (weight / volumeInCubicMeters).toFixed(1);
-      }
-      
-      return {
-        ...row,
-        area,
-        density
-      };
-    });
-
-    setTestRows(updatedRows);
-
-    // Fill average strength
-    const avgStrength = (updatedRows.reduce((sum, row) => sum + parseFloat(row.compressiveStrength), 0) / updatedRows.length).toFixed(1);
-    setFormData(prev => ({
-      ...prev,
-      averageStrength: avgStrength
-    }));
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -1012,7 +979,7 @@ const TestObservations = () => {
                                 value={row.length}
                                 onChange={(e) => handleRowChange(index, 'length', e.target.value)}
                                 placeholder="Length"
-                                step="0.1"
+                                step="0.0001"
                                 min="0"
                                 className="text-center"
                               />
@@ -1023,7 +990,7 @@ const TestObservations = () => {
                                 value={row.breadth}
                                 onChange={(e) => handleRowChange(index, 'breadth', e.target.value)}
                                 placeholder="Breadth"
-                                step="0.1"
+                                step="0.0001"
                                 min="0"
                                 className="text-center"
                               />
@@ -1034,7 +1001,7 @@ const TestObservations = () => {
                                 value={row.height}
                                 onChange={(e) => handleRowChange(index, 'height', e.target.value)}
                                 placeholder="Height"
-                                step="0.1"
+                                step="0.0001"
                                 min="0"
                                 className="text-center"
                               />
@@ -1053,7 +1020,7 @@ const TestObservations = () => {
                                 value={row.weight}
                                 onChange={(e) => handleRowChange(index, 'weight', e.target.value)}
                                 placeholder="Weight"
-                                step="0.001"
+                                step="0.0001"
                                 className={`text-center ${validationErrors[`weight_${index}`] ? 'is-invalid' : ''}`}
                               />
                               {validationErrors[`weight_${index}`] && (
@@ -1076,7 +1043,7 @@ const TestObservations = () => {
                                 value={row.crushingLoad}
                                 onChange={(e) => handleRowChange(index, 'crushingLoad', e.target.value)}
                                 placeholder="Load"
-                                step="0.1"
+                                step="0.0001"
                                 min="0"
                                 className="text-center"
                               />
@@ -1087,7 +1054,7 @@ const TestObservations = () => {
                                 value={row.compressiveStrength}
                                 onChange={(e) => handleRowChange(index, 'compressiveStrength', e.target.value)}
                                 placeholder="Strength"
-                                step="0.1"
+                                step="0.0001"
                                 min="0"
                                 required
                                 className="text-center"
@@ -1099,7 +1066,7 @@ const TestObservations = () => {
                                 value={row.failureType}
                                 onChange={(e) => handleRowChange(index, 'failureType', e.target.value)}
                                 placeholder="Failure Type"
-                                step="0.1"
+                                step="0.0001"
                                 className="text-center"
                               />
                             </td>
@@ -1135,7 +1102,7 @@ const TestObservations = () => {
                               onChange={handleInputChange}
                               className="text-center"
                               placeholder="Enter Average"
-                              step="0.1"
+                              step="0.0001"
                               min="0"
                               required
                               style={{ width: '120px', minWidth: '120px' }}
@@ -1519,14 +1486,6 @@ const TestObservations = () => {
                       <i className="fas fa-times me-2"></i> Cancel
                     </Button>
                     <Button 
-                      type="button"
-                      variant="info" 
-                      className="me-md-2"
-                      onClick={fillRandomData}
-                    >
-                      <i className="fas fa-magic me-2"></i> Fill Random Data
-                    </Button>
-                    <Button 
                       type="submit" 
                       variant="warning" 
                       className="me-md-2"
@@ -1586,7 +1545,7 @@ const TestObservations = () => {
                       testRows: testRows
                     },
                     testRows: testRows,
-                    capturedImages: capturedImages,
+                    capturedImages: capturedImages, // Send images to backend
                     testRequestId: testRequestId,
                     timestamp: new Date().toISOString()
                   }

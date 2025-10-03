@@ -467,36 +467,6 @@ const CoarseAggregateForm = () => {
     }));
   };
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const randomData = {
-        customer_id: 'CUST-' + Math.floor(Math.random() * 10000),
-        sample_description: '10/20mm Coarse Aggregate Sample',
-        date_of_receipt: today.toISOString().split('T')[0],
-        aggregate_type: 'Crushed Stone',
-        test_method: 'IS 2386 (Part 3)',
-        sample_test_code: 'CA-' + Math.floor(Math.random() * 1000),
-        aggregate_grade: '10/20mm',
-        environmental_conditions: 'Laboratory Conditions, Temperature: 27±2°C, RH: 65±5%',
-        customer_site_address: 'Sample Construction Site, Mumbai',
-        date_of_report: today.toISOString().split('T')[0],
-        reference_number: 'REF-' + Math.floor(Math.random() * 10000),
-        date_of_material_receipt: today.toISOString().split('T')[0],
-        type_grade_aggregate: '10/20mm Coarse Aggregate',
-        url_number: 'URL-' + Math.floor(Math.random() * 1000),
-        job_code_number: 'JOB-' + Math.floor(Math.random() * 1000),
-        period_of_testing: '7 days',
-        condition_of_sample: 'Good',
-        location_of_testing: 'Vitrag Associates Laboratory',
-        tested_by_name: 'Test Engineer',
-        checked_by_name: 'Senior Engineer',
-        remarks: 'All tests completed as per IS standards'
-      };
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

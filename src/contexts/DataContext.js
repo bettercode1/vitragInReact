@@ -107,23 +107,19 @@ export const DataProvider = ({ children }) => {
   // Get test request with all related data for PDF generation
   const getTestRequestForPDF = async (testRequestId) => {
     try {
-      const testRequest = await databaseService.getTestRequestById(testRequestId);
-      const testResults = await databaseService.getTestResults(testRequestId);
-      const customer = await databaseService.getCustomerById(testRequest.customer_id);
+      console.log(`📄 DataContext: Fetching PDF data for test request ${testRequestId}`);
       
-      return {
-        test_request: testRequest,
-        customer: customer,
-        main_test: testResults,
-        reviewer_info: {
-          name: 'Lalita S. Dussa',
-          designation: 'Quality Manager',
-          graduation: 'B.Tech.(Civil)'
-        }
-      };
+      // Use the new API endpoint that fetches complete data from database
+      const pdfData = await databaseService.getTestRequestPDFData(testRequestId);
+      
+      console.log('✅ DataContext: PDF data fetched successfully from database');
+      return pdfData;
+      
     } catch (err) {
-      console.error('Error fetching test request for PDF:', err);
-      // Return mock data as fallback
+      console.error('❌ DataContext: Error fetching test request for PDF:', err);
+      console.log('⚠️ DataContext: Falling back to mock data');
+      
+      // Return mock data as fallback only if database fetch fails
       return {
         test_request: getMockTestRequests()[0],
         customer: getMockCustomers()[0],

@@ -1180,6 +1180,13 @@
                     console.log('✅ Average strength FROM DATABASE:', avgStrengthFromDB);
                 }
                 
+                // Also update observation sheet average
+                const obsAvgEl = document.getElementById('avg-compressive-strength');
+                if (obsAvgEl) {
+                    obsAvgEl.textContent = avgStrengthFromDB;
+                    console.log('✅ Observation sheet average updated:', avgStrengthFromDB);
+                }
+                
                 // ===== UPDATE OBSERVATION SHEET (PAGE 1) - NEW CODE =====
                 console.log('📋 Populating observation sheet (Page 1)...');
                 
@@ -1775,8 +1782,9 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="6">Average</td>
-                        <td id="avg-load-max" colspan="3"></td>
+                        <td colspan="7">Average</td>
+                        <td id="avg-compressive-strength" style="font-weight: bold; text-align: center;"></td>
+                        <td colspan="2"></td>
                     </tr>
                     <tr>
                         <td colspan="9" style="text-align:left; padding:12px; height:40mm; vertical-align:top; font-size:16px;">
@@ -2474,8 +2482,12 @@
             
             document.getElementById('avg-compressive-strength').textContent = compressiveAverage;
             document.getElementById('avg-density').textContent = densityAverage;
-            document.getElementById('avg-load-max').textContent = loadAverage;
-            document.getElementById('average-compressive-strength-result').textContent = compressiveAverage;
+            
+            // Update the average strength in the test results table
+            const avgStrengthEl = document.getElementById('average-strength');
+            if (avgStrengthEl) {
+                avgStrengthEl.innerHTML = `<span class="highlight-text">${compressiveAverage}</span>`;
+            }
             console.log('Calculated averages - Compressive:', compressiveAverage, 'Density:', densityAverage, 'Load:', loadAverage, 'from', count, 'values');
             
             // Verification (Observation Report - Page 1)
@@ -3006,13 +3018,13 @@
             console.log('required_7 param:', urlParams.get('required_7'));
             console.log('actual_7 param:', urlParams.get('actual_7'));
             
-            // Get strength data from URL parameters with default values for testing
-            const required7 = urlParams.has('required_7') ? parseFloat(urlParams.get('required_7')) : 16.5;
-            const actual7 = urlParams.has('actual_7') ? parseFloat(urlParams.get('actual_7')) : 18.5;
-            const required14 = urlParams.has('required_14') ? parseFloat(urlParams.get('required_14')) : 22.5;
-            const actual14 = urlParams.has('actual_14') ? parseFloat(urlParams.get('actual_14')) : 24.1;
-            const required28 = urlParams.has('required_28') ? parseFloat(urlParams.get('required_28')) : 30.0;
-            const actual28 = urlParams.has('actual_28') ? parseFloat(urlParams.get('actual_28')) : 31.5;
+            // Get strength data from URL parameters
+            const required7 = urlParams.has('required_7') ? parseFloat(urlParams.get('required_7')) : 0;
+            const actual7 = urlParams.has('actual_7') ? parseFloat(urlParams.get('actual_7')) : 0;
+            const required14 = urlParams.has('required_14') ? parseFloat(urlParams.get('required_14')) : 0;
+            const actual14 = urlParams.has('actual_14') ? parseFloat(urlParams.get('actual_14')) : 0;
+            const required28 = urlParams.has('required_28') ? parseFloat(urlParams.get('required_28')) : 0;
+            const actual28 = urlParams.has('actual_28') ? parseFloat(urlParams.get('actual_28')) : 0;
             
             console.log('Parsed values - 7 days:', { required: required7, actual: actual7 });
             console.log('Parsed values - 14 days:', { required: required14, actual: actual14 });

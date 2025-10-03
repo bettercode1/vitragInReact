@@ -1677,70 +1677,6 @@ const SoilTestingForm = () => {
     </Row>
   );
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const randomData = {
-        // General Information
-        customer_id: '1',
-        sample_test_code: 'ST-2024-001',
-        date_of_receipt: today.toISOString().split('T')[0],
-        quantity: '5 kg',
-        sample_condition: 'Good',
-        sample_description: 'Soil sample for compaction test - Clayey soil with moderate plasticity',
-        date_of_testing: today.toISOString().split('T')[0],
-        test_method: currentTest === 2 ? 'IS2720 (PART-40)-1977' : currentTest === 3 ? 'IS 2720 (PART 4)-1985' : currentTest === 4 ? 'IS 2720 (PART 5)-1985' : currentTest === 5 ? 'IS 2720 (PART-5)-1985' : currentTest === 6 ? 'IS 2720 (PART 2)-1973' : 'IS 2720 (PART 7-1980)\nIS 2720 (PART 8-1983)',
-        soil_type: 'Clayey Soil',
-        soil_classification: 'CH (Clay of High plasticity)',
-        
-        // Test Report Details
-        customer_site_address: 'Sample Construction Site, Mumbai',
-        date_of_report: today.toISOString().split('T')[0],
-        reference_number: 'REF-2024-001',
-        date_of_material_receipt: today.toISOString().split('T')[0],
-        type_grade_soil: 'Clayey Soil',
-        url_number: 'URL-2024-001',
-        job_code_number: 'JOB-2024-001',
-        period_of_testing: '1 day',
-        condition_of_sample: 'Acceptable',
-        location_of_testing: 'Laboratory',
-        
-        // Form 1 - Compaction Test Data
-        weight_mould_1: '4500.00', weight_mould_2: '4500.00', weight_mould_3: '4500.00', weight_mould_4: '4500.00', weight_mould_5: '4500.00',
-        weight_mould_soil_1: '6200.00', weight_mould_soil_2: '6350.00', weight_mould_soil_3: '6480.00', weight_mould_soil_4: '6520.00', weight_mould_soil_5: '6400.00',
-        container_no_1: 'C-001', container_no_2: 'C-002', container_no_3: 'C-003', container_no_4: 'C-004', container_no_5: 'C-005',
-        weight_container_1: '25.50', weight_container_2: '26.20', weight_container_3: '24.80', weight_container_4: '25.90', weight_container_5: '26.10',
-        weight_wet_soil_1: '180.50', weight_wet_soil_2: '175.20', weight_wet_soil_3: '182.80', weight_wet_soil_4: '178.90', weight_wet_soil_5: '179.10',
-        weight_dry_soil_1: '165.20', weight_dry_soil_2: '158.40', weight_dry_soil_3: '162.60', weight_dry_soil_4: '159.80', weight_dry_soil_5: '160.20',
-        wet_density_1: '1.700', wet_density_2: '1.850', wet_density_3: '1.980', wet_density_4: '2.020', wet_density_5: '1.900',
-        moisture_content_1: '9.27', moisture_content_2: '10.61', moisture_content_3: '12.41', moisture_content_4: '11.95', moisture_content_5: '11.79',
-        dry_density_1: '1.556', dry_density_2: '1.673', dry_density_3: '1.762', dry_density_4: '1.805', dry_density_5: '1.700',
-        volume_mould: '1000.00',
-        weight_rammer: '2.60',
-        sieve_size_passing: '4.75',
-        percentage_passing: '95.5',
-        sieve_size_retained: '4.75',
-        percentage_retained: '4.5',
-        max_dry_density: '1.805',
-        optimum_moisture: '11.95',
-        compaction_type: 'Standard Proctor',
-        
-        // Verification
-        tested_by_name: 'John Doe',
-        tested_by_date: today.toISOString().split('T')[0],
-        checked_by_name: 'Jane Smith',
-        checked_by_date: today.toISOString().split('T')[0],
-        remarks: 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'
-      };
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-      
-      alert('Random data filled successfully! Please review and modify as needed before submitting.');
-    }
-  };
 
   const handleSaveAndNext = () => {
     // Create mapping from test keys to form numbers
@@ -2134,16 +2070,6 @@ const SoilTestingForm = () => {
                 <Button variant="secondary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={() => navigate('/other-services')}>
                   <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
                   Cancel
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="info" 
-                  size="lg" 
-                  className="me-3"
-                  onClick={fillRandomData}
-                >
-                  <FontAwesomeIcon icon={faMagic} className="me-2" />
-                  Fill Random Data
                 </Button>
                 <Button variant="primary" className="btn-lg me-md-2 btn-vitrag-primary" onClick={handleSaveAndNext}>
                     <FontAwesomeIcon icon={faEye} className="me-2" />

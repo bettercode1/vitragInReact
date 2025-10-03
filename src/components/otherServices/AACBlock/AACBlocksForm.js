@@ -136,67 +136,6 @@ const AACBlocksForm = () => {
     }));
   };
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const randomData = {
-        sample_description: 'AAC Blocks for compressive strength testing - Grade 3.5, manufactured by ABC Construction Ltd.',
-        date_of_receipt: today.toISOString().split('T')[0],
-        customer_site_name_address: 'ABC Construction Site, Plot No. 123, Industrial Area, Mumbai - 400001',
-        reference_number: 'REF-2024-001',
-        date_of_manufacturer: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        type_of_specimen: 'AAC Block 600x200x200mm',
-        machine_used_for_testing: 'Compression Testing Machine - 2000 kN',
-        location_of_test: 'Laboratory',
-        capacity_range: '0-2000 kN',
-        test_method: 'IS 2185 (Part 1): 2005',
-        sample_test_code: 'AAC-2024-001',
-        date_of_report: tomorrow.toISOString().split('T')[0],
-        ulr_number: 'ULR-2024-001',
-        job_code_number: 'JOB-2024-001',
-        manufacturer: 'ABC Construction Ltd.',
-        condition_of_specimen: 'Dry',
-        calibration_due_date: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        environmental_condition: 'Laboratory Conditions: 27°C ± 2°C, 65% ± 5% RH',
-        quantity_of_blocks: '10',
-        date_of_casting: new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        grade_of_blocks: 'Grade 3.5',
-        manufacture_of_blocks: 'ABC Construction Ltd.',
-        blocks_condition: 'Dry',
-        curing_condition: 'Air cured for 14 days',
-        tested_by_name: 'John Doe',
-        checked_by_name: 'Jane Smith',
-        remarks: 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'
-      };
-      
-      // Fill test results with random data
-      for (let row = 1; row <= 3; row++) {
-        randomData[`block_id_${row}`] = `BLK-${row.toString().padStart(3, '0')}`;
-        randomData[`length_${row}`] = (600 + Math.random() * 2).toFixed(1);
-        randomData[`breadth_${row}`] = (200 + Math.random() * 2).toFixed(1);
-        randomData[`height_${row}`] = (200 + Math.random() * 2).toFixed(1);
-        randomData[`weight_${row}`] = (8.5 + Math.random() * 1).toFixed(3);
-        randomData[`load_max_${row}`] = (35000 + Math.random() * 5000).toFixed(1);
-        randomData[`compressive_strength_${row}`] = (3.5 + Math.random() * 0.5).toFixed(2);
-      }
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-      
-      // Trigger calculations
-      setTimeout(() => {
-        for (let row = 1; row <= 3; row++) {
-          calculateArea(row);
-          calculateDensity(row);
-        }
-        calculateAverages();
-      }, 100);
-      
-      alert('Random data filled successfully! Please review and modify as needed before submitting.');
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -1278,16 +1217,6 @@ const AACBlocksForm = () => {
           {/* Action Buttons */}
           <Row>
             <Col className="text-center">
-              <Button 
-                type="button" 
-                variant="info" 
-                size="lg" 
-                className="me-3"
-                onClick={fillRandomData}
-              >
-                <FontAwesomeIcon icon={faMagic} className="me-2" />
-                Fill Random Data
-              </Button>
               <Button 
                 type="submit" 
                 variant="primary" 

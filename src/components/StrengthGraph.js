@@ -3,6 +3,7 @@ import { Container, Card, Button, Table, Row, Col, Form, Modal } from 'react-boo
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import API_BASE_URL from '../config/api';
+import databaseService from '../services/database';
 
 const StrengthGraph = () => {
   const navigate = useNavigate();
@@ -40,35 +41,40 @@ const StrengthGraph = () => {
       
       try {
         console.log('🔄 Fetching saved strength graph data for test:', testRequestId);
-        const response = await axios.get(`${API_BASE_URL}/test-requests/${testRequestId}/details`);
-        const data = response.data;
         
-        const firstTest = data.concrete_tests?.[0];
-        if (firstTest?.test_results_json) {
-          const savedStrength = JSON.parse(firstTest.test_results_json);
-          const savedObs = firstTest.observations_json ? JSON.parse(firstTest.observations_json) : {};
+        // Use the database service to fetch PDF data
+        const data = await databaseService.getTestRequestPDFData(testRequestId);
+        
+        console.log('📊 PDF Data Response:', data);
+        
+        if (data.main_test) {
+          const testResults = data.main_test.test_results_json || {};
+          const observations = data.main_test.observations_json || {};
           
-          console.log('✅ Found saved data:', savedStrength, savedObs);
+          console.log('✅ Found saved test results:', testResults);
+          console.log('✅ Found saved observations:', observations);
           
           setStrengthData({
-            required_7: savedStrength.required_7 || '',
-            actual_7: savedStrength.actual_7 || '',
-            required_14: savedStrength.required_14 || '',
-            actual_14: savedStrength.actual_14 || '',
-            required_28: savedStrength.required_28 || '',
-            actual_28: savedStrength.actual_28 || '',
-            obs_strength_duration: savedObs.obs_strength_duration || '',
-            obs_test_results: savedObs.obs_test_results || '',
-            obs_weight: savedObs.obs_weight || '',
-            obs_failure_pattern: savedObs.obs_failure_pattern || '',
-            obs_bonding: savedObs.obs_bonding || '',
-            obs_strength_criteria: savedObs.obs_strength_criteria || ''
+            required_7: testResults.required_7 || '',
+            actual_7: testResults.actual_7 || '',
+            required_14: testResults.required_14 || '',
+            actual_14: testResults.actual_14 || '',
+            required_28: testResults.required_28 || '',
+            actual_28: testResults.actual_28 || '',
+            obs_strength_duration: observations.obs_strength_duration || '',
+            obs_test_results: observations.obs_test_results || '',
+            obs_weight: observations.obs_weight || '',
+            obs_failure_pattern: observations.obs_failure_pattern || '',
+            obs_bonding: observations.obs_bonding || '',
+            obs_strength_criteria: observations.obs_strength_criteria || ''
           });
           
-          console.log('✅ Strength data pre-filled!');
+          console.log('✅ Strength data pre-filled from database!');
+        } else {
+          console.log('⚠️ No main_test data found in response');
         }
       } catch (error) {
-        console.log('No saved data found (this is OK for new tests)');
+        console.log('⚠️ No saved data found (this is OK for new tests):', error.message);
       }
     };
     
@@ -116,18 +122,11 @@ const StrengthGraph = () => {
         throw new Error('Cannot connect to backend server. Make sure Flask is running on port 5000.');
       }
       
-      // Save to database
-      console.log('💾 Sending POST request...');
-      const response = await axios({
-        method: 'POST',
-        url: `${API_BASE_URL}/strength-graph/${testRequestId}`,
-        data: strengthData,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // Save to database using database service
+      console.log('💾 Saving strength graph data...');
+      const response = await databaseService.saveStrengthGraphData(testRequestId, strengthData);
       
-      console.log('✅ Strength graph data saved:', response.data);
+      console.log('✅ Strength graph data saved:', response);
       
       // Show success and display graph
       setShowSuccessModal(true);
@@ -206,6 +205,11 @@ const StrengthGraph = () => {
     // Add basic info
     params.append('customer_name', formData?.customerName || testData?.customerName || 'Customer');
     params.append('site_name', formData?.siteName || testData?.siteName || 'Site');
+    
+    // Add average strength from backend
+    const avgStrength = formData?.averageStrength || testData?.averageStrength || '';
+    params.append('average_strength', avgStrength);
+    console.log('📊 Average Strength being sent to report:', avgStrength);
     
     const reportUrl = `/cubeTestingReport.html?${params.toString()}`;
     console.log('Opening PDF with URL:', reportUrl);

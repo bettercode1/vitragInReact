@@ -121,6 +121,35 @@ class DatabaseService {
     }
   }
 
+  // PDF Data - Fetch complete data for PDF generation
+  async getTestRequestPDFData(testRequestId) {
+    try {
+      console.log(`📄 Fetching PDF data for test request: ${testRequestId}`);
+      const response = await this.request(`/test-requests/${testRequestId}/pdf-data`);
+      console.log('✅ PDF data fetched successfully:', response);
+      return response;
+    } catch (error) {
+      console.error('Failed to get PDF data:', error);
+      throw error;
+    }
+  }
+
+  // Strength Graph Data - Save strength graph data and observations
+  async saveStrengthGraphData(testRequestId, strengthData) {
+    try {
+      console.log(`📊 Saving strength graph data for test request: ${testRequestId}`);
+      const response = await this.request(`/strength-graph/${testRequestId}`, {
+        method: 'POST',
+        body: JSON.stringify(strengthData),
+      });
+      console.log('✅ Strength graph data saved successfully:', response);
+      return response;
+    } catch (error) {
+      console.error('Failed to save strength graph data:', error);
+      throw error;
+    }
+  }
+
   // PDF Generation
   async generatePDF(testRequestId) {
     try {

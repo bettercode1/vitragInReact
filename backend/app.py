@@ -592,11 +592,15 @@ def get_test_request_details(test_request_id):
                 'average_strength': ct.average_strength,
                 'failure_type': ct.failure_type,
                 'test_remarks': ct.test_remarks,
+                'testRemarks': ct.test_remarks,
                 'observations_json': ct.observations_json,
                 'test_results_json': ct.test_results_json,
                 'tested_by': ct.tested_by,
+                'testedBy': ct.tested_by,
                 'checked_by': ct.checked_by,
+                'checkedBy': ct.checked_by,
                 'verified_by': ct.verified_by,
+                'verifiedBy': ct.verified_by,
                 'sample_description': ct.sample_description,
                 'cube_condition': ct.cube_condition,
                 'curing_condition': ct.curing_condition,
@@ -748,6 +752,154 @@ def get_pending_tests():
         app.logger.error(f"Error fetching pending tests: {str(e)}")
         return jsonify({'error': 'Failed to fetch pending tests'}), 500
 
+# API endpoint to fetch complete data for PDF generation
+@app.route('/api/test-requests/<int:test_request_id>/pdf-data', methods=['GET'])
+def get_test_request_pdf_data(test_request_id):
+    """Fetch complete data for PDF generation from all related tables"""
+    try:
+        from models import TestRequest, ConcreteTest, TestPhoto, Customer
+        import json
+        
+        print(f"\n{'='*50}")
+        print(f"📄 PDF DATA FETCH - Test Request ID: {test_request_id}")
+        print(f"{'='*50}\n")
+        
+        # Get test request with customer info
+        test_request = db.session.query(TestRequest, Customer).\
+            join(Customer, TestRequest.customer_id == Customer.id).\
+            filter(TestRequest.id == test_request_id).first()
+        
+        if not test_request:
+            print(f"❌ Test request {test_request_id} not found")
+            return jsonify({'error': 'Test request not found'}), 404
+        
+        tr, customer = test_request
+        print(f"✅ Found test request: {tr.job_number}")
+        print(f"✅ Customer: {customer.name}")
+        
+        # Get concrete tests with results
+        concrete_tests = ConcreteTest.query.filter_by(
+            test_request_id=test_request_id,
+            has_results=True
+        ).all()
+        
+        if not concrete_tests:
+            print(f"❌ No concrete tests with results found")
+            return jsonify({'error': 'No test results found for PDF generation'}), 404
+        
+        concrete_test = concrete_tests[0]  # Use first test for main data
+        print(f"✅ Found concrete test with results")
+        
+        # Get photos for this concrete test
+        photos = TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).all()
+        print(f"✅ Found {len(photos)} photos")
+        
+        # Parse JSON data
+        test_results_json = {}
+        observations_json = {}
+        
+        if concrete_test.test_results_json:
+            try:
+                test_results_json = json.loads(concrete_test.test_results_json)
+            except json.JSONDecodeError:
+                print("⚠️ Failed to parse test_results_json")
+        
+        if concrete_test.observations_json:
+            try:
+                observations_json = json.loads(concrete_test.observations_json)
+            except json.JSONDecodeError:
+                print("⚠️ Failed to parse observations_json")
+        
+        # Build complete PDF data structure
+        pdf_data = {
+            'test_request': {
+                'id': tr.id,
+                'job_number': tr.job_number,
+                'ulr_number': tr.ulr_number,
+                'receipt_date': tr.receipt_date.isoformat() if tr.receipt_date else None,
+                'completion_date': tr.completion_date.isoformat() if tr.completion_date else None,
+                'site_name': tr.site_name,
+                'test_type': tr.test_type,
+                'status': tr.status
+            },
+            'customer': {
+                'id': customer.id,
+                'name': customer.name,
+                'first_name': customer.first_name,
+                'last_name': customer.last_name,
+                'contact_person': customer.contact_person,
+                'phone': customer.phone,
+                'email': customer.email,
+                'address': customer.address,
+                'city': customer.city,
+                'site_name': customer.site_name
+            },
+            'main_test': {
+                'id': concrete_test.id,
+                'id_mark': concrete_test.id_mark,
+                'location_nature': concrete_test.location_nature,
+                'grade': concrete_test.grade,
+                'casting_date': concrete_test.casting_date.isoformat() if concrete_test.casting_date else None,
+                'testing_date': concrete_test.testing_date.isoformat() if concrete_test.testing_date else None,
+                'age_in_days': concrete_test.age_in_days,
+                'sample_description': concrete_test.sample_description,
+                'cube_condition': concrete_test.cube_condition,
+                'curing_condition': concrete_test.curing_condition,
+                'machine_used': concrete_test.machine_used,
+                'test_method': concrete_test.test_method,
+                'weight': concrete_test.weight,
+                'dimension_length': concrete_test.dimension_length,
+                'dimension_width': concrete_test.dimension_width,
+                'dimension_height': concrete_test.dimension_height,
+                'crushing_load': concrete_test.crushing_load,
+                'compressive_strength': concrete_test.compressive_strength,
+                'average_strength': concrete_test.average_strength,
+                'failure_type': concrete_test.failure_type,
+                'test_remarks': concrete_test.test_remarks,
+                'tested_by': concrete_test.tested_by,
+                'checked_by': concrete_test.checked_by,
+                'verified_by': concrete_test.verified_by,
+                'test_results_json': test_results_json,
+                'observations_json': observations_json
+            },
+            'photos': [],
+            'reviewer_info': {
+                'name': 'Lalita S. Dussa',
+                'designation': 'Quality Manager',
+                'graduation': 'B.Tech.(Civil)'
+            }
+        }
+        
+        # Add photos data
+        for photo in photos:
+            photo_data = {
+                'id': photo.id,
+                'photo_type': photo.photo_type,
+                'cube_number': photo.cube_number,
+                'photo_data': photo.photo_data,
+                'filename': photo.filename
+            }
+            pdf_data['photos'].append(photo_data)
+        
+        print(f"✅ Built complete PDF data structure")
+        print(f"   - Test Request: {pdf_data['test_request']['job_number']}")
+        print(f"   - Customer: {pdf_data['customer']['name']}")
+        print(f"   - Test Results: {len(test_results_json)} fields")
+        print(f"   - Observations: {len(observations_json)} fields")
+        print(f"   - Photos: {len(pdf_data['photos'])}")
+        print(f"{'='*50}\n")
+        
+        return jsonify(pdf_data), 200
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        app.logger.error(f"Error fetching PDF data: {error_trace}")
+        print(f"\n❌ PDF DATA FETCH ERROR:")
+        print(error_trace)
+        print(f"{'='*50}\n")
+        return jsonify({'error': f'Failed to fetch PDF data: {str(e)}'}), 500
+
 # API endpoint to save test observations and results
 @app.route('/api/test-observations/<int:test_request_id>', methods=['GET', 'OPTIONS'])
 def get_test_observations(test_request_id):
@@ -829,24 +981,53 @@ def get_test_observations(test_request_id):
         
         print(f"✅ Built formData")
         
-        # Build test rows from saved concrete tests
+        # Build test rows from observations_json if available, otherwise from concrete test data
         print(f"✅ Building test rows from {len(concrete_tests)} concrete tests...")
-        for idx, ct in enumerate(concrete_tests):
-            print(f"   Row {idx + 1}: weight={ct.weight}, strength={ct.compressive_strength}")
-            row = {
-                'id': idx + 1,
-                'cubeId': f'C{idx + 1}',
-                'length': str(ct.dimension_length) if ct.dimension_length else '',
-                'breadth': str(ct.dimension_width) if ct.dimension_width else '',
-                'height': str(ct.dimension_height) if ct.dimension_height else '',
-                'area': str(ct.dimension_length * ct.dimension_width) if (ct.dimension_length and ct.dimension_width) else '',
-                'weight': str(ct.weight) if ct.weight else '',
-                'density': '',  # Calculate if needed
-                'crushingLoad': str(ct.crushing_load) if ct.crushing_load else '',
-                'compressiveStrength': str(ct.compressive_strength) if ct.compressive_strength else '',
-                'failureType': str(ct.failure_type) if ct.failure_type else ''
-            }
-            saved_data['testRows'].append(row)
+        
+        # Try to load from observations_json first
+        if concrete_tests and concrete_tests[0].observations_json:
+            try:
+                import json
+                observations_data = json.loads(concrete_tests[0].observations_json)
+                if 'testRows' in observations_data:
+                    saved_data['testRows'] = observations_data['testRows']
+                    print(f"✅ Loaded {len(saved_data['testRows'])} test rows from observations_json")
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"⚠️ Failed to parse observations_json: {e}")
+        
+        # Load captured images from database
+        if concrete_tests:
+            concrete_test = concrete_tests[0]
+            photos = TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).all()
+            captured_images = {}
+            
+            for photo in photos:
+                image_key = f"{photo.photo_type}_{int(photo.cube_number)}"
+                if photo.photo_data:
+                    # Add data URL prefix for display
+                    captured_images[image_key] = f"data:image/jpeg;base64,{photo.photo_data}"
+            
+            saved_data['capturedImages'] = captured_images
+            print(f"✅ Loaded {len(captured_images)} images from database")
+        
+        # Fallback to building from concrete test data if no observations_json
+        if not saved_data['testRows']:
+            for idx, ct in enumerate(concrete_tests):
+                print(f"   Row {idx + 1}: weight={ct.weight}, strength={ct.compressive_strength}")
+                row = {
+                    'id': idx + 1,
+                    'cubeId': ct.id_mark or f'C{idx + 1}',
+                    'length': str(ct.dimension_length) if ct.dimension_length else '',
+                    'breadth': str(ct.dimension_width) if ct.dimension_width else '',
+                    'height': str(ct.dimension_height) if ct.dimension_height else '',
+                    'area': str(ct.dimension_length * ct.dimension_width) if (ct.dimension_length and ct.dimension_width) else '',
+                    'weight': str(ct.weight) if ct.weight else '',
+                    'density': '',  # Calculate if needed
+                    'crushingLoad': str(ct.crushing_load) if ct.crushing_load else '',
+                    'compressiveStrength': str(ct.compressive_strength) if ct.compressive_strength else '',
+                    'failureType': str(ct.failure_type) if ct.failure_type else ''
+                }
+                saved_data['testRows'].append(row)
         
         print(f"✅ Built {len(saved_data['testRows'])} test rows")
         
@@ -886,38 +1067,73 @@ def save_test_observations(test_request_id):
         form_data = data.get('formData', {})
         test_rows = data.get('testRows', [])
         
-        # Get all concrete tests for this test request
-        concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
+        # Get the first concrete test for this test request
+        concrete_test = ConcreteTest.query.filter_by(test_request_id=test_request_id).first()
+        if not concrete_test:
+            return jsonify({'error': 'Concrete test not found'}), 404
         
-        # Update each concrete test with results
-        for index, test_row in enumerate(test_rows):
-            if index < len(concrete_tests):
-                concrete_test = concrete_tests[index]
-                
-                # Update test results
-                concrete_test.weight = float(test_row.get('weight', 0)) if test_row.get('weight') else None
-                concrete_test.dimension_length = float(test_row.get('length', 0)) if test_row.get('length') else None
-                concrete_test.dimension_width = float(test_row.get('breadth', 0)) if test_row.get('breadth') else None
-                concrete_test.dimension_height = float(test_row.get('height', 0)) if test_row.get('height') else None
-                concrete_test.crushing_load = float(test_row.get('crushingLoad', 0)) if test_row.get('crushingLoad') else None
-                concrete_test.compressive_strength = float(test_row.get('compressiveStrength', 0)) if test_row.get('compressiveStrength') else None
-                concrete_test.failure_type = test_row.get('failureType', '')
-                concrete_test.has_results = True
-                
-                # Save additional form data
-                concrete_test.sample_description = form_data.get('sampleDescription', 'Concrete Cube Specimen')
-                concrete_test.cube_condition = form_data.get('cubeCondition', 'Good')
-                concrete_test.curing_condition = form_data.get('curingCondition', '')
-                concrete_test.machine_used = form_data.get('machineUsed', 'Universal Testing Machine')
-                concrete_test.test_method = form_data.get('testMethod', 'IS 516 (Part1/Sec1):2021')
-                concrete_test.test_remarks = form_data.get('testRemarks', '')
-                concrete_test.tested_by = form_data.get('testedBy', '')
-                concrete_test.checked_by = form_data.get('checkedBy', '')
-                concrete_test.verified_by = form_data.get('verifiedBy', 'Mr. P A Sanghave')
-                
-                # Calculate average strength if provided
-                if form_data.get('averageStrength'):
-                    concrete_test.average_strength = float(form_data['averageStrength'])
+        # Save all test rows as JSON in observations_json
+        import json
+        concrete_test.observations_json = json.dumps({
+            'formData': form_data,
+            'testRows': test_rows
+        })
+        
+        # Save captured images to database
+        captured_images = data.get('capturedImages', {})
+        if captured_images:
+            # Clear existing photos for this test
+            TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).delete()
+            
+            # Save new photos
+            for image_key, image_data in captured_images.items():
+                if image_data and image_data.startswith('data:image'):
+                    # Parse image key to get cube number and photo type
+                    # Format: front_failure_1, digital_reading_1, back_failure_1
+                    parts = image_key.split('_')
+                    if len(parts) >= 3:
+                        photo_type = f"{parts[0]}_{parts[1]}"  # front_failure, digital_reading, back_failure
+                        cube_number = float(parts[2])
+                        
+                        # Remove data URL prefix
+                        if 'base64,' in image_data:
+                            image_data = image_data.split('base64,')[1]
+                        
+                        photo = TestPhoto(
+                            concrete_test_id=concrete_test.id,
+                            photo_type=photo_type,
+                            cube_number=cube_number,
+                            photo_data=image_data,
+                            filename=f"{photo_type}_{cube_number}.jpg"
+                        )
+                        db.session.add(photo)
+        
+        # Save additional form data
+        concrete_test.sample_description = form_data.get('sampleDescription', 'Concrete Cube Specimen')
+        concrete_test.cube_condition = form_data.get('cubeCondition', 'Good')
+        concrete_test.curing_condition = form_data.get('curingCondition', '')
+        concrete_test.machine_used = form_data.get('machineUsed', 'Universal Testing Machine')
+        concrete_test.test_method = form_data.get('testMethod', 'IS 516 (Part1/Sec1):2021')
+        concrete_test.test_remarks = form_data.get('testRemarks', '')
+        concrete_test.tested_by = form_data.get('testedBy', '')
+        concrete_test.checked_by = form_data.get('checkedBy', '')
+        concrete_test.verified_by = form_data.get('verifiedBy', 'Mr. P A Sanghave')
+        
+        # Calculate average strength if provided
+        if form_data.get('averageStrength'):
+            concrete_test.average_strength = float(form_data['averageStrength'])
+        
+        # Update with first test row data (for backward compatibility)
+        if test_rows:
+            first_row = test_rows[0]
+            concrete_test.weight = float(first_row.get('weight', 0)) if first_row.get('weight') else None
+            concrete_test.dimension_length = float(first_row.get('length', 0)) if first_row.get('length') else None
+            concrete_test.dimension_width = float(first_row.get('breadth', 0)) if first_row.get('breadth') else None
+            concrete_test.dimension_height = float(first_row.get('height', 0)) if first_row.get('height') else None
+            concrete_test.crushing_load = float(first_row.get('crushingLoad', 0)) if first_row.get('crushingLoad') else None
+            concrete_test.compressive_strength = float(first_row.get('compressiveStrength', 0)) if first_row.get('compressiveStrength') else None
+            concrete_test.failure_type = first_row.get('failureType', '')
+            concrete_test.has_results = True
         
         # Update test request status
         test_request.status = 'observations_completed'

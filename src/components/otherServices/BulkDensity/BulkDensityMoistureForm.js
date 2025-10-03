@@ -152,59 +152,6 @@ const BulkDensityMoistureForm = () => {
     }));
   };
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const randomData = {
-        sample_description: 'Concrete aggregate sample for bulk density and moisture content testing - 20mm nominal size',
-        date_of_receipt: today.toISOString().split('T')[0],
-        customer_site_name: 'ABC Construction Site, Plot No. 123, Industrial Area, Mumbai - 400001',
-        reference_number: 'REF-2024-001',
-        date_of_manufacturer: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        type_of_specimen: 'Coarse Aggregate 20mm',
-        machine_used: 'Digital Balance - 10kg capacity',
-        location_of_test: 'Laboratory',
-        capacity_range: '0-10kg',
-        test_method: 'IS 2386 (Part 3): 1963',
-        sample_test_code: 'BD-2024-001',
-        date_of_report: tomorrow.toISOString().split('T')[0],
-        url_number: 'URL-2024-001',
-        job_code_number: 'JOB-2024-001',
-        manufacturer: 'ABC Quarry Ltd.',
-        condition_of_specimen: 'Air dried',
-        calibration_due_date: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        environmental_conditions: 'Laboratory Conditions: 27°C ± 2°C, 65% ± 5% RH',
-        tested_by_name: 'John Doe',
-        checked_by_name: 'Jane Smith',
-        remarks: 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'
-      };
-      
-      // Fill test results with random data
-      for (let row = 1; row <= 3; row++) {
-        randomData[`weight_before_${row}`] = (2.5 + Math.random() * 0.5).toFixed(3);
-        randomData[`weight_after_${row}`] = (2.3 + Math.random() * 0.4).toFixed(3);
-        randomData[`length_${row}`] = (200 + Math.random() * 5).toFixed(1);
-        randomData[`breadth_${row}`] = (200 + Math.random() * 5).toFixed(1);
-        randomData[`depth_${row}`] = (200 + Math.random() * 5).toFixed(1);
-      }
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-      
-      // Trigger calculations
-      setTimeout(() => {
-        for (let row = 1; row <= 3; row++) {
-          calculateVolume(row);
-          calculateBulkDensity(row);
-          calculateMoistureContent(row);
-        }
-      }, 100);
-      
-      alert('Random data filled successfully! Please review and modify as needed before submitting.');
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -820,10 +767,6 @@ const BulkDensityMoistureForm = () => {
           {/* Action Buttons */}
           <Row>
             <Col className="text-center">
-              <Button type="button" variant="info" size="lg" className="me-3" onClick={fillRandomData}>
-                <FontAwesomeIcon icon={faMagic} className="me-2" />
-                Fill Random Data
-              </Button>
               <Button type="submit" variant="primary" size="lg" className="me-3">
                 <FontAwesomeIcon icon={faSave} className="me-2" />
                 Save Test Data

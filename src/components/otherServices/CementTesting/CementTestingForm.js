@@ -228,63 +228,6 @@ const CementTestingForm = () => {
     }));
   };
 
-  const fillRandomData = () => {
-    if (window.confirm('This will fill all fields with sample data. Continue?')) {
-      const today = new Date();
-      const randomData = {
-        sample_description: 'Portland Cement sample for comprehensive testing - OPC 43 Grade',
-        date_of_receipt: today.toISOString().split('T')[0],
-        cement_type: 'Ordinary Portland Cement (OPC)',
-        test_method: 'IS 4031 (Part 1) - 1996',
-        sample_test_code: 'CT-2024-001',
-        cement_grade: '43 Grade',
-        customer_site_address: 'ABC Construction Site, Plot No. 123, Industrial Area, Mumbai - 400001',
-        url_number: 'URL-2024-001',
-        job_code_number: 'JOB-2024-001',
-        period_of_testing: '28 days',
-        condition_of_sample: 'As Received',
-        location_of_testing: 'Laboratory',
-        tested_by_name: 'John Doe',
-        checked_by_name: 'Jane Smith',
-        remarks: 'Sample data filled for testing purposes. All measurements are approximate and should be replaced with actual test data.'
-      };
-      
-      // Fill test 1 data
-      randomData.liquid_taken_01 = (0.5 + Math.random() * 0.1).toFixed(3);
-      randomData.specific_gravity_liquid_01 = (1.0 + Math.random() * 0.1).toFixed(3);
-      randomData.weight_cement_01 = (50 + Math.random() * 10).toFixed(3);
-      randomData.initial_reading_01 = (20 + Math.random() * 5).toFixed(1);
-      randomData.final_reading_01 = (25 + Math.random() * 5).toFixed(1);
-      
-      randomData.liquid_taken_02 = (0.5 + Math.random() * 0.1).toFixed(3);
-      randomData.specific_gravity_liquid_02 = (1.0 + Math.random() * 0.1).toFixed(3);
-      randomData.weight_cement_02 = (50 + Math.random() * 10).toFixed(3);
-      randomData.initial_reading_02 = (20 + Math.random() * 5).toFixed(1);
-      randomData.final_reading_02 = (25 + Math.random() * 5).toFixed(1);
-      
-      // Fill test 2 data
-      for (let i = 1; i <= 5; i++) {
-        randomData[`distance_27c_0${i}`] = (10 + Math.random() * 2).toFixed(2);
-        randomData[`distance_boiler_0${i}`] = (12 + Math.random() * 2).toFixed(2);
-      }
-      
-      // Fill test 3 data
-      for (let i = 1; i <= 3; i++) {
-        randomData[`cement_weight_0${i}`] = (100 + Math.random() * 10).toFixed(3);
-        randomData[`residue_weight_0${i}`] = (5 + Math.random() * 2).toFixed(3);
-      }
-      
-      setFormData(prev => ({ ...prev, ...randomData }));
-      
-      setTimeout(() => {
-        calculateSpecificGravityAverages();
-        calculateSoundnessAverages();
-        calculateFinenessAverages();
-      }, 100);
-      
-      alert('Random data filled successfully! Please review and modify as needed before submitting.');
-    }
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -1418,10 +1361,6 @@ const CementTestingForm = () => {
           {/* Action Buttons */}
           <Row>
             <Col className="text-center">
-              <Button type="button" variant="info" size="lg" className="me-3" onClick={fillRandomData}>
-                <FontAwesomeIcon icon={faMagic} className="me-2" />
-                Fill Random Data
-              </Button>
               <Button type="submit" variant="primary" size="lg" className="me-3">
                 <FontAwesomeIcon icon={faSave} className="me-2" />
                 Save Test Data
