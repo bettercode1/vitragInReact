@@ -436,6 +436,11 @@ const TestObservations = () => {
         timestamp: new Date().toISOString()
       };
 
+      console.log('🔍 FRONTEND DEBUG: About to send data:');
+      console.log('  testRows length:', testRows.length);
+      console.log('  testRows content:', testRows);
+      console.log('  observationsData:', observationsData);
+
       setSaveProgress(30);
 
       // Validate we have a test request ID before saving
