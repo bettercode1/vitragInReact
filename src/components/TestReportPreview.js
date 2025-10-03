@@ -12,12 +12,13 @@ import {
   faCog,
   faFlask
 } from '@fortawesome/free-solid-svg-icons';
-import databaseService from '../services/database';
+import axios from 'axios';
 
 const TestReportPreview = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // ALL useState hooks MUST be at the top, before any returns!
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [testData, setTestData] = useState(null);
@@ -29,46 +30,74 @@ const TestReportPreview = () => {
   });
   const [selectedReviewer, setSelectedReviewer] = useState('1');
   
-  // Get test request ID from location state
+  // Get test request ID from location state - CHECK MULTIPLE SOURCES
   const testRequestId = location.state?.testRequestId || location.state?.testData?.id || location.state?.id;
   
   // Debug logging
-  console.log('🔍 TestReportPreview - testRequestId:', testRequestId);
-  console.log('🔍 TestReportPreview - location.state:', location.state);
+  console.log('🔍 TestReportPreview - Full Location State:', location.state);
+  console.log('🔍 TestReportPreview - testRequestId (final):', testRequestId);
+  console.log('🔍 TestReportPreview - location.state?.testRequestId:', location.state?.testRequestId);
+  console.log('🔍 TestReportPreview - location.state?.testData?.id:', location.state?.testData?.id);
+  console.log('🔍 TestReportPreview - location.state?.id:', location.state?.id);
   
   // Fetch data from backend
   useEffect(() => {
     const fetchTestData = async () => {
       if (!testRequestId) {
         console.error('❌ NO TEST REQUEST ID!');
+        console.error('   location.state:', location.state);
+        console.error('   location.state?.testData:', location.state?.testData);
+        console.error('   location.state?.id:', location.state?.id);
         setError('No test request ID provided. Please navigate from a test sample.');
         setLoading(false);
         return;
       }
       
       try {
-        console.log('🔍 Fetching COMPLETE PDF data for ID:', testRequestId);
+        console.log('🔍 Fetching test data for ID:', testRequestId);
+        const response = await axios.get(`http://localhost:5000/api/test-requests/${testRequestId}/details`);
+        const data = response.data;
         
-        // Use the new PDF data endpoint that fetches from ALL required tables
-        const data = await databaseService.getTestRequestPDFData(testRequestId);
-        console.log('✅ Fetched COMPLETE PDF data:', data);
+        console.log('✅ Fetched data:', data);
         
-        // Transform PDF data to match component's expected format
-        const mainTest = data.main_test || {};
-        const strengthData = mainTest.test_results_json || {};
-        const observationsData = mainTest.observations_json || {};
+        // Get all concrete tests (not just the first one)
+        const concreteTests = data.concrete_tests || [];
+        const firstTest = concreteTests[0] || {};
         
-        console.log('🔍 Data Structure:');
-        console.log('  test_request:', data.test_request);
-        console.log('  customer:', data.customer);
-        console.log('  main_test:', mainTest);
-        console.log('  strengthData:', strengthData);
-        console.log('  observationsData:', observationsData);
-        console.log('  photos:', data.photos);
+        // Parse JSON fields from first test (where all data is stored)
+        let strengthData = {};
+        let observationsData = {};
+        let cubeMeasurements = [];
+        
+        console.log('🔍 Raw JSON from DB:');
+        console.log('  test_results_json:', firstTest.test_results_json);
+        console.log('  observations_json:', firstTest.observations_json);
+        console.log('  Total concrete tests:', concreteTests.length);
+        
+        try {
+          if (firstTest.test_results_json) {
+            const testResultsData = JSON.parse(firstTest.test_results_json);
+            strengthData = testResultsData.strength_data || {};
+            cubeMeasurements = testResultsData.cube_measurements || [];
+            console.log('✅ Parsed strengthData:', strengthData);
+            console.log('✅ Parsed cubeMeasurements:', cubeMeasurements);
+          } else {
+            console.warn('⚠️ No test_results_json found!');
+          }
+          
+          if (firstTest.observations_json) {
+            observationsData = JSON.parse(firstTest.observations_json);
+            console.log('✅ Parsed observationsData:', observationsData);
+          } else {
+            console.warn('⚠️ No observations_json found!');
+          }
+        } catch (parseError) {
+          console.error('❌ Error parsing JSON fields:', parseError);
+        }
         
         // Calculate age in days
         const calculateAge = (castingDate, testingDate) => {
-          if (!castingDate || !testingDate) return 'N/A';
+          if (!castingDate || !testingDate) return '';
           const casting = new Date(castingDate);
           const testing = new Date(testingDate);
           const diffTime = Math.abs(testing - casting);
@@ -76,77 +105,75 @@ const TestReportPreview = () => {
           return diffDays;
         };
         
-        // Transform data to match component's expected format
+        // Transform backend data to match component's expected format
         const transformedData = {
           id: data.test_request.id,
-          jobNumber: data.test_request.job_number || 'N/A',
-          customerName: data.customer.name || 'N/A',
-          siteName: data.test_request.site_name || 'N/A',
-          siteAddress: data.customer.address || 'N/A',
-          receiptDate: data.test_request.receipt_date || 'N/A',
+          jobNumber: data.test_request.job_number || '',
+          customerName: data.customer.name || '',
+          siteName: data.test_request.site_name || '',
+          siteAddress: data.customer.address || '',
+          receiptDate: data.test_request.receipt_date || '',
           status: data.test_request.status || 'pending',
-          ulrNumber: data.test_request.ulr_number || 'N/A',
-          referenceNumber: mainTest.sample_code_number || 'N/A',
-          cubeTests: [{
-            id: mainTest.id || 1,
-            idMark: mainTest.id_mark || 'N/A',
-            locationNature: mainTest.location_nature || 'N/A',
-            grade: mainTest.grade || 'N/A',
-            castingDate: mainTest.casting_date || 'N/A',
-            testingDate: mainTest.testing_date || 'N/A',
-            ageInDays: mainTest.age_in_days || calculateAge(mainTest.casting_date, mainTest.testing_date),
-            quantity: mainTest.num_of_cubes || 3,
-            testMethod: mainTest.test_method || 'IS 516 (Part1/Sec1):2021',
-            sampleCodeNumber: mainTest.sample_code_number || 'N/A',
-            ulrNumber: mainTest.ulr_number || data.test_request.ulr_number || 'N/A',
-            machineUsed: mainTest.machine_used || 'CTM (2000KN)',
-            cubeCondition: mainTest.cube_condition || 'Acceptable',
-            curingCondition: mainTest.curing_condition || 'N/A',
-            averageStrength: mainTest.average_strength || 'N/A',
-            testedBy: mainTest.tested_by || 'N/A',
-            checkedBy: mainTest.checked_by || 'N/A',
-            verifiedBy: mainTest.verified_by || 'Mr. P A Sanghave',
-            testRemarks: mainTest.test_remarks || 'N/A',
-            // Use testRows from observations data for individual cube data
-            testResults: observationsData.testRows?.map((row, i) => {
-              // Calculate density if not provided
-              let density = row.density;
-              if (!density && row.length && row.breadth && row.height && row.weight) {
-                const length = parseFloat(row.length);
-                const breadth = parseFloat(row.breadth);
-                const height = parseFloat(row.height);
-                const weight = parseFloat(row.weight);
-                const volume = (length * breadth * height) / 1000000; // Convert mm³ to m³
-                density = volume > 0 ? (weight / volume).toFixed(0) : 'N/A';
-              }
-              
-              return {
-                srNo: row.id || i + 1,
-                idMark: row.cubeId || 'N/A',
-                dimensionLength: parseFloat(row.length) || 150,
-                dimensionWidth: parseFloat(row.breadth) || 150,
-                dimensionHeight: parseFloat(row.height) || 150,
-                area: parseFloat(row.area) ? parseFloat(row.area).toFixed(3) : '22500.000',
-                weight: row.weight || 'N/A',
-                crushingLoad: row.crushingLoad || 'N/A',
-                density: density || 'N/A',
-                compressiveStrength: row.compressiveStrength || 'N/A'
-              };
-            }) || []
-          }],
-          // Add strength data from graph
+          ulrNumber: data.test_request.ulr_number || firstTest.ulr_number || data.test_request.ulr_number || '',
+          referenceNumber: firstTest.sample_code_number || data.test_request.sample_code_number || '',
+          // Create a single test results array with all cubes from cubeMeasurements
+          allTestResults: cubeMeasurements.map((cube, index) => {
+            return {
+              srNo: index + 1,
+              idMark: cube.cube_id || '',
+              dimensionLength: cube.dimension_length || '',
+              dimensionWidth: cube.dimension_width || '',
+              dimensionHeight: cube.dimension_height || '',
+              area: cube.area ? cube.area.toFixed(2) : '',
+              weight: cube.weight || '',
+              crushingLoad: cube.crushing_load || '',
+              density: cube.density ? cube.density.toFixed(0) : '',
+              compressiveStrength: cube.compressive_strength || ''
+            };
+          }),
+          cubeTests: concreteTests.map((ct, index) => {
+            return {
+              id: ct.id,
+              idMark: ct.id_mark || '',
+              locationNature: ct.location_nature || '',
+              grade: ct.grade || '',
+              castingDate: ct.casting_date || '',
+              testingDate: ct.testing_date || '',
+              ageInDays: ct.age_in_days || calculateAge(ct.casting_date, ct.testing_date),
+              quantity: 1, // Each concrete test represents one cube
+              testMethod: ct.test_method || 'IS 516 (Part1/Sec1):2021',
+              sampleCodeNumber: ct.sample_code_number || '',
+              ulrNumber: ct.ulr_number || '',
+              machineUsed: ct.machine_used || 'CTM (2000KN)',
+              cubeCondition: ct.cube_condition || 'Acceptable',
+              curingCondition: ct.curing_condition || 'Water Curing',
+              sampleDescription: ct.sample_description || 'Concrete Cube Specimen',
+              testedBy: ct.tested_by || '',
+              checkedBy: ct.checked_by || '',
+              verifiedBy: ct.verified_by || 'Mr. P A Sanghave',
+              averageStrength: ct.average_strength || '',
+              // Add individual measurements
+              weight: ct.weight || '',
+              dimensionLength: ct.dimension_length || '',
+              dimensionWidth: ct.dimension_width || '',
+              dimensionHeight: ct.dimension_height || '',
+              crushingLoad: ct.crushing_load || '',
+              compressiveStrength: ct.compressive_strength || '',
+              failureType: ct.failure_type || '',
+              testRemarks: ct.test_remarks || ''
+            };
+          }),
           strengthData: strengthData,
-          // Add photos data
-          photos: data.photos || []
+          observationsData: observationsData
         };
         
-        console.log('✅ Transformed data for preview:', transformedData);
+        console.log('✅ Transformed data:', transformedData);
         setTestData(transformedData);
         setLoading(false);
         
-      } catch (error) {
-        console.error('❌ Error fetching test data:', error);
-        setError(`Failed to fetch test data: ${error.message}`);
+      } catch (err) {
+        console.error('❌ Error fetching test data:', err);
+        setError(err.message || 'Failed to fetch test data');
         setLoading(false);
       }
     };
@@ -154,284 +181,1185 @@ const TestReportPreview = () => {
     fetchTestData();
   }, [testRequestId]);
   
-  const handleBack = () => {
-    navigate(-1);
-  };
-  
-  const handleGeneratePDF = () => {
-    if (testData) {
-      navigate(`/generate-pdf/${testData.id}`, {
-        state: { testData }
-      });
-    }
-  };
-  
+  // Show loading state
   if (loading) {
     return (
-      <Container className="mt-4">
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-2">Loading test data...</p>
-        </div>
+      <Container className="mt-5">
+        <Card style={{ backgroundColor: '#1C2333', border: '2px solid #FFA500' }}>
+          <Card.Body className="text-center p-5">
+            <Spinner animation="border" variant="warning" style={{ width: '4rem', height: '4rem' }} />
+            <h2 className="mt-4 text-white">Loading Test Report...</h2>
+            <p className="text-muted mt-2">Please wait while we fetch your test data from the database</p>
+            <div className="mt-4">
+              <div className="progress" style={{ height: '4px', backgroundColor: '#333' }}>
+                <div className="progress-bar bg-warning" role="progressbar" style={{ width: '100%', animation: 'progress 2s ease-in-out infinite' }}></div>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+        <style>{`
+          @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+          }
+        `}</style>
       </Container>
     );
   }
   
-  if (error) {
+  // Show error state
+  if (error || !testData) {
     return (
-      <Container className="mt-4">
+      <Container className="mt-5">
         <Alert variant="danger">
-          <Alert.Heading>Error</Alert.Heading>
-          <p>{error}</p>
-          <Button variant="outline-danger" onClick={handleBack}>
-            <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-            Go Back
+          <Alert.Heading>Error Loading Test Report</Alert.Heading>
+          <p>{error || 'Test data not found'}</p>
+          <Button variant="outline-danger" onClick={() => navigate(-1)}>
+            <FontAwesomeIcon icon={faArrowLeft} /> Go Back
           </Button>
         </Alert>
       </Container>
     );
   }
   
-  if (!testData) {
-    return (
-      <Container className="mt-4">
-        <Alert variant="warning">
-          <Alert.Heading>No Data</Alert.Heading>
-          <p>No test data found for this request.</p>
-          <Button variant="outline-warning" onClick={handleBack}>
-            <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-            Go Back
-          </Button>
-        </Alert>
-      </Container>
-    );
-  }
+  // Reviewers list
+  const reviewers = [
+    { id: 1, name: 'Lalita S. Dussa', designation: 'Quality Manager', graduation: 'B.Tech.(Civil)' },
+    { id: 2, name: 'Harsha Prakarsha Sangave', designation: 'Quality Manager', graduation: 'M.E(Civil-Structures)' },
+    { id: 3, name: 'Amol A Adam', designation: 'Quality Manager', graduation: 'B.E(Civil)' },
+    { id: 4, name: 'Aaquib J. Shaikh', designation: 'Quality Manager', graduation: 'B.E(Civil)' },
+    { id: 5, name: 'Prakarsha A. Sangave', designation: 'Chief Executive Officer', graduation: 'M.E(Civil-Structures)' }
+  ];
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return dateString;
+  };
+
+  const handleReviewerChange = (e) => {
+    const reviewerId = e.target.value;
+    setSelectedReviewer(reviewerId);
+    const reviewer = reviewers.find(r => r.id === parseInt(reviewerId));
+    if (reviewer) {
+      setReviewerInfo(reviewer);
+    }
+  };
+
+
+  // Function to view OBSERVATION SHEET (Page 1 only)
+  const handleViewObservationSheet = () => {
+    // Navigate to observation sheet page
+    const params = new URLSearchParams();
+    const cubeTest = testData.cubeTests ? testData.cubeTests[0] : testData;
+    
+    // Pass only observation-related data
+    params.append('page_type', 'observation'); // Flag to show only page 1
+    params.append('customer_name', testData.customerName || '');
+    params.append('site_name', testData.siteName || '');
+    params.append('job_code_number', testData.jobNumber || '');
+    params.append('ulr_number', cubeTest.ulrNumber || testData.ulrNumber || '');
+    params.append('reference_number', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    params.append('date_of_testing', cubeTest.testingDate || '');
+    params.append('date_of_casting', cubeTest.castingDate || '');
+    params.append('sample_description', testData.sampleDescription || 'Concrete Cube Specimen');
+    params.append('blocks_condition', testData.cubeCondition || 'Acceptable');
+    params.append('curing_condition', testData.curingCondition || '');
+    params.append('machine_used_for_testing', testData.machineUsed || 'CTM (2000KN)');
+    
+    // Test results
+    const testResults = cubeTest.testResults || [];
+    testResults.forEach((result, index) => {
+      const i = index + 1;
+      params.append(`block_id_${i}`, result.idMark || `C${i}`);
+      params.append(`length_${i}`, result.dimensionLength || '');
+      params.append(`breadth_${i}`, result.dimensionWidth || '');
+      params.append(`height_${i}`, result.dimensionHeight || '');
+      params.append(`area_${i}`, result.area || '');
+      params.append(`weight_${i}`, result.weight || '');
+      params.append(`load_max_${i}`, result.crushingLoad || '');
+      params.append(`compressive_strength_${i}`, result.compressiveStrength || '');
+    });
+    
+    params.append('tested_by_name', testData.testedBy || '');
+    params.append('checked_by_name', testData.checkedBy || '');
+    params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name);
+    
+    // Add average compressive strength
+    params.append('average_compressive_strength', cubeTest.averageStrength || '');
+    
+    window.open(`/cubeTestingReport.html?${params.toString()}`, '_blank');
+  };
   
-  const firstCubeTest = testData.cubeTests[0];
-  
-  return (
-    <Container className="mt-4">
-      <style jsx>{`
-        .report-container {
-          background-color: #1C2333;
-          color: #ffffff;
-          min-height: 100vh;
-          padding: 20px;
-        }
-        .report-header {
-          background-color: #2C3E50;
-          padding: 20px;
-          border-radius: 10px;
-          margin-bottom: 20px;
-        }
-        .report-section {
-          background-color: #34495E;
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 15px;
-        }
-        .table-dark th {
-          background-color: #2C3E50;
-          color: #FFD700;
-        }
-        .table-dark td {
-          background-color: #1C2333;
-          color: #ffffff;
-        }
-      `}</style>
+  // Function to view FULL REPORT (Pages 2-4)
+  const handleViewPDF = () => {
+    // Build URL parameters from testData
+    const params = new URLSearchParams();
+    
+    console.log('Full testData:', testData); // Debug log
+    
+    params.append('page_type', 'full'); // Flag to show full report
+    params.append('test_request_id', testData.id); // For sessionStorage image retrieval
+    
+    // Get cube test data - handle both old and new data structure
+    const cubeTest = testData.cubeTests ? testData.cubeTests[0] : testData;
+    
+    // Customer Information (Page 1 & Page 2)
+    params.append('customer_name', testData.customerName || '');
+    params.append('site_name', testData.siteName || '');
+    params.append('site_address', testData.siteAddress || '');
+    params.append('job_code_number', testData.jobNumber || '');
+    params.append('ulr_number', testData.ulrNumber || cubeTest.ulrNumber || '');
+    params.append('reference_number', testData.referenceNumber || cubeTest.sampleCodeNumber || '');
+    
+    // Dates
+    params.append('date_of_report', new Date().toISOString().split('T')[0]);
+    params.append('date_of_receipt', testData.receiptDate || '');
+    params.append('date_of_material_receipt', testData.receiptDate || '');
+    params.append('date_of_casting', cubeTest.castingDate || testData.castingDate || '');
+    params.append('date_of_testing', cubeTest.testingDate || testData.testingDate || '');
+    
+    // Test Information (Page 1 & Page 2 - from TestObservations)
+    params.append('sample_test_code', cubeTest.sampleCodeNumber || testData.referenceNumber || '');
+    params.append('sample_description', cubeTest.sampleDescription || testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('material_description', cubeTest.sampleDescription || testData.sampleDescription || `Concrete Cube Specimen - Grade ${cubeTest.grade || testData.grade}` || '');
+    params.append('quantity_of_blocks', cubeTest.quantity || testData.quantity || '');
+    params.append('grade_of_blocks', cubeTest.grade || testData.grade || '');
+    params.append('grade_of_specimen', cubeTest.grade || testData.grade || '');
+    params.append('blocks_condition', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
+    params.append('condition_of_specimen', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
+    params.append('condition_of_sample', cubeTest.cubeCondition || testData.cubeCondition || 'Acceptable');
+    params.append('manufacture_of_blocks', `${cubeTest.ageInDays || testData.ageInDays || ''} Days`);
+    params.append('age_of_specimen', `${cubeTest.ageInDays || testData.ageInDays || ''}`);
+    params.append('curing_condition', cubeTest.curingCondition || testData.curingCondition || '');
+    params.append('machine_used', cubeTest.machineUsed || testData.machineUsed || 'Fully automatic Digital Compression Testing Machine');
+    params.append('machine_used_for_testing', cubeTest.machineUsed || testData.machineUsed || 'Fully automatic Digital Compression Testing Machine');
+    params.append('location_of_testing', 'Permanent');
+    params.append('location_structure', cubeTest.locationNature || testData.locationNature || '');
+    params.append('type_of_specimen', cubeTest.sampleDescription || 'Concrete Cube');
+    params.append('environmental_conditions', 'Not Applicable');
+    params.append('capacity_range', '2000KN');
+    params.append('calibration_due_date', '01/10/2026');
+    
+    // Test Results - from TestObservations rows data
+    const testResults = cubeTest.testResults || testData.testResults || testData.rows || [];
+    console.log('Test Results:', testResults); // Debug log
+    
+    testResults.forEach((result, index) => {
+      const i = index + 1;
+      params.append(`block_id_${i}`, result.cubeId || result.idMark || '');
+      params.append(`length_${i}`, result.length || result.dimensionLength || '');
+      params.append(`breadth_${i}`, result.breadth || result.dimensionWidth || '');
+      params.append(`height_${i}`, result.height || result.dimensionHeight || '');
+      params.append(`area_${i}`, result.area || '');
+      params.append(`weight_${i}`, result.weight || '');
+      params.append(`load_max_${i}`, result.crushingLoad || '');
+      params.append(`density_${i}`, result.density || '');
+      params.append(`compressive_strength_${i}`, result.compressiveStrength || '');
+      params.append(`failure_type_${i}`, result.failureType || '-');
+    });
+    
+    // Remarks - from TestObservations
+    params.append('remarks', testData.testRemarks || testData.remarks || '');
+    
+    // Verification/Authorization - from TestObservations
+    params.append('tested_by_name', testData.testedBy || 'John Doe');
+    params.append('tested_by_date', testData.testedDate || new Date().toLocaleDateString('en-GB'));
+    params.append('checked_by_name', testData.checkedBy || 'Jane Smith');
+    params.append('checked_by_date', testData.checkedDate || new Date().toLocaleDateString('en-GB'));
+    params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name || 'Prakarsh A Sangave');
+    params.append('verified_by_date', testData.verifiedDate || new Date().toLocaleDateString('en-GB'));
+    
+    // Add average compressive strength
+    params.append('average_compressive_strength', cubeTest.averageStrength || '');
+    
+    // Strength Graph Data - from StrengthGraph
+    console.log('🔍 FULL testData object:', testData);
+    console.log('🔍 testData.strengthData:', testData.strengthData);
+    console.log('🔍 testData.observationsData:', testData.observationsData);
+    console.log('🔍 cubeTest:', cubeTest);
+    
+    if (testData.strengthData) {
+      const r7 = testData.strengthData.required_7 || '15.0';
+      const a7 = testData.strengthData.actual_7 || '0';
+      const r14 = testData.strengthData.required_14 || '22.5';
+      const a14 = testData.strengthData.actual_14 || '0';
+      const r28 = testData.strengthData.required_28 || '30.0';
+      const a28 = testData.strengthData.actual_28 || '0';
       
-      <div className="report-container">
-        {/* Header */}
-        <div className="report-header">
-          <Row className="align-items-center">
-            <Col>
-              <h2 className="mb-0 text-center text-warning">
-                <FontAwesomeIcon icon={faFlask} className="me-2" />
-                TEST REPORT PREVIEW
-              </h2>
-              <p className="text-center text-muted mb-0">
-                Complete data from database - test_request, concrete_test, test_photo tables
-              </p>
-            </Col>
-            <Col xs="auto">
-              <Button variant="outline-light" onClick={handleBack}>
-                <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-                Back
-              </Button>
-            </Col>
-          </Row>
-        </div>
-        
-        {/* Test Request Information */}
-        <div className="report-section">
-          <h4 className="text-warning mb-3">
-            <FontAwesomeIcon icon={faBuilding} className="me-2" />
-            Test Request Information
-          </h4>
-          <Row>
-            <Col md={6}>
-              <p><strong>Job Number:</strong> {testData.jobNumber}</p>
-              <p><strong>Customer:</strong> {testData.customerName}</p>
-              <p><strong>Site:</strong> {testData.siteName}</p>
-              <p><strong>Address:</strong> {testData.siteAddress}</p>
-            </Col>
-            <Col md={6}>
-              <p><strong>ULR Number:</strong> {testData.ulrNumber}</p>
-              <p><strong>Reference Number:</strong> {testData.referenceNumber}</p>
-              <p><strong>Receipt Date:</strong> {testData.receiptDate}</p>
-              <p><strong>Status:</strong> <Badge bg="success">{testData.status}</Badge></p>
-            </Col>
-          </Row>
-        </div>
-        
-        {/* Test Details */}
-        <div className="report-section">
-          <h4 className="text-warning mb-3">
-            <FontAwesomeIcon icon={faCog} className="me-2" />
-            Test Details
-          </h4>
-          <Row>
-            <Col md={6}>
-              <p><strong>ID Mark:</strong> {firstCubeTest.idMark}</p>
-              <p><strong>Location/Nature:</strong> {firstCubeTest.locationNature}</p>
-              <p><strong>Grade:</strong> {firstCubeTest.grade}</p>
-              <p><strong>Age in Days:</strong> {firstCubeTest.ageInDays}</p>
-            </Col>
-            <Col md={6}>
-              <p><strong>Casting Date:</strong> {firstCubeTest.castingDate}</p>
-              <p><strong>Testing Date:</strong> {firstCubeTest.testingDate}</p>
-              <p><strong>Test Method:</strong> {firstCubeTest.testMethod}</p>
-              <p><strong>Machine Used:</strong> {firstCubeTest.machineUsed}</p>
-            </Col>
-          </Row>
-        </div>
-        
-        {/* Test Results */}
-        {firstCubeTest.testResults && firstCubeTest.testResults.length > 0 && (
-          <div className="report-section">
-            <h4 className="text-warning mb-3">
-              <FontAwesomeIcon icon={faFlask} className="me-2" />
-              Test Results (From Database)
-            </h4>
-            <Table striped bordered hover variant="dark" className="table-sm">
-              <thead>
-                <tr>
-                  <th>Sr. No.</th>
-                  <th>ID Mark</th>
-                  <th>Length (mm)</th>
-                  <th>Breadth (mm)</th>
-                  <th>Height (mm)</th>
-                  <th>Area (mm²)</th>
-                  <th>Weight (kg)</th>
-                  <th>Density (kg/m³)</th>
-                  <th>Crushing Load (kN)</th>
-                  <th>Compressive Strength (MPa)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {firstCubeTest.testResults.map((result, index) => (
-                  <tr key={index}>
-                    <td>{result.srNo}</td>
-                    <td>{result.idMark}</td>
-                    <td>{result.dimensionLength}</td>
-                    <td>{result.dimensionWidth}</td>
-                    <td>{result.dimensionHeight}</td>
-                    <td>{result.area}</td>
-                    <td>{result.weight}</td>
-                    <td>{result.density}</td>
-                    <td>{result.crushingLoad}</td>
-                    <td>{result.compressiveStrength}</td>
+      console.log('📊 STRENGTH VALUES BEING SENT:', {r7, a7, r14, a14, r28, a28});
+      
+      params.append('required_7', r7);
+      params.append('actual_7', a7);
+      params.append('required_14', r14);
+      params.append('actual_14', a14);
+      params.append('required_28', r28);
+      params.append('actual_28', a28);
+      console.log('Strength params:', {
+        required_7: testData.strengthData.required_7,
+        actual_7: testData.strengthData.actual_7,
+        required_14: testData.strengthData.required_14,
+        actual_14: testData.strengthData.actual_14,
+        required_28: testData.strengthData.required_28,
+        actual_28: testData.strengthData.actual_28
+      });
+    } else {
+      console.warn('No strengthData found in testData!');
+    }
+    
+    // Observations Data (6 observation points) - from StrengthGraph
+    console.log('testData.observationsData:', testData.observationsData);
+    if (testData.observationsData) {
+      params.append('obs_strength_duration', testData.observationsData.obs_strength_duration || '');
+      params.append('obs_test_results', testData.observationsData.obs_test_results || '');
+      params.append('obs_weight', testData.observationsData.obs_weight || '');
+      params.append('obs_failure_pattern', testData.observationsData.obs_failure_pattern || '');
+      params.append('obs_bonding', testData.observationsData.obs_bonding || '');
+      params.append('obs_strength_criteria', testData.observationsData.obs_strength_criteria || '');
+    }
+    
+    // Pass images directly via URL parameters (base64 encoded)
+    if (testData.capturedImages || testData.cubeTests?.[0]?.capturedImages) {
+      const images = testData.capturedImages || testData.cubeTests?.[0]?.capturedImages || {};
+      console.log('📸 Passing images via URL parameters:', Object.keys(images));
+      
+      // Pass each image as a separate parameter
+      Object.entries(images).forEach(([key, value]) => {
+        if (value && typeof value === 'string' && value.startsWith('data:image')) {
+          // Truncate very long base64 strings to avoid URL length limits
+          const truncatedValue = value.length > 10000 ? value.substring(0, 10000) + '...' : value;
+          params.append(`image_${key}`, truncatedValue);
+        }
+      });
+    } else {
+      console.warn('⚠️ No capturedImages found in testData');
+    }
+    
+    // Add cache buster to force browser to reload the HTML
+    params.append('_t', Date.now());
+    
+    // Navigate to the existing HTML PDF file with parameters
+    const reportUrl = `/cubeTestingReport.html?${params.toString()}`;
+    console.log('🚀 Opening report with URL:', reportUrl);
+    console.log('🚀 URL length:', reportUrl.length);
+    window.open(reportUrl, '_blank');
+  };
+
+  return (
+    <div style={{ backgroundColor: '#1C2333', minHeight: '100vh', padding: '20px 0' }}>
+      <Container>
+        {/* Header with Logos */}
+        <Card style={{
+          backgroundColor: '#1C2333',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '15px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+          marginBottom: '20px'
+        }}>
+          <Card.Header style={{
+            backgroundColor: '#1C2333',
+            borderBottom: '2px solid #FFA500',
+            padding: '20px'
+          }}>
+            <Row className="align-items-center">
+              <Col md={2} className="text-center">
+                <img 
+                  src="/logo.png" 
+                  alt="Vitrag Associates Logo" 
+                  height="50"
+                  style={{ borderRadius: '5px' }}
+                />
+              </Col>
+              <Col md={8} className="text-center">
+                <h2 style={{ 
+                  color: '#ffffff', 
+                  fontWeight: '700',
+                  margin: '0'
+                }}>
+                  TEST REPORT
+                </h2>
+              </Col>
+              <Col md={2} className="text-center">
+                <img 
+                  src="/nabl_logo_final.png" 
+                  alt="NABL Logo" 
+                  height="50"
+                  style={{ borderRadius: '5px' }}
+                />
+              </Col>
+            </Row>
+          </Card.Header>
+
+          <Card.Body style={{ backgroundColor: '#1C2333', padding: '30px' }}>
+            {/* Customer Information Section */}
+            <div className="mb-4">
+              <Table style={{
+                backgroundColor: '#1C2333',
+                color: '#ffffff',
+                borderCollapse: 'collapse'
+              }}>
+                <tbody>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      width: '25%'
+                    }} rowSpan={2}>
+                      Customer/Site Name & Address
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }} rowSpan={2}>
+                      {testData.customerName}<br />
+                      {testData.siteName}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      width: '18%'
+                    }}>
+                      Date of Report
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      width: '25%'
+                    }}>
+                      {new Date().toLocaleDateString('en-GB')}
+                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
-        
-        {/* Strength Data from Graph */}
-        {testData.strengthData && Object.keys(testData.strengthData).length > 0 && (
-          <div className="report-section">
-            <h4 className="text-warning mb-3">
-              <FontAwesomeIcon icon={faFlask} className="me-2" />
-              Strength Graph Data (From Database)
-            </h4>
-            <Row>
-              <Col md={4}>
-                <p><strong>7 Days:</strong> Required: {testData.strengthData.required_7 || 'N/A'}, Actual: {testData.strengthData.actual_7 || 'N/A'}</p>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      ULR Number
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.ulrNumber || testData.cubeTests[0]?.ulrNumber || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Job Code Number
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.jobNumber}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Reference Number
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.sampleCodeNumber || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Location/Structure Type
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }} colSpan={3}>
+                      {testData.cubeTests[0]?.locationNature || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Date of Receipt
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {formatDate(testData.receiptDate)}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Age of Specimen
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.ageInDays || ''} Days
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Date of Casting
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {formatDate(testData.cubeTests[0]?.castingDate)}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Date of Testing
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {formatDate(testData.cubeTests[0]?.testingDate)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Type of Specimen
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Concrete Cube Specimen
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Grade of Specimen
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.grade || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Condition of Specimen
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.cubeCondition || ''}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Curing Condition
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.curingCondition || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Machine used for Testing
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }} colSpan={3}>
+                      {testData.cubeTests[0]?.machineUsed || ''}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Location of Test
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }} colSpan={3}>
+                      Permanent
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Capacity/Range
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      2000KN
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Calibration Due Date
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB')}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Test Method
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {testData.cubeTests[0]?.testMethod || ''}
+                    </td>
+                    <th style={{
+                      backgroundColor: '#1C2333',
+                      color: '#FFD700',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Environmental condition
+                    </th>
+                    <td style={{
+                      backgroundColor: '#1C2333',
+                      color: '#ffffff',
+                      textAlign: 'center',
+                      padding: '15px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}>
+                      Not Applicable
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </div>
+
+            {/* Test Sample Description */}
+            <div className="mb-4">
+              <h5 style={{
+                backgroundColor: '#1C2333',
+                color: '#FFD700',
+                padding: '10px',
+                textAlign: 'center',
+                marginBottom: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '5px'
+              }}>
+                DESCRIPTION OF TEST SAMPLE
+              </h5>
+              <div className="table-responsive">
+                <Table style={{
+                  backgroundColor: '#1C2333',
+                  color: '#ffffff',
+                  borderCollapse: 'collapse',
+                  margin: '0 auto',
+                  width: 'auto'
+                }}>
+                  <thead>
+                    <tr style={{
+                      backgroundColor: '#1C2333',
+                      borderBottom: '2px solid #FFA500'
+                    }}>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '70px'
+                      }}>
+                        Sr. No.
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '100px'
+                      }}>
+                        ID Mark
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '70px'
+                      }}>
+                        L
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '70px'
+                      }}>
+                        B
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '70px'
+                      }}>
+                        H
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '100px'
+                      }}>
+                        Area (mm²)
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '100px'
+                      }}>
+                        Weight (kg)
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '120px'
+                      }}>
+                        Maximum Load (kN)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {testData.allTestResults?.map((result, index) => (
+                      <tr key={index}>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.srNo}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.idMark}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.dimensionLength}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.dimensionWidth}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.dimensionHeight}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.area}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.weight}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.crushingLoad}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Test Results */}
+            <div className="mb-4">
+              <h5 style={{
+                backgroundColor: '#1C2333',
+                color: '#FFD700',
+                padding: '10px',
+                textAlign: 'center',
+                marginBottom: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '5px'
+              }}>
+                Test Result for Compressive Strength of Concrete Cube
+              </h5>
+              <div className="table-responsive">
+                <Table style={{
+                  backgroundColor: '#1C2333',
+                  color: '#ffffff',
+                  borderCollapse: 'collapse',
+                  margin: '0 auto',
+                  width: 'auto'
+                }}>
+                  <thead>
+                    <tr style={{
+                      backgroundColor: '#343a40',
+                      borderBottom: '2px solid #FFA500'
+                    }}>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '100px'
+                      }}>
+                        Sr. No.
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '120px'
+                      }}>
+                        ID Mark
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '150px'
+                      }}>
+                        Density (kg/m³)
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '200px'
+                      }}>
+                        Compressive Strength (N/mm²)
+                      </th>
+                      <th style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        padding: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        width: '220px'
+                      }}>
+                        Average Compressive Strength (N/mm²)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {testData.allTestResults?.map((result, index) => (
+                      <tr key={index}>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.srNo}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.idMark}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.density}
+                        </td>
+                        <td style={{
+                          color: '#ffffff',
+                          textAlign: 'center',
+                          padding: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {result.compressiveStrength}
+                        </td>
+                        {index === 0 && (
+                          <td style={{
+                            color: '#ffffff',
+                            textAlign: 'center',
+                            padding: '10px',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            verticalAlign: 'middle'
+                          }} rowSpan={testData.allTestResults?.length}>
+                            {testData.cubeTests[0]?.averageStrength}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="mb-4">
+              <h5 style={{
+                backgroundColor: '#1C2333',
+                color: '#FFD700',
+                padding: '10px',
+                marginBottom: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '5px'
+              }}>
+                Terms & Conditions –
+              </h5>
+              <ul style={{
+                backgroundColor: '#1C2333',
+                color: '#ffffff',
+                padding: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '5px'
+              }}>
+                <li style={{ marginBottom: '10px' }}>Samples were not drawn by VAs lab.</li>
+                <li style={{ marginBottom: '10px' }}>The Test Reports & Results pertain to Sample/ Samples of material received by VAs.</li>
+                <li style={{ marginBottom: '10px' }}>The Test Report cannot be reproduced without the written approval of CEO/QM of VAs.</li>
+                <li style={{ marginBottom: '10px' }}>Any change/ correction/ alteration to the Test Report shall be invalid.</li>
+                <li style={{ marginBottom: '10px' }}>The role VAs is restricted to testing of the material sample as received in the laboratory. VAs or any of its employees shall not be liable for any dispute/ litigation arising between the customer & Third Party on account of test results. VAs shall not interact with any Third Party in this regard.</li>
+                <li>The CEO of VAs may make necessary changes to the terms & conditions without any prior notice.</li>
+              </ul>
+            </div>
+
+            {/* Reviewer Selection */}
+            <div className="mb-4">
+              <Card style={{
+                backgroundColor: '#1C2333',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}>
+                <Card.Header style={{
+                  backgroundColor: '#FFA500',
+                  color: '#000000',
+                  padding: '10px'
+                }}>
+                  <h6 className="mb-0">Select Report Reviewer</h6>
+                </Card.Header>
+                <Card.Body style={{ padding: '15px' }}>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Label style={{ color: '#ffffff' }}>Select Reviewer:</Form.Label>
+                      <Form.Select
+                        value={selectedReviewer}
+                        onChange={handleReviewerChange}
+                        style={{
+                          backgroundColor: '#495057',
+                          borderColor: '#6c757d',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {reviewers.map(reviewer => (
+                          <option key={reviewer.id} value={reviewer.id}>
+                            {reviewer.name} - {reviewer.designation}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Col>
+                    <Col md={6} className="d-flex align-items-end">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        style={{
+                          backgroundColor: '#28a745',
+                          borderColor: '#28a745',
+                          color: '#ffffff'
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faSave} className="me-1" />
+                        Update Reviewer
+                      </Button>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </div>
+
+            {/* Authorization Section */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <div className="text-center" style={{
+                  backgroundColor: '#1C2333',
+                  padding: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '5px'
+                }}>
+                  <p className="mb-2 fw-bold" style={{ color: '#FFD700' }}>Reviewed by –</p>
+                  <p className="mb-1 fw-bold" style={{ color: '#ffffff' }}>{reviewerInfo.name}</p>
+                  <p className="mb-1" style={{ color: '#ffffff' }}>({reviewerInfo.designation})</p>
+                  <p className="mb-0 fst-italic" style={{ color: '#ffffff' }}>{reviewerInfo.graduation}</p>
+                </div>
               </Col>
-              <Col md={4}>
-                <p><strong>14 Days:</strong> Required: {testData.strengthData.required_14 || 'N/A'}, Actual: {testData.strengthData.actual_14 || 'N/A'}</p>
-              </Col>
-              <Col md={4}>
-                <p><strong>28 Days:</strong> Required: {testData.strengthData.required_28 || 'N/A'}, Actual: {testData.strengthData.actual_28 || 'N/A'}</p>
+              <Col md={6}>
+                <div className="text-center" style={{
+                  backgroundColor: '#1C2333',
+                  padding: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '5px'
+                }}>
+                  <p className="mb-2 fw-bold" style={{ color: '#FFD700' }}>Authorized by –</p>
+                  <p className="mb-1 fw-bold" style={{ color: '#ffffff' }}>Mr. Prakarsh A Sangave</p>
+                  <p className="mb-1" style={{ color: '#ffffff' }}>(Chief Executive Officer)</p>
+                  <p className="mb-1 fst-italic" style={{ color: '#ffffff' }}>M.E(Civil-Structures)</p>
+                  <p className="mb-0 fst-italic" style={{ color: '#ffffff' }}>MTech (Civil-Geotechnical), M.I.E, F.I.E.</p>
+                </div>
               </Col>
             </Row>
-          </div>
-        )}
-        
-        {/* Photos */}
-        {testData.photos && testData.photos.length > 0 && (
-          <div className="report-section">
-            <h4 className="text-warning mb-3">
-              <FontAwesomeIcon icon={faFlask} className="me-2" />
-              Test Photos (From Database)
-            </h4>
-            <p><strong>Number of Photos:</strong> {testData.photos.length}</p>
-            <Row>
-              {testData.photos.map((photo, index) => (
-                <Col md={4} key={index} className="mb-3">
-                  <Card className="bg-dark text-white">
-                    <Card.Body>
-                      <p><strong>Type:</strong> {photo.photo_type}</p>
-                      <p><strong>Cube:</strong> {photo.cube_number}</p>
-                      <p><strong>Filename:</strong> {photo.filename}</p>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </div>
-        )}
-        
-        {/* Verification */}
-        <div className="report-section">
-          <h4 className="text-warning mb-3">
-            <FontAwesomeIcon icon={faUser} className="me-2" />
-            Verification
-          </h4>
-          <Row>
-            <Col md={4}>
-              <p><strong>Tested By:</strong> {firstCubeTest.testedBy}</p>
-            </Col>
-            <Col md={4}>
-              <p><strong>Checked By:</strong> {firstCubeTest.checkedBy}</p>
-            </Col>
-            <Col md={4}>
-              <p><strong>Verified By:</strong> {firstCubeTest.verifiedBy}</p>
-            </Col>
-          </Row>
-          <p><strong>Average Strength:</strong> {firstCubeTest.averageStrength}</p>
-          <p><strong>Test Remarks:</strong> {firstCubeTest.testRemarks}</p>
-        </div>
-        
-        {/* Actions */}
-        <div className="report-section">
-          <h4 className="text-warning mb-3">Actions</h4>
-          <Button variant="success" size="lg" onClick={handleGeneratePDF}>
-            <FontAwesomeIcon icon={faFilePdf} className="me-2" />
-            Generate PDF with Real Data
-          </Button>
-        </div>
-        
-        {/* Debug Info */}
-        <div className="report-section">
-          <h4 className="text-warning mb-3">Debug Information</h4>
-          <p><strong>Test Request ID:</strong> {testRequestId}</p>
-          <p><strong>Data Source:</strong> Database (test_request + concrete_test + test_photo tables)</p>
-          <p><strong>Status:</strong> ✅ Using real data from database</p>
-        </div>
-      </div>
-    </Container>
+
+            {/* Report Footer */}
+            <div className="text-center border-top pt-3" style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+              paddingTop: '20px'
+            }}>
+              <p style={{ color: '#ffffff' }}>
+                X-----------X-----------X-----------X----------END OF REPORT----------X-----------X-----------X-----------X
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="text-center mt-4">
+              <Button
+                variant="secondary"
+                className="me-2"
+                onClick={() => navigate('/view-sample', { state: { testData } })}
+                style={{
+                  backgroundColor: '#6c757d',
+                  borderColor: '#6c757d',
+                  color: '#ffffff'
+                }}
+              >
+                <FontAwesomeIcon icon={faArrowLeft} className="me-1" />
+                Back to Test Details
+              </Button>
+              
+              <Button
+                variant="info"
+                className="me-2"
+                onClick={handleViewObservationSheet}
+                style={{
+                  backgroundColor: '#17a2b8',
+                  borderColor: '#17a2b8',
+                  color: '#ffffff'
+                }}
+              >
+                <FontAwesomeIcon icon={faFlask} className="me-1" />
+                View Observation Sheet
+              </Button>
+              
+              <Button
+                variant="warning"
+                className="me-2"
+                onClick={handleViewPDF}
+                style={{
+                  backgroundColor: '#FFA500',
+                  borderColor: '#FFA500',
+                  color: '#000000'
+                }}
+              >
+                <FontAwesomeIcon icon={faFilePdf} className="me-1" />
+                View Full Report
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   );
 };
 

@@ -750,10 +750,10 @@ const StrengthGraph = () => {
                           console.log('🚀 testRequestId:', testRequestId);
                           console.log('🚀 observationsData:', observationsData);
                           
-                          // Store images in sessionStorage for PDF access
+                          // Skip sessionStorage for images - they're too large and cause quota errors
                           const capturedImages = observationsData?.capturedImages || {};
                           console.log('📸 Captured Images:', Object.keys(capturedImages));
-                          sessionStorage.setItem('testImages_' + testRequestId, JSON.stringify(capturedImages));
+                          console.log('📸 Skipping sessionStorage to avoid quota errors');
                           
                           navigate('/test-report-preview', { 
                             state: { 

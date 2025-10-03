@@ -1056,7 +1056,8 @@ def save_test_observations(test_request_id):
         from models import TestRequest, ConcreteTest
         
         data = request.get_json()
-        print(f"Saving observations for test request {test_request_id}: {data}")
+        print(f"🔍 FULL REQUEST DATA: {data}")
+        print(f"Saving observations for test request {test_request_id}")
         
         # Get test request
         test_request = db.session.get(TestRequest, test_request_id)
@@ -1067,73 +1068,165 @@ def save_test_observations(test_request_id):
         form_data = data.get('formData', {})
         test_rows = data.get('testRows', [])
         
-        # Get the first concrete test for this test request
-        concrete_test = ConcreteTest.query.filter_by(test_request_id=test_request_id).first()
-        if not concrete_test:
-            return jsonify({'error': 'Concrete test not found'}), 404
+        print(f"🔍 DEBUG: form_data keys: {list(form_data.keys())}")
+        print(f"🔍 DEBUG: test_rows length: {len(test_rows)}")
+        print(f"🔍 DEBUG: test_rows content: {test_rows}")
         
-        # Save all test rows as JSON in observations_json
+        # Check if testRows is inside formData
+        if not test_rows and 'testRows' in form_data:
+            test_rows = form_data['testRows']
+            print(f"🔍 DEBUG: Found testRows in formData: {len(test_rows)} rows")
+        
+        print(f"🔍 DEBUG: Final test_rows: {test_rows}")
+        for i, row in enumerate(test_rows):
+            print(f"   Row {i+1}: {row}")
+        
+        # Clear existing concrete tests for this test request
+        ConcreteTest.query.filter_by(test_request_id=test_request_id).delete()
+        
+        # Create cube measurements array (like previous project)
+        cube_measurements = []
+        for index, row in enumerate(test_rows):
+            print(f"🔍 Processing row {index+1}: {row}")
+            
+            # Calculate area and density
+            area = None
+            density = None
+            if row.get('length') and row.get('breadth'):
+                area = float(row['length']) * float(row['breadth'])
+                print(f"   Calculated area: {area}")
+            if row.get('weight') and row.get('length') and row.get('breadth') and row.get('height'):
+                volume = float(row['length']) * float(row['breadth']) * float(row['height']) / 1000000  # Convert to m³
+                density = float(row['weight']) / volume if volume > 0 else None
+                print(f"   Calculated density: {density}")
+            
+            cube_measurement = {
+                'cube_id': row.get('cubeId', f'C{index + 1}'),
+                'dimension_length': float(row['length']) if row.get('length') else None,
+                'dimension_width': float(row['breadth']) if row.get('breadth') else None,
+                'dimension_height': float(row['height']) if row.get('height') else None,
+                'area': area,
+                'weight': float(row['weight']) if row.get('weight') else None,
+                'density': density,
+                'crushing_load': float(row['crushingLoad']) if row.get('crushingLoad') else None,
+                'compressive_strength': float(row['compressiveStrength']) if row.get('compressiveStrength') else None,
+                'failure_type': row.get('failureType')
+            }
+            cube_measurements.append(cube_measurement)
+            print(f"   Created cube_measurement: {cube_measurement}")
+        
+        print(f"🔍 Final cube_measurements array: {cube_measurements}")
+        
+        # Create test_results_json (like previous project)
         import json
-        concrete_test.observations_json = json.dumps({
+        test_results_json = json.dumps({
+            'cube_measurements': cube_measurements,
+            'strength_data': {
+                'required_7': None,
+                'required_14': None,
+                'required_28': None,
+                'actual_7': None,
+                'actual_14': None,
+                'actual_28': None,
+                'has_data': False
+            }
+        })
+        print(f"🔍 Created test_results_json: {test_results_json}")
+        
+        # Create observations_json
+        observations_json = json.dumps({
             'formData': form_data,
             'testRows': test_rows
         })
         
-        # Save captured images to database
-        captured_images = data.get('capturedImages', {})
-        if captured_images:
-            # Clear existing photos for this test
-            TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).delete()
-            
-            # Save new photos
-            for image_key, image_data in captured_images.items():
-                if image_data and image_data.startswith('data:image'):
-                    # Parse image key to get cube number and photo type
-                    # Format: front_failure_1, digital_reading_1, back_failure_1
-                    parts = image_key.split('_')
-                    if len(parts) >= 3:
-                        photo_type = f"{parts[0]}_{parts[1]}"  # front_failure, digital_reading, back_failure
-                        cube_number = float(parts[2])
-                        
-                        # Remove data URL prefix
-                        if 'base64,' in image_data:
-                            image_data = image_data.split('base64,')[1]
-                        
-                        photo = TestPhoto(
-                            concrete_test_id=concrete_test.id,
-                            photo_type=photo_type,
-                            cube_number=cube_number,
-                            photo_data=image_data,
-                            filename=f"{photo_type}_{cube_number}.jpg"
-                        )
-                        db.session.add(photo)
+        # Create a SINGLE concrete test record (like previous project)
+        print(f"🔍 DEBUG: Creating 1 concrete test record with {len(test_rows)} cube measurements")
+        concrete_test = ConcreteTest(
+            test_request_id=test_request_id,
+            sr_no=1,
+            id_mark=test_rows[0].get('cubeId', 'C1') if test_rows else '',
+            sample_description=form_data.get('sampleDescription', 'Concrete Cube Specimen'),
+            cube_condition=form_data.get('cubeCondition', 'Good'),
+            curing_condition=form_data.get('curingCondition', ''),
+            machine_used=form_data.get('machineUsed', 'Universal Testing Machine'),
+            test_method=form_data.get('testMethod', 'IS 516 (Part1/Sec1):2021'),
+            test_remarks=form_data.get('testRemarks', ''),
+            tested_by=form_data.get('testedBy', ''),
+            checked_by=form_data.get('checkedBy', ''),
+            verified_by=form_data.get('verifiedBy', 'Mr. P A Sanghave'),
+            has_results=True,
+            # Copy ULR number and job number from test request
+            ulr_number=test_request.ulr_number,
+            job_number=test_request.job_number,
+            # Store JSON data
+            test_results_json=test_results_json,
+            observations_json=observations_json,
+            # Set num_of_cubes
+            num_of_cubes=len(test_rows)
+        )
         
-        # Save additional form data
-        concrete_test.sample_description = form_data.get('sampleDescription', 'Concrete Cube Specimen')
-        concrete_test.cube_condition = form_data.get('cubeCondition', 'Good')
-        concrete_test.curing_condition = form_data.get('curingCondition', '')
-        concrete_test.machine_used = form_data.get('machineUsed', 'Universal Testing Machine')
-        concrete_test.test_method = form_data.get('testMethod', 'IS 516 (Part1/Sec1):2021')
-        concrete_test.test_remarks = form_data.get('testRemarks', '')
-        concrete_test.tested_by = form_data.get('testedBy', '')
-        concrete_test.checked_by = form_data.get('checkedBy', '')
-        concrete_test.verified_by = form_data.get('verifiedBy', 'Mr. P A Sanghave')
+        # Set individual data from first cube (for backward compatibility)
+        if test_rows:
+            first_row = test_rows[0]
+            if first_row.get('weight'):
+                concrete_test.weight = float(first_row['weight'])
+            if first_row.get('length'):
+                concrete_test.dimension_length = float(first_row['length'])
+            if first_row.get('breadth'):
+                concrete_test.dimension_width = float(first_row['breadth'])
+            if first_row.get('height'):
+                concrete_test.dimension_height = float(first_row['height'])
+            if first_row.get('crushingLoad'):
+                concrete_test.crushing_load = float(first_row['crushingLoad'])
+            if first_row.get('compressiveStrength'):
+                concrete_test.compressive_strength = float(first_row['compressiveStrength'])
+            if first_row.get('failureType'):
+                concrete_test.failure_type = first_row['failureType']
         
         # Calculate average strength if provided
         if form_data.get('averageStrength'):
             concrete_test.average_strength = float(form_data['averageStrength'])
         
-        # Update with first test row data (for backward compatibility)
-        if test_rows:
-            first_row = test_rows[0]
-            concrete_test.weight = float(first_row.get('weight', 0)) if first_row.get('weight') else None
-            concrete_test.dimension_length = float(first_row.get('length', 0)) if first_row.get('length') else None
-            concrete_test.dimension_width = float(first_row.get('breadth', 0)) if first_row.get('breadth') else None
-            concrete_test.dimension_height = float(first_row.get('height', 0)) if first_row.get('height') else None
-            concrete_test.crushing_load = float(first_row.get('crushingLoad', 0)) if first_row.get('crushingLoad') else None
-            concrete_test.compressive_strength = float(first_row.get('compressiveStrength', 0)) if first_row.get('compressiveStrength') else None
-            concrete_test.failure_type = first_row.get('failureType', '')
-            concrete_test.has_results = True
+        db.session.add(concrete_test)
+        print(f"   ✅ Added single concrete test record with {len(test_rows)} cube measurements")
+        
+        print(f"🔍 DEBUG: About to commit 1 record to database")
+        
+        # Save captured images to database (attach to first concrete test)
+        captured_images = data.get('capturedImages', {})
+        if captured_images and test_rows:
+            # Get the first concrete test ID after it's added
+            first_concrete_test = ConcreteTest.query.filter_by(
+                test_request_id=test_request_id, 
+                sr_no=1
+            ).first()
+            
+            if first_concrete_test:
+                # Clear existing photos for this test
+                TestPhoto.query.filter_by(concrete_test_id=first_concrete_test.id).delete()
+                
+                # Save new photos
+                for image_key, image_data in captured_images.items():
+                    if image_data and image_data.startswith('data:image'):
+                        # Parse image key to get cube number and photo type
+                        # Format: front_failure_1, digital_reading_1, back_failure_1
+                        parts = image_key.split('_')
+                        if len(parts) >= 3:
+                            photo_type = f"{parts[0]}_{parts[1]}"  # front_failure, digital_reading, back_failure
+                            cube_number = float(parts[2])
+                            
+                            # Remove data URL prefix
+                            if 'base64,' in image_data:
+                                image_data = image_data.split('base64,')[1]
+                            
+                            photo = TestPhoto(
+                                concrete_test_id=first_concrete_test.id,
+                                photo_type=photo_type,
+                                cube_number=cube_number,
+                                photo_data=image_data,
+                                filename=f"{photo_type}_{cube_number}.jpg"
+                            )
+                            db.session.add(photo)
         
         # Update test request status
         test_request.status = 'observations_completed'
@@ -1188,18 +1281,9 @@ def save_strength_graph(test_request_id):
         # Get concrete tests
         concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
         if not concrete_tests:
-            print(f"⚠️ WARNING: No concrete tests found for request {test_request_id}")
-            print(f"⚠️ Creating a new concrete test record...")
-            
-            # Create a new concrete test record
-            concrete_test = ConcreteTest(
-                test_request_id=test_request_id,
-                has_results=True,
-                test_method='IS 516 (Part1/Sec1):2021'
-            )
-            db.session.add(concrete_test)
-            db.session.flush()  # Get the ID
-            print(f"✅ Created new concrete test with ID: {concrete_test.id}")
+            print(f"❌ ERROR: No concrete tests found for request {test_request_id}")
+            print(f"❌ Strength graph data cannot be saved without concrete test records")
+            return jsonify({'error': 'No concrete test records found. Please save test observations first.'}), 400
         else:
             print(f"✅ Found {len(concrete_tests)} concrete test(s)")
             # We'll save to the first concrete test
@@ -1237,9 +1321,25 @@ def save_strength_graph(test_request_id):
         print(f"📊 Strength data: {strength_data}")
         print(f"📝 Observations: {observations_data}")
         
-        # Save as JSON strings
-        concrete_test.test_results_json = json.dumps(strength_data)
+        # Save as JSON strings - preserve existing cube_measurements
+        existing_test_results = {}
+        if concrete_test.test_results_json:
+            try:
+                existing_test_results = json.loads(concrete_test.test_results_json)
+            except json.JSONDecodeError:
+                print("⚠️ Failed to parse existing test_results_json")
+        
+        # Merge strength_data with existing cube_measurements
+        merged_test_results = {
+            'cube_measurements': existing_test_results.get('cube_measurements', []),
+            'strength_data': strength_data
+        }
+        
+        concrete_test.test_results_json = json.dumps(merged_test_results)
         concrete_test.observations_json = json.dumps(observations_data)
+        
+        print(f"🔍 Preserved cube_measurements: {len(merged_test_results['cube_measurements'])} cubes")
+        print(f"🔍 Updated strength_data: {strength_data}")
         
         # Update test request status
         test_request.status = 'graph_generated'

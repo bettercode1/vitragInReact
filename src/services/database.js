@@ -129,8 +129,21 @@ class DatabaseService {
       console.log('✅ PDF data fetched successfully:', response);
       return response;
     } catch (error) {
-      console.error('Failed to get PDF data:', error);
-      throw error;
+      console.error('❌ Failed to get PDF data:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        status: error.status,
+        testRequestId: testRequestId
+      });
+      
+      // Provide more specific error messages
+      if (error.message.includes('404')) {
+        throw new Error(`Test request with ID ${testRequestId} not found in database`);
+      } else if (error.message.includes('Failed to fetch')) {
+        throw new Error('Cannot connect to backend server. Make sure Flask is running on port 5000');
+      } else {
+        throw error;
+      }
     }
   }
 
