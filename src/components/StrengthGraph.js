@@ -175,7 +175,30 @@ const StrengthGraph = () => {
     ];
 
     const maxValue = Math.max(...requiredValues, ...actualValues, 35);
-    const yMax = Math.ceil(maxValue / 5) * 5;
+    const allValues = [...requiredValues, ...actualValues];
+    const hasValueAbove50 = allValues.some(value => value > 50);
+    
+    // Dynamic y-axis calculation with conditional intervals
+    let yMax, interval;
+    if (hasValueAbove50) {
+      // If any value > 50, use 10-unit intervals
+      interval = 10;
+      if (maxValue <= 55) {
+        yMax = 60;
+      } else {
+        yMax = Math.ceil(maxValue / 10) * 10;
+      }
+    } else {
+      // If all values ≤ 50, use 5-unit intervals
+      interval = 5;
+      yMax = Math.ceil(maxValue / 5) * 5;
+    }
+    
+    // Generate y-axis labels with appropriate intervals
+    const yAxisLabels = [];
+    for (let i = 0; i <= yMax; i += interval) {
+      yAxisLabels.push(i);
+    }
     
     return {
       data: [
@@ -183,7 +206,8 @@ const StrengthGraph = () => {
         { name: '14 days strength', required: requiredValues[1], actual: actualValues[1] },
         { name: '28 days strength', required: requiredValues[2], actual: actualValues[2] }
       ],
-      yMax
+      yMax,
+      yAxisLabels
     };
   };
 
@@ -622,18 +646,22 @@ const StrengthGraph = () => {
                           <div style={{ position: 'relative', height: '450px', marginTop: '20px', marginLeft: '50px' }}>
                             {/* Y-axis */}
                             <div style={{ position: 'absolute', left: '60px', top: '0', height: '350px', borderLeft: '2px solid #000' }}>
-                              {/* Y-axis labels - 0 to 45 with gap of 5 */}
-                              {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45].reverse().map((value, i) => {
+                              {/* Y-axis labels - dynamic with gap of 10 */}
+                              {getChartData().yAxisLabels.reverse().map((value, i) => {
+                                const totalLabels = getChartData().yAxisLabels.length - 1;
                                 return (
-                                  <div key={i} style={{ position: 'absolute', right: '10px', top: `${(i / 9) * 100}%`, transform: 'translateY(-50%)', fontSize: '9pt', color: '#000' }}>
+                                  <div key={i} style={{ position: 'absolute', right: '10px', top: `${(i / totalLabels) * 100}%`, transform: 'translateY(-50%)', fontSize: '9pt', color: '#000' }}>
                                     {value}
                                   </div>
                                 );
                               })}
                               {/* Grid lines */}
-                              {[...Array(9)].map((_, i) => (
-                                <div key={i} style={{ position: 'absolute', left: '0', top: `${((i + 1) / 9) * 100}%`, width: '680px', borderTop: '1px solid rgba(0,0,0,0.15)' }} />
-                              ))}
+                              {getChartData().yAxisLabels.slice(1).map((_, i) => {
+                                const totalLabels = getChartData().yAxisLabels.length - 1;
+                                return (
+                                  <div key={i} style={{ position: 'absolute', left: '0', top: `${((i + 1) / totalLabels) * 100}%`, width: '680px', borderTop: '1px solid rgba(0,0,0,0.15)' }} />
+                                );
+                              })}
                             </div>
                             
                             {/* X-axis line */}
@@ -642,8 +670,9 @@ const StrengthGraph = () => {
                             {/* Bars - positioned absolutely at bottom of Y-axis */}
                             <div style={{ position: 'absolute', left: '70px', bottom: '35px', width: '680px', height: '350px', display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end' }}>
                               {getChartData().data.map((item, index) => {
-                                const requiredHeight = (item.required / 45) * 350;
-                                const actualHeight = (item.actual / 45) * 350;
+                                const chartData = getChartData();
+                                const requiredHeight = (item.required / chartData.yMax) * 350;
+                                const actualHeight = (item.actual / chartData.yMax) * 350;
                                 
                                 return (
                                   <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '200px', position: 'relative' }}>
