@@ -579,13 +579,17 @@ const TestReportPreview = () => {
     console.log('  verifiedBy variable:', verifiedBy);
     console.log('  finalTestRemarks variable:', finalTestRemarks);
     
-    // Store complete testData in sessionStorage for the observation sheet
+    // Store testData WITHOUT images in sessionStorage to avoid quota exceeded
     if (testData.id || testRequestId) {
       const sessionKey = `testData_${testData.id || testRequestId}`;
       
-      // DYNAMIC FIX: Store the actual testData (which is the main_test object)
-      sessionStorage.setItem(sessionKey, JSON.stringify(testData));
-      console.log('✅ DYNAMIC: Stored actual testData in sessionStorage:', sessionKey);
+      // Create a copy without large image data
+      const testDataWithoutImages = { ...testData };
+      delete testDataWithoutImages.capturedImages;
+      delete testDataWithoutImages.photos;
+      
+      sessionStorage.setItem(sessionKey, JSON.stringify(testDataWithoutImages));
+      console.log('✅ DYNAMIC: Stored testData WITHOUT images in sessionStorage:', sessionKey);
       console.log('  📷 testData.curing_condition:', testData.curing_condition);
       console.log('  📷 testData.tested_by:', testData.tested_by);
       console.log('  📷 testData.checked_by:', testData.checked_by);
@@ -648,7 +652,7 @@ const TestReportPreview = () => {
     
     if (!testData) {
       console.error('❌ NO TESTDATA - Cannot open PDF');
-      alert('Error: No test data available. Please try refreshing the page.');
+      console.log('Error: No test data available. Please try refreshing the page.');
       return;
     }
     
@@ -859,11 +863,14 @@ const TestReportPreview = () => {
       console.log('🔍 Available testData properties:', Object.keys(testData));
     }
     
-    // Store complete testData in sessionStorage for HTML page to access
-    sessionStorage.setItem(`testData_${testData.id}`, JSON.stringify(testData));
-    console.log('✅ COMPLETE TESTDATA STORED IN SESSIONSTORAGE');
-    console.log('📸 Stored testData.capturedImages:', testData.capturedImages ? Object.keys(testData.capturedImages) : 'null');
-    console.log('📸 Stored testData.photos:', testData.photos ? testData.photos.length : 'null');
+    // Store testData WITHOUT images in sessionStorage to avoid quota exceeded
+    const testDataWithoutImages = { ...testData };
+    delete testDataWithoutImages.capturedImages;
+    delete testDataWithoutImages.photos;
+    
+    sessionStorage.setItem(`testData_${testData.id}`, JSON.stringify(testDataWithoutImages));
+    console.log('✅ TESTDATA STORED WITHOUT IMAGES IN SESSIONSTORAGE');
+    console.log('📸 Images will be loaded directly from database in finalTestReport.html');
     
     // PRIORITY 1: Use capturedImages from database (most reliable)
     let capturedImages = testData.capturedImages || {};
@@ -892,16 +899,8 @@ const TestReportPreview = () => {
     if (capturedImages && Object.keys(capturedImages).length > 0) {
       console.log('📸 Using capturedImages:', Object.keys(capturedImages));
       
-      // FORCE PASS IMAGES VIA URL PARAMETERS
-      Object.keys(capturedImages).forEach(key => {
-        const imageData = capturedImages[key];
-        if (imageData) {
-          params.set(key, imageData);
-          console.log(`📸 FORCED ${key} to URL params (${imageData.length} chars)`);
-        }
-      });
-      
-      console.log('✅ ALL IMAGES FORCED TO URL PARAMETERS');
+      // DON'T pass images via URL parameters (too long) - use sessionStorage only
+      console.log('📸 Images will be loaded from sessionStorage to avoid URL length issues');
       
     } else {
       console.log('⚠️ No capturedImages found in testData');
@@ -938,7 +937,8 @@ const TestReportPreview = () => {
     
     if (!newWindow) {
       console.error('❌ POPUP BLOCKED! Please allow popups for this site.');
-      alert('Popup blocked! Please allow popups for this site and try again.');
+      // Remove the alert popup - just log the error
+      console.log('Please allow popups for this site and try again.');
     } else {
       console.log('✅ PDF opened in new tab successfully');
     }

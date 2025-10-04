@@ -49,7 +49,7 @@ if database_url and database_url.strip():
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url.strip()
     print(f"Using database: {database_url}")
 else:
-    print("❌ DATABASE_URL not found in environment variables")
+    print(" DATABASE_URL not found in environment variables")
     exit(1)
 
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -324,16 +324,16 @@ def create_test_request():
         
         data = request.get_json()
         print(f"\n{'='*80}")
-        print(f"🔵 CREATING NEW TEST REQUEST")
+        print(f" CREATING NEW TEST REQUEST")
         print(f"{'='*80}")
-        print(f"📥 Received data: {data}")
-        print(f"📥 Data keys: {list(data.keys())}")
-        print(f"📥 Customer ID: {data.get('customer_id')}")
-        print(f"📥 Customer Name: {data.get('customer_name')}")
-        print(f"📥 ULR Number: {data.get('ulr_number')}")
-        print(f"📥 Job Number: {data.get('job_number')}")
-        print(f"📥 Concrete Tests: {data.get('concrete_tests', [])}")
-        print(f"📥 Number of concrete tests: {len(data.get('concrete_tests', []))}")
+        print(f" Received data: {data}")
+        print(f" Data keys: {list(data.keys())}")
+        print(f" Customer ID: {data.get('customer_id')}")
+        print(f" Customer Name: {data.get('customer_name')}")
+        print(f" ULR Number: {data.get('ulr_number')}")
+        print(f" Job Number: {data.get('job_number')}")
+        print(f" Concrete Tests: {data.get('concrete_tests', [])}")
+        print(f" Number of concrete tests: {len(data.get('concrete_tests', []))}")
         print(f"{'='*80}")
         
         # Validate required fields
@@ -765,6 +765,57 @@ def get_pending_tests():
         app.logger.error(f"Error fetching pending tests: {str(e)}")
         return jsonify({'error': 'Failed to fetch pending tests'}), 500
 
+# Test endpoint to verify routing
+@app.route('/api/test-photos', methods=['GET'])
+def test_photos_endpoint():
+    return jsonify({'message': 'Photos endpoint is working'}), 200
+
+# API endpoint to fetch photos for a test request
+@app.route('/api/test-request/<int:test_request_id>/photos', methods=['GET'])
+def get_test_request_photos(test_request_id):
+    """Get photos for a specific test request"""
+    try:
+        print(f"📸 GET PHOTOS: Fetching photos for test_request_id={test_request_id}")
+        
+        # Get concrete tests for this request
+        concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
+        if not concrete_tests:
+            return jsonify({'photos': []}), 200
+        
+        concrete_test = concrete_tests[0]  # Use first test
+        
+        # Get photos using custom query
+        from sqlalchemy import text
+        photos_query = text("""
+            SELECT id, concrete_test_id, photo_type, cube_number, photo_data, filename, created_at
+            FROM test_photo 
+            WHERE concrete_test_id = :concrete_test_id
+        """)
+        
+        result = db.session.execute(photos_query, {'concrete_test_id': concrete_test.id})
+        photos_data = result.fetchall()
+        
+        # Convert to list of dictionaries
+        photos = []
+        for row in photos_data:
+            photo_dict = {
+                'id': row[0],
+                'concrete_test_id': row[1],
+                'photo_type': row[2],
+                'cube_number': row[3],
+                'photo_data': row[4],
+                'filename': row[5],
+                'created_at': row[6]
+            }
+            photos.append(photo_dict)
+        
+        print(f"📸 Found {len(photos)} photos for test_request_id={test_request_id}")
+        return jsonify({'photos': photos}), 200
+        
+    except Exception as e:
+        print(f"❌ Error fetching photos: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 # API endpoint to fetch complete data for PDF generation
 @app.route('/api/test-requests/<int:test_request_id>/pdf-data', methods=['GET'])
 def get_test_request_pdf_data(test_request_id):
@@ -783,7 +834,7 @@ def get_test_request_pdf_data(test_request_id):
             filter(TestRequest.id == test_request_id).first()
         
         if not test_request:
-            print(f"❌ Test request {test_request_id} not found")
+            print(f" Test request {test_request_id} not found")
             return jsonify({'error': 'Test request not found'}), 404
         
         tr, customer = test_request
@@ -797,7 +848,7 @@ def get_test_request_pdf_data(test_request_id):
         ).all()
         
         if not concrete_tests:
-            print(f"❌ No concrete tests with results found")
+            print(f" No concrete tests with results found")
             return jsonify({'error': 'No test results found for PDF generation'}), 404
         
         concrete_test = concrete_tests[0]  # Use first test for main data
@@ -839,7 +890,7 @@ def get_test_request_pdf_data(test_request_id):
             for photo in photos:
                 print(f"   - Photo: {photo['photo_type']}_cube_{photo['cube_number']} (ID: {photo['id']}, concrete_test_id: {photo['concrete_test_id']})")
         else:
-            print(f"⚠️ NO PHOTOS FOUND - This could mean:")
+            print(f" NO PHOTOS FOUND - This could mean:")
             print(f"   1. No images were captured during test observations")
             print(f"   2. Images are stored in a different table or format")
             print(f"   3. Database schema mismatch between Flask and Node.js backends")
@@ -994,13 +1045,13 @@ def get_test_observations(test_request_id):
         import json
         
         print(f"\n{'='*50}")
-        print(f"📥 GET TEST OBSERVATIONS - Request ID: {test_request_id}")
+        print(f" GET TEST OBSERVATIONS - Request ID: {test_request_id}")
         print(f"{'='*50}\n")
         
         # Get test request
         test_request = db.session.get(TestRequest, test_request_id)
         if not test_request:
-            print(f"❌ Test request {test_request_id} not found")
+            print(f" Test request {test_request_id} not found")
             return jsonify({'error': 'Test request not found'}), 404
         
         # Get concrete tests with results - try has_results=True first, then all tests
@@ -1011,7 +1062,7 @@ def get_test_observations(test_request_id):
         
         # If no tests with results, return empty structure (new test - no saved data yet)
         if not concrete_tests:
-            print(f"⚠️ No tests with has_results=True")
+            print(f" No tests with has_results=True")
             print(f"SUCCESS: Returning empty observation structure for new test")
             return jsonify({
                 'formData': {
@@ -1074,7 +1125,7 @@ def get_test_observations(test_request_id):
                     saved_data['testRows'] = observations_data['testRows']
                     print(f"SUCCESS: Loaded {len(saved_data['testRows'])} test rows from observations_json")
             except (json.JSONDecodeError, KeyError) as e:
-                print(f"⚠️ Failed to parse observations_json: {e}")
+                print(f" Failed to parse observations_json: {e}")
         
         # Load captured images from database
         if concrete_tests:
@@ -1139,7 +1190,7 @@ def get_test_observations(test_request_id):
         import traceback
         error_trace = traceback.format_exc()
         app.logger.error(f"Error retrieving test observations: {error_trace}")
-        print(f"\n❌ ERROR RETRIEVING OBSERVATIONS:")
+        print(f"\n ERROR RETRIEVING OBSERVATIONS:")
         print(error_trace)
         print(f"{'='*50}\n")
         return jsonify({'error': f'Failed to retrieve observations: {str(e)}'}), 500
@@ -1151,8 +1202,27 @@ def save_test_observations(test_request_id):
         from models import TestRequest, ConcreteTest, TestPhoto
         
         data = request.get_json()
-        print(f"DEBUG: FULL REQUEST DATA: {data}")
-        print(f"Saving observations for test request {test_request_id}")
+        print("\n" + "="*60)
+        print("SAVING TEST OBSERVATIONS - Request ID: " + str(test_request_id))
+        print("="*60)
+        print("FULL REQUEST DATA KEYS: " + str(list(data.keys()) if data else 'NULL'))
+        
+        # Check if capturedImages are in the data
+        captured_images = data.get('capturedImages', {})
+        print("CAPTURED IMAGES RECEIVED: " + str(len(captured_images)) + " images")
+        if captured_images:
+            print(" Image keys: " + str(list(captured_images.keys())))
+            for key, value in captured_images.items():
+                data_length = len(value) if value else 0
+                data_start = value[:30] if value else 'NULL'
+                print(" " + str(key) + ": " + str(data_length) + " chars, starts with: " + str(data_start) + "...")
+        else:
+            print(" NO CAPTURED IMAGES FOUND IN REQUEST DATA!")
+        
+        print("="*60)
+        
+        # Initialize images_saved_count
+        images_saved_count = 0
         
         # Get test request
         test_request = db.session.get(TestRequest, test_request_id)
@@ -1229,7 +1299,7 @@ def save_test_observations(test_request_id):
                 if (processed_row.get('dimension_length') and processed_row.get('dimension_width') and 
                     processed_row.get('dimension_height') and processed_row.get('weight')):
                     volume_m3 = (processed_row['dimension_length'] * processed_row['dimension_width'] * 
-                               processed_row['dimension_height']) / 1000000000  # mm³ to m³
+                               processed_row['dimension_height']) / 1000000000  # mm3 to m3
                     processed_row['density'] = processed_row['weight'] / volume_m3 if volume_m3 > 0 else None
                     print(f"   Calculated density: {processed_row['density']}")
                 else:
@@ -1385,12 +1455,34 @@ def save_test_observations(test_request_id):
         
         # Save captured images to database (attach to first concrete test)
         captured_images = data.get('capturedImages', {})
+        print(f"DEBUG: captured_images check: {bool(captured_images)}")
+        print(f"DEBUG: processed_rows check: {bool(processed_rows)}")
+        print(f"DEBUG: Both conditions met: {bool(captured_images and processed_rows)}")
+        
         if captured_images and processed_rows:
-            # Get the concrete test ID after it's added
+            # Get the concrete test ID after it's added - try different approaches
             concrete_test = ConcreteTest.query.filter_by(
                 test_request_id=test_request_id, 
                 sr_no=1
             ).first()
+            
+            # If not found with sr_no=1, try to find any concrete test for this request
+            if not concrete_test:
+                concrete_test = ConcreteTest.query.filter_by(
+                    test_request_id=test_request_id
+                ).first()
+                print(f"DEBUG: Found concrete_test without sr_no filter: {concrete_test is not None}")
+                if concrete_test:
+                    print(f"DEBUG: concrete_test.id: {concrete_test.id}, sr_no: {concrete_test.sr_no}")
+            
+            print(f"DEBUG: Found concrete_test: {concrete_test is not None}")
+            if concrete_test:
+                print(f"DEBUG: concrete_test.id: {concrete_test.id}, sr_no: {concrete_test.sr_no}")
+            else:
+                print(f"DEBUG: No concrete_test found for test_request_id={test_request_id}")
+                # List all concrete tests for this request for debugging
+                all_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
+                print(f"DEBUG: All concrete tests for this request: {[(t.id, t.sr_no) for t in all_tests]}")
             
             if concrete_test:
                 # Clear existing photos for this test using custom query
@@ -1402,28 +1494,44 @@ def save_test_observations(test_request_id):
                 db.session.execute(delete_query, {'concrete_test_id': concrete_test.id})
                 
                 # Save new photos
+                print(" SAVING " + str(len(captured_images)) + " IMAGES TO DATABASE:")
+                print(f" Image keys: {list(captured_images.keys())}")
                 for image_key, image_data in captured_images.items():
+                    print(f" Processing image key: {image_key}")
+                    print(f" Image data length: {len(image_data) if image_data else 0} chars")
+                    print(f" Image data starts with: {image_data[:50] if image_data else 'NULL'}...")
+                    
                     if image_data and image_data.startswith('data:image'):
                         # Parse image key to get cube number and photo type
                         # Format: front_failure_1, digital_reading_1, back_failure_1
                         parts = image_key.split('_')
                         if len(parts) >= 3:
                             photo_type = f"{parts[0]}_{parts[1]}"  # front_failure, digital_reading, back_failure
-                            cube_number = float(parts[2])
+                            cube_number = int(parts[2])  # Convert to integer, not float
                             
-                            # Remove data URL prefix
-                            if 'base64,' in image_data:
-                                image_data = image_data.split('base64,')[1]
+                            # Keep the full data URL (don't remove prefix - backend adds it back)
+                            photo_data_to_save = image_data
                             
                             photo = TestPhoto(
                                 concrete_test_id=concrete_test.id,
                                 photo_type=photo_type,
                                 cube_number=cube_number,
-                                photo_data=image_data,
+                                photo_data=photo_data_to_save,
                                 filename=f"{photo_type}_{cube_number}.jpg"
                             )
                             db.session.add(photo)
-                            print(f"   SUCCESS: Added photo: {photo_type} for cube {cube_number}")
+                            images_saved_count += 1
+                            print(f" SUCCESS: Added photo: {photo_type} for cube {cube_number}")
+                            print(f" Photo data length: {len(photo_data_to_save)} chars")
+                        else:
+                            print(f" ERROR: Invalid image key format: {image_key}")
+                    else:
+                        print(f" ERROR: Invalid image data for key {image_key}")
+                        print(f" Data is null or doesn't start with 'data:image'")
+                
+                print(f" TOTAL IMAGES SAVED TO DATABASE: {images_saved_count}")
+        else:
+            print(f"DEBUG: Image saving skipped - captured_images: {bool(captured_images)}, processed_rows: {bool(processed_rows)}")
         
         # Update test request status
         test_request.status = 'observations_completed'
@@ -1431,16 +1539,20 @@ def save_test_observations(test_request_id):
         # Commit all changes
         db.session.commit()
         
-        print(f"SUCCESS: All data committed to database")
-        print(f"   - Concrete test record created")
-        print(f"   - {len(captured_images)} images saved")
-        print(f"   - Test request status updated to 'observations_completed'")
+        print(f" SUCCESS: All data committed to database")
+        print(f" - Concrete test record created")
+        print(f" - {images_saved_count} images saved to test_photo table")
+        print(f" - Test request status updated to 'observations_completed'")
+        print(f" - Total images received: {len(captured_images)}")
+        print(f" - Images successfully saved: {images_saved_count}")
+        print(f"{'='*60}")
         
         return jsonify({
             'message': 'Test observations saved successfully',
             'test_request_id': test_request_id,
             'concrete_test_id': concrete_test.id if concrete_test else None,
-            'images_saved': len(captured_images),
+            'images_received': len(captured_images),
+            'images_saved': images_saved_count,
             'test_rows_saved': len(processed_rows)
         }), 200
         
@@ -1582,7 +1694,7 @@ def save_strength_graph(test_request_id):
                     if (reconstructed_cube['dimension_length'] and reconstructed_cube['dimension_width'] and 
                         reconstructed_cube['dimension_height'] and reconstructed_cube['weight']):
                         volume_m3 = (reconstructed_cube['dimension_length'] * reconstructed_cube['dimension_width'] * 
-                                   reconstructed_cube['dimension_height']) / 1000000000  # mm³ to m³
+                                   reconstructed_cube['dimension_height']) / 1000000000  # mm3 to m3
                         reconstructed_cube['density'] = reconstructed_cube['weight'] / volume_m3 if volume_m3 > 0 else None
                     
                     cube_measurements = [reconstructed_cube]

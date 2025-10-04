@@ -184,7 +184,6 @@ class TestPhoto(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     concrete_test_id = db.Column(db.Integer, db.ForeignKey('concrete_test.id', ondelete='CASCADE'), nullable=True)
-    test_request_id = db.Column(db.Integer, db.ForeignKey('test_request.id', ondelete='CASCADE'), nullable=True)  # Support for server.js backend
     photo_type = db.Column(db.String(50), nullable=False)  # front_failure, digital_reading, back_failure
     cube_number = db.Column(db.Float, nullable=False)  # Changed from Integer to Float to support decimal values
     photo_data = db.Column(db.Text)  # Base64 encoded image data
@@ -193,8 +192,6 @@ class TestPhoto(db.Model):
     
     # Relationship to ConcreteTest
     concrete_test = db.relationship('ConcreteTest', backref=db.backref('photos', lazy=True, cascade='all, delete-orphan'))
-    # Relationship to TestRequest (for server.js compatibility)
-    test_request = db.relationship('TestRequest', backref=db.backref('test_photos', lazy=True, cascade='all, delete-orphan'))
     
     def __repr__(self):
         return f'<TestPhoto {self.photo_type} for Cube {self.cube_number}>'

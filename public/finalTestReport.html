@@ -884,7 +884,7 @@
             flex: 1;
         }
 
-        /* Print Optimization */
+        /* Print Optimization - Perfect margins for all devices */
         @media print {
             body {
                 background: white;
@@ -896,7 +896,7 @@
                 box-shadow: none;
                 border: none;
                 margin: 0;
-                padding: 15mm;
+                padding: 14mm;
                 width: 210mm;
                 min-height: 297mm;
                 max-height: 297mm;
@@ -906,6 +906,12 @@
             .page * {
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
+            }
+            
+            /* Ensure exact A4 dimensions */
+            @page {
+                size: A4;
+                margin: 0;
             }
         }
 
@@ -1327,7 +1333,7 @@
                 // ===== END OBSERVATION SHEET POPULATION =====
                 
                 // ===== UPDATE STRENGTH GRAPH (PAGE 4) - WITH RETRY =====
-                setTimeout(() => {
+                setTimeout(async () => {
                     const r7 = parseFloat(urlParams.get('required_7')) || 16;
                     const a7 = parseFloat(urlParams.get('actual_7')) || 20;
                     const r14 = parseFloat(urlParams.get('required_14')) || 30;
@@ -1592,218 +1598,183 @@
                         }
                     }
                     
-                    // Load images from testData passed from React component
-                    console.log('🔍 LOADING IMAGES FROM TESTDATA');
+                    // DIRECT DATABASE FETCH - Skip sessionStorage completely
+                    console.log('📸 DIRECT DATABASE FETCH - Loading images directly from backend');
                     
-                    // First try to get testData from sessionStorage
-                    const testDataJson = sessionStorage.getItem(`testData_${testRequestId}`);
-                    let testData = null;
-                    if (testDataJson) {
-                        try {
-                            testData = JSON.parse(testDataJson);
-                            console.log('✅ LOADED TESTDATA FROM SESSIONSTORAGE:', testData);
-                            console.log('🔍 testData.capturedImages:', testData ? testData.capturedImages : 'testData is null');
-                            console.log('🔍 testData.photos:', testData ? testData.photos : 'testData is null');
+                    // FIRST: Make all image elements visible and check they exist
+                    console.log('🔍 CHECKING IMAGE ELEMENTS EXISTENCE...');
+                    for (let i = 1; i <= 3; i++) {
+                        const frontEl = document.getElementById(`cube${i}-front-img`);
+                        const screenEl = document.getElementById(`cube${i}-screen-img`);
+                        const backEl = document.getElementById(`cube${i}-back-img`);
+                        
+                        console.log(`🔍 Cube ${i} elements:`, {
+                            front: !!frontEl,
+                            screen: !!screenEl,
+                            back: !!backEl
+                        });
+                        
+                        // Force visibility
+                        if (frontEl) {
+                            frontEl.style.display = 'block';
+                            frontEl.style.visibility = 'visible';
+                            frontEl.style.opacity = '1';
+                        }
+                        if (screenEl) {
+                            screenEl.style.display = 'block';
+                            screenEl.style.visibility = 'visible';
+                            screenEl.style.opacity = '1';
+                        }
+                        if (backEl) {
+                            backEl.style.display = 'block';
+                            backEl.style.visibility = 'visible';
+                            backEl.style.opacity = '1';
+                        }
+                    }
+                    
+                    try {
+                        console.log('📸 Fetching photos from database for testRequestId:', testRequestId);
+                        const response = await fetch(`http://localhost:5000/api/test-requests/${testRequestId}/pdf-data`);
+                        if (response.ok) {
+                            const pdfData = await response.json();
+                            console.log('📸 SUCCESS: Got PDF data from database:', pdfData);
                             
-                            // CRITICAL DEBUG: Check what image data we have
-                            if (testData && testData.capturedImages) {
-                                const imageKeys = Object.keys(testData.capturedImages);
-                                console.log('📸 FOUND capturedImages with keys:', imageKeys);
-                                imageKeys.forEach(key => {
-                                    const imageData = testData.capturedImages[key];
-                                    if (imageData) {
-                                        console.log(`📸 Image ${key}: ${imageData.length} characters, starts with: ${imageData.substring(0, 30)}...`);
-                                    } else {
-                                        console.log(`❌ Image ${key}: NULL or EMPTY`);
+                            // Extract photos from PDF data - they are directly in pdfData.photos
+                            const photosData = { photos: pdfData.photos || [] };
+                            console.log('📸 Extracted photos from PDF data:', photosData);
+                            console.log('📸 Number of photos found:', photosData.photos.length);
+                            
+                            if (photosData.photos && photosData.photos.length > 0) {
+                                console.log('📸 Processing', photosData.photos.length, 'photos from database');
+                                
+                                // Convert photos to capturedImages format
+                                const capturedImages = {};
+                                photosData.photos.forEach(photo => {
+                                    const { photo_type, cube_number, photo_data } = photo;
+                                    if (photo_data) {
+                                        const key = `${photo_type}_${cube_number}`;
+                                        // photo_data is already in correct format (data:image/jpeg;base64,...)
+                                        capturedImages[key] = photo_data;
+                                        console.log(`📸 Converted photo: ${key} (${photo_data.length} chars)`);
+                                        console.log(`📸 Photo data preview: ${photo_data.substring(0, 50)}...`);
                                     }
                                 });
-                            } else {
-                                console.log('❌ NO capturedImages found in testData!');
-                                if (testData) {
-                                    console.log('🔍 Available testData keys:', Object.keys(testData));
-                                }
-                            }
-                        } catch (e) {
-                            console.error('❌ Error parsing testData:', e);
-                            testData = null;
-                        }
-                    } else {
-                        console.log('❌ NO testData found in sessionStorage');
-                        console.log('🔍 Available sessionStorage keys:', Object.keys(sessionStorage));
-                    }
-                    
-                    // DYNAMIC IMAGE LOADING: Use data from testData.capturedImages
-                    console.log('📸 DYNAMIC IMAGE LOADING FROM MAIN_TEST DATA...');
-                    
-                    // Check if we have images in testData (from main_test)
-                    if (testData && testData.capturedImages && Object.keys(testData.capturedImages).length > 0) {
-                        console.log('✅ Found capturedImages in testData:', Object.keys(testData.capturedImages));
-                        
-                        // Dynamically load images for each cube
-                        for (let i = 1; i <= quantity; i++) {
-                            const frontKey = `front_failure_${i}`;
-                            const screenKey = `digital_reading_${i}`;
-                            const backKey = `back_failure_${i}`;
-                            
-                            // Load front image if available
-                            if (testData.capturedImages[frontKey]) {
-                                const frontEl = document.getElementById(`cube${i}-front-img`);
-                                if (frontEl) {
-                                    frontEl.src = testData.capturedImages[frontKey];
-                                    frontEl.onload = () => console.log(`✅ Loaded front image for cube ${i}`);
-                                    frontEl.onerror = () => console.log(`⚠️ Failed to load front image for cube ${i}`);
-                                }
-                            }
-                            
-                            // Load screen image if available
-                            if (testData.capturedImages[screenKey]) {
-                                const screenEl = document.getElementById(`cube${i}-screen-img`);
-                                if (screenEl) {
-                                    screenEl.src = testData.capturedImages[screenKey];
-                                    screenEl.onload = () => console.log(`✅ Loaded screen image for cube ${i}`);
-                                    screenEl.onerror = () => console.log(`⚠️ Failed to load screen image for cube ${i}`);
-                                }
-                            }
-                            
-                            // Load back image if available
-                            if (testData.capturedImages[backKey]) {
-                                const backEl = document.getElementById(`cube${i}-back-img`);
-                                if (backEl) {
-                                    backEl.src = testData.capturedImages[backKey];
-                                    backEl.onload = () => console.log(`✅ Loaded back image for cube ${i}`);
-                                    backEl.onerror = () => console.log(`⚠️ Failed to load back image for cube ${i}`);
-                                }
-                            }
-                        }
-                    } else if (testData && testData.photos && Array.isArray(testData.photos)) {
-                        console.log('✅ Found photos array in testData:', testData.photos.length, 'photos');
-                        
-                        // Dynamically process photos array
-                        testData.photos.forEach((photo) => {
-                            const { photo_type, cube_number, photo_data } = photo;
-                            if (photo_data) {
-                                const imageData = photo_data.startsWith('data:image') ? photo_data : `data:image/jpeg;base64,${photo_data}`;
-                                const cubeNum = Math.floor(cube_number);
-                                const elementId = `cube${cubeNum}-${photo_type.replace('_', '-')}-img`;
-                                const imgEl = document.getElementById(elementId);
                                 
-                                if (imgEl) {
-                                    imgEl.src = imageData;
-                                    imgEl.onload = () => console.log(`✅ Loaded ${photo_type} for cube ${cubeNum}`);
-                                    console.log(`📸 Set ${photo_type} image for cube ${cubeNum}`);
+                                console.log('📸 Converted photos to capturedImages:', Object.keys(capturedImages));
+                                
+                                // Load images directly into DOM elements
+                                console.log('📸 LOADING IMAGES DIRECTLY INTO DOM...');
+                                
+                                for (let i = 1; i <= quantity; i++) {
+                                    const frontKey = `front_failure_${i}`;
+                                    const screenKey = `digital_reading_${i}`;
+                                    const backKey = `back_failure_${i}`;
+                                    
+                                    console.log(`🔍 Looking for images for cube ${i}:`, {
+                                        frontKey,
+                                        screenKey,
+                                        backKey,
+                                        frontExists: !!capturedImages[frontKey],
+                                        screenExists: !!capturedImages[screenKey],
+                                        backExists: !!capturedImages[backKey]
+                                    });
+                                    
+                                    // Load front image
+                                    if (capturedImages[frontKey]) {
+                                        const frontEl = document.getElementById(`cube${i}-front-img`);
+                                        if (frontEl) {
+                                            frontEl.src = capturedImages[frontKey];
+                                            frontEl.style.display = 'block';
+                                            frontEl.style.visibility = 'visible';
+                                            frontEl.style.opacity = '1';
+                                            frontEl.style.maxWidth = '100%';
+                                            frontEl.style.height = '180px';
+                                            frontEl.style.objectFit = 'contain';
+                                            frontEl.style.backgroundColor = '#f5f5f5';
+                                            console.log(`✅ DIRECT: Set front image for cube ${i} - SRC: ${capturedImages[frontKey].substring(0, 50)}...`);
+                                        } else {
+                                            console.log(`❌ DIRECT: Front element not found: cube${i}-front-img`);
+                                        }
+                                    } else {
+                                        console.log(`❌ DIRECT: No front image data for cube ${i} (key: ${frontKey})`);
+                                    }
+                                    
+                                    // Load screen image
+                                    if (capturedImages[screenKey]) {
+                                        const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                        if (screenEl) {
+                                            screenEl.src = capturedImages[screenKey];
+                                            screenEl.style.display = 'block';
+                                            screenEl.style.visibility = 'visible';
+                                            screenEl.style.opacity = '1';
+                                            screenEl.style.maxWidth = '100%';
+                                            screenEl.style.height = '180px';
+                                            screenEl.style.objectFit = 'contain';
+                                            screenEl.style.backgroundColor = '#f5f5f5';
+                                            console.log(`✅ DIRECT: Set screen image for cube ${i} - SRC: ${capturedImages[screenKey].substring(0, 50)}...`);
+                                        } else {
+                                            console.log(`❌ DIRECT: Screen element not found: cube${i}-screen-img`);
+                                        }
+                                    } else {
+                                        console.log(`❌ DIRECT: No screen image data for cube ${i} (key: ${screenKey})`);
+                                    }
+                                    
+                                    // Load back image
+                                    if (capturedImages[backKey]) {
+                                        const backEl = document.getElementById(`cube${i}-back-img`);
+                                        if (backEl) {
+                                            backEl.src = capturedImages[backKey];
+                                            backEl.style.display = 'block';
+                                            backEl.style.visibility = 'visible';
+                                            backEl.style.opacity = '1';
+                                            backEl.style.maxWidth = '100%';
+                                            backEl.style.height = '180px';
+                                            backEl.style.objectFit = 'contain';
+                                            backEl.style.backgroundColor = '#f5f5f5';
+                                            console.log(`✅ DIRECT: Set back image for cube ${i} - SRC: ${capturedImages[backKey].substring(0, 50)}...`);
+                                        } else {
+                                            console.log(`❌ DIRECT: Back element not found: cube${i}-back-img`);
+                                        }
+                                    } else {
+                                        console.log(`❌ DIRECT: No back image data for cube ${i} (key: ${backKey})`);
+                                    }
                                 }
+                                
+                                console.log('✅ DIRECT DATABASE FETCH: All images loaded successfully!');
+                                
+                                // FINAL TEST: Check if images are actually visible
+                                setTimeout(() => {
+                                    console.log('🔍 FINAL CHECK: Verifying images are visible...');
+                                    for (let i = 1; i <= 3; i++) {
+                                        const frontEl = document.getElementById(`cube${i}-front-img`);
+                                        const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                        const backEl = document.getElementById(`cube${i}-back-img`);
+                                        
+                                        console.log(`Cube ${i} final check:`, {
+                                            front: frontEl ? (frontEl.src ? 'HAS SRC' : 'NO SRC') : 'NO ELEMENT',
+                                            screen: screenEl ? (screenEl.src ? 'HAS SRC' : 'NO SRC') : 'NO ELEMENT',
+                                            back: backEl ? (backEl.src ? 'HAS SRC' : 'NO SRC') : 'NO ELEMENT'
+                                        });
+                                        
+                                        if (frontEl && frontEl.src) {
+                                            console.log(`Front image ${i} src: ${frontEl.src.substring(0, 50)}...`);
+                                        }
+                                    }
+                                }, 1000);
+                            } else {
+                                console.log('❌ DIRECT FETCH: No photos found in database response');
                             }
-                        });
-                    } else {
-                        console.log('ℹ️ No images found in testData - checking URL parameters...');
-                        
-                        // Fallback: check URL parameters for images
-                        for (let i = 1; i <= quantity; i++) {
-                            const frontImg = urlParams.get(`front_failure_${i}`);
-                            const screenImg = urlParams.get(`digital_reading_${i}`);
-                            const backImg = urlParams.get(`back_failure_${i}`);
-                            
-                            if (frontImg) {
-                                const frontEl = document.getElementById(`cube${i}-front-img`);
-                                if (frontEl) frontEl.src = frontImg;
-                            }
-                            if (screenImg) {
-                                const screenEl = document.getElementById(`cube${i}-screen-img`);
-                                if (screenEl) screenEl.src = screenImg;
-                            }
-                            if (backImg) {
-                                const backEl = document.getElementById(`cube${i}-back-img`);
-                                if (backEl) backEl.src = backImg;
-                            }
+                        } else {
+                            console.log('❌ DIRECT FETCH: API request failed with status:', response.status);
                         }
+                    } catch (e) {
+                        console.error('❌ DIRECT FETCH: Error fetching from database:', e);
                     }
                     
-                    // Load images from testData.capturedImages or testData.photos (priority 1) - ADD NULL CHECKS
-                    const capturedImages = (testData && testData.capturedImages) ? testData.capturedImages : 
-                                          (testData && testData.photos) ? testData.photos : {};
-                    if (testData && capturedImages && Object.keys(capturedImages).length > 0) {
-                        console.log('📸 LOADING IMAGES FROM TESTDATA:', Object.keys(capturedImages));
-                        
-                        for (let i = 1; i <= quantity; i++) {
-                            const frontImg = capturedImages[`front_failure_${i}`];
-                            const screenImg = capturedImages[`digital_reading_${i}`];
-                            const backImg = capturedImages[`back_failure_${i}`];
-                            
-                            console.log(`🔍 Cube ${i} images from testData:`, {
-                                front: frontImg ? 'EXISTS' : 'MISSING',
-                                screen: screenImg ? 'EXISTS' : 'MISSING', 
-                                back: backImg ? 'EXISTS' : 'MISSING'
-                            });
-                            
-                            // Set front image
-                            if (frontImg) {
-                                const frontEl = document.getElementById(`cube${i}-front-img`);
-                                if (frontEl) {
-                                    frontEl.src = frontImg;
-                                    console.log(`✅ Set cube${i} front image from testData`);
-                                }
-                            }
-                            
-                            // Set screen image
-                            if (screenImg) {
-                                const screenEl = document.getElementById(`cube${i}-screen-img`);
-                                if (screenEl) {
-                                    screenEl.src = screenImg;
-                                    console.log(`✅ Set cube${i} screen image from testData`);
-                                }
-                            }
-                            
-                            // Set back image
-                            if (backImg) {
-                                const backEl = document.getElementById(`cube${i}-back-img`);
-                                if (backEl) {
-                                    backEl.src = backImg;
-                                    console.log(`✅ Set cube${i} back image from testData`);
-                                }
-                            }
-                        }
-                    } else {
-                        // Fallback: Load images directly from URL parameters
-                        console.log('📸 FALLBACK: Loading images from URL parameters');
-                        for (let i = 1; i <= quantity; i++) {
-                            const frontImg = urlParams.get(`front_failure_${i}`);
-                            const screenImg = urlParams.get(`digital_reading_${i}`);
-                            const backImg = urlParams.get(`back_failure_${i}`);
-                            
-                            console.log(`🔍 Cube ${i} images from URL:`, {
-                                front: frontImg ? 'EXISTS' : 'MISSING',
-                                screen: screenImg ? 'EXISTS' : 'MISSING', 
-                                back: backImg ? 'EXISTS' : 'MISSING'
-                            });
-                            
-                            // Set front image
-                            if (frontImg) {
-                                const frontEl = document.getElementById(`cube${i}-front-img`);
-                                if (frontEl) {
-                                    frontEl.src = frontImg;
-                                    console.log(`✅ Set cube${i} front image from URL`);
-                                }
-                            }
-                            
-                            // Set screen image
-                            if (screenImg) {
-                                const screenEl = document.getElementById(`cube${i}-screen-img`);
-                                if (screenEl) {
-                                    screenEl.src = screenImg;
-                                    console.log(`✅ Set cube${i} screen image from URL`);
-                                }
-                            }
-                            
-                            // Set back image
-                            if (backImg) {
-                                const backEl = document.getElementById(`cube${i}-back-img`);
-                                if (backEl) {
-                                    backEl.src = backImg;
-                                    console.log(`✅ Set cube${i} back image from URL`);
-                                }
-                            }
-                        }
-                    }
+                    // Images are now loaded directly from database above
+                    console.log('📸 Image loading completed - check console for results');
+                    
+                    // All image loading is now handled by direct database fetch above
                     
                     console.log('✅✅✅ ALL DATA UPDATED - TABLES, GRAPH, OBSERVATIONS, IMAGES!');
                     
@@ -3321,26 +3292,49 @@
             console.log('✅ Observations populated:', {obs1, obs2, obs3, obs4, obs5, obs6});
         }
 
-        // Download PDF function
+        // Download PDF function - Perfect for all devices
         function downloadPDF() {
             console.log('Download PDF clicked');
-
+            
             // Get data for filename
             const urlParams = new URLSearchParams(window.location.search);
-            const customerName = urlParams.get('customer_site_name') || 'Customer';
+            const customerName = urlParams.get('customer_name') || 'Customer';
+            const jobCode = urlParams.get('job_code_number') || 'JOB-001';
             const dateOfTesting = urlParams.get('date_of_testing') || new Date().toISOString().split('T')[0];
-
+            
             // Create default filename
-            const defaultFilename = `Cube_Testing_Report_${customerName.replace(/\s+/g, '_')}_${dateOfTesting}.pdf`;
-
-            // Set document title
+            const defaultFilename = `Final_Test_Report_${customerName.replace(/\s+/g, '_')}_${jobCode}_${dateOfTesting}.pdf`;
+            
+            // Set the document title for print dialog
             document.title = defaultFilename;
-
-            // Show instructions
-            alert('Print dialog will open. Please select "Save as PDF" and use the suggested filename: ' + defaultFilename);
-
-            // Open print dialog
+            
+            // Add print-specific CSS
+            const printStyle = document.createElement('style');
+            printStyle.textContent = `
+              @media print {
+                body { margin: 0; padding: 0; }
+                .page { box-shadow: none; margin: 0; }
+                .no-print { display: none !important; }
+              }
+            `;
+            document.head.appendChild(printStyle);
+            
+            // Hide the download button during print
+            const downloadBtn = document.querySelector('button[onclick="downloadPDF()"]');
+            if (downloadBtn) {
+              downloadBtn.classList.add('no-print');
+            }
+            
+            // Open print dialog directly without pop-up
             window.print();
+            
+            // Clean up after print
+            setTimeout(() => {
+              if (downloadBtn) {
+                downloadBtn.classList.remove('no-print');
+              }
+              document.head.removeChild(printStyle);
+            }, 1000);
         }
         
 
