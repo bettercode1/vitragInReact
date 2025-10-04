@@ -323,7 +323,18 @@ def create_test_request():
         from datetime import datetime
         
         data = request.get_json()
-        print(f"Received data: {data}")
+        print(f"\n{'='*80}")
+        print(f"🔵 CREATING NEW TEST REQUEST")
+        print(f"{'='*80}")
+        print(f"📥 Received data: {data}")
+        print(f"📥 Data keys: {list(data.keys())}")
+        print(f"📥 Customer ID: {data.get('customer_id')}")
+        print(f"📥 Customer Name: {data.get('customer_name')}")
+        print(f"📥 ULR Number: {data.get('ulr_number')}")
+        print(f"📥 Job Number: {data.get('job_number')}")
+        print(f"📥 Concrete Tests: {data.get('concrete_tests', [])}")
+        print(f"📥 Number of concrete tests: {len(data.get('concrete_tests', []))}")
+        print(f"{'='*80}")
         
         # Validate required fields
         required_fields = ['customer_name', 'test_type']
@@ -419,7 +430,9 @@ def create_test_request():
                     age_in_days=age_in_days,
                     num_of_cubes=test_data.get('quantity', 1),
                     test_method=test_data.get('test_method', 'IS 516 (Part1/Sec1):2021'),
-                    sample_code_number=test_data.get('sample_code_number', '')  # Save reference number
+                    sample_code_number=test_data.get('sample_code_number', ''),  # Save reference number
+                    ulr_number=test_request.ulr_number,  # Copy ULR number from test request
+                    job_number=test_request.job_number   # Copy job number from test request
                 )
                 db.session.add(concrete_test)
         
@@ -761,7 +774,7 @@ def get_test_request_pdf_data(test_request_id):
         import json
         
         print(f"\n{'='*50}")
-        print(f"📄 PDF DATA FETCH - Test Request ID: {test_request_id}")
+        print(f"PDF DATA FETCH - Test Request ID: {test_request_id}")
         print(f"{'='*50}\n")
         
         # Get test request with customer info
@@ -774,8 +787,8 @@ def get_test_request_pdf_data(test_request_id):
             return jsonify({'error': 'Test request not found'}), 404
         
         tr, customer = test_request
-        print(f"✅ Found test request: {tr.job_number}")
-        print(f"✅ Customer: {customer.name}")
+        print(f"SUCCESS: Found test request: {tr.job_number}")
+        print(f"SUCCESS: Customer: {customer.name}")
         
         # Get concrete tests with results
         concrete_tests = ConcreteTest.query.filter_by(
@@ -788,27 +801,43 @@ def get_test_request_pdf_data(test_request_id):
             return jsonify({'error': 'No test results found for PDF generation'}), 404
         
         concrete_test = concrete_tests[0]  # Use first test for main data
-        print(f"✅ Found concrete test with results")
+        print(f"SUCCESS: Found concrete test with results")
         
         # Get photos for this concrete test
         photos = TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).all()
-        print(f"✅ Found {len(photos)} photos")
+        print(f"SUCCESS: Found {len(photos)} photos")
         
-        # Parse JSON data
+        # Parse JSON data and structure for PDF
         test_results_json = {}
         observations_json = {}
+        cube_results = []  # Structured cube data for PDF
         
         if concrete_test.test_results_json:
             try:
-                test_results_json = json.loads(concrete_test.test_results_json)
+                raw_test_results = json.loads(concrete_test.test_results_json)
+                
+                # Handle both new Python-style format (array) and old format (object)
+                if isinstance(raw_test_results, list):
+                    # New Python-style format: data is stored directly as array
+                    print("DEBUG: Parsing new Python-style cube data for PDF")
+                    cube_results = raw_test_results
+                    test_results_json = {'cube_data': raw_test_results}
+                else:
+                    # Old format: data is stored as object with cube_measurements or cube_data
+                    print("DEBUG: Parsing old format cube data for PDF")
+                    cube_results = raw_test_results.get('cube_data', raw_test_results.get('cube_measurements', []))
+                    test_results_json = raw_test_results
+                
+                print(f"DEBUG: Found {len(cube_results)} cube results for PDF")
+                
             except json.JSONDecodeError:
-                print("⚠️ Failed to parse test_results_json")
+                print("WARNING: Failed to parse test_results_json")
         
         if concrete_test.observations_json:
             try:
                 observations_json = json.loads(concrete_test.observations_json)
             except json.JSONDecodeError:
-                print("⚠️ Failed to parse observations_json")
+                print("WARNING: Failed to parse observations_json")
         
         # Build complete PDF data structure
         pdf_data = {
@@ -860,8 +889,11 @@ def get_test_request_pdf_data(test_request_id):
                 'checked_by': concrete_test.checked_by,
                 'verified_by': concrete_test.verified_by,
                 'test_results_json': test_results_json,
-                'observations_json': observations_json
+                'observations_json': observations_json,
+                'cube_results': cube_results  # Structured cube data for PDF
             },
+            # Debug average_strength
+            'debug_average_strength': concrete_test.average_strength,
             'photos': [],
             'reviewer_info': {
                 'name': 'Lalita S. Dussa',
@@ -881,12 +913,17 @@ def get_test_request_pdf_data(test_request_id):
             }
             pdf_data['photos'].append(photo_data)
         
-        print(f"✅ Built complete PDF data structure")
+        print(f"SUCCESS: Built complete PDF data structure")
         print(f"   - Test Request: {pdf_data['test_request']['job_number']}")
         print(f"   - Customer: {pdf_data['customer']['name']}")
         print(f"   - Test Results: {len(test_results_json)} fields")
         print(f"   - Observations: {len(observations_json)} fields")
+        print(f"   - Cube Results: {len(cube_results)} cubes")
         print(f"   - Photos: {len(pdf_data['photos'])}")
+        
+        # Log cube results details
+        for i, cube in enumerate(cube_results):
+            print(f"   - Cube {i+1}: {cube.get('cube_id', 'N/A')} - Strength: {cube.get('compressive_strength', 'N/A')}")
         print(f"{'='*50}\n")
         
         return jsonify(pdf_data), 200
@@ -895,7 +932,7 @@ def get_test_request_pdf_data(test_request_id):
         import traceback
         error_trace = traceback.format_exc()
         app.logger.error(f"Error fetching PDF data: {error_trace}")
-        print(f"\n❌ PDF DATA FETCH ERROR:")
+        print(f"\nERROR: PDF DATA FETCH ERROR:")
         print(error_trace)
         print(f"{'='*50}\n")
         return jsonify({'error': f'Failed to fetch PDF data: {str(e)}'}), 500
@@ -931,7 +968,7 @@ def get_test_observations(test_request_id):
         # If no tests with results, return empty structure (new test - no saved data yet)
         if not concrete_tests:
             print(f"⚠️ No tests with has_results=True")
-            print(f"✅ Returning empty observation structure for new test")
+            print(f"SUCCESS: Returning empty observation structure for new test")
             return jsonify({
                 'formData': {
                     'sampleDescription': 'Concrete Cube Specimen',
@@ -950,12 +987,12 @@ def get_test_observations(test_request_id):
                 'isEmpty': True
             }), 200
         
-        print(f"✅ Found {len(concrete_tests)} concrete test(s)")
+        print(f"SUCCESS: Found {len(concrete_tests)} concrete test(s)")
         
         # Get the first concrete test (or you can get specific one)
         concrete_test = concrete_tests[0]
         
-        print(f"✅ Concrete Test Details:")
+        print(f"SUCCESS: Concrete Test Details:")
         print(f"   - ID: {concrete_test.id}")
         print(f"   - Weight: {concrete_test.weight}")
         print(f"   - Compressive Strength: {concrete_test.compressive_strength}")
@@ -979,10 +1016,10 @@ def get_test_observations(test_request_id):
             'capturedImages': {}
         }
         
-        print(f"✅ Built formData")
+        print(f"SUCCESS: Built formData")
         
         # Build test rows from observations_json if available, otherwise from concrete test data
-        print(f"✅ Building test rows from {len(concrete_tests)} concrete tests...")
+        print(f"SUCCESS: Building test rows from {len(concrete_tests)} concrete tests...")
         
         # Try to load from observations_json first
         if concrete_tests and concrete_tests[0].observations_json:
@@ -991,7 +1028,7 @@ def get_test_observations(test_request_id):
                 observations_data = json.loads(concrete_tests[0].observations_json)
                 if 'testRows' in observations_data:
                     saved_data['testRows'] = observations_data['testRows']
-                    print(f"✅ Loaded {len(saved_data['testRows'])} test rows from observations_json")
+                    print(f"SUCCESS: Loaded {len(saved_data['testRows'])} test rows from observations_json")
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"⚠️ Failed to parse observations_json: {e}")
         
@@ -1008,7 +1045,7 @@ def get_test_observations(test_request_id):
                     captured_images[image_key] = f"data:image/jpeg;base64,{photo.photo_data}"
             
             saved_data['capturedImages'] = captured_images
-            print(f"✅ Loaded {len(captured_images)} images from database")
+            print(f"SUCCESS: Loaded {len(captured_images)} images from database")
         
         # Fallback to building from concrete test data if no observations_json
         if not saved_data['testRows']:
@@ -1029,11 +1066,11 @@ def get_test_observations(test_request_id):
                 }
                 saved_data['testRows'].append(row)
         
-        print(f"✅ Built {len(saved_data['testRows'])} test rows")
+        print(f"SUCCESS: Built {len(saved_data['testRows'])} test rows")
         
         # TODO: Load captured images from database if stored
         
-        print(f"✅ Returning saved observations data:")
+        print(f"SUCCESS: Returning saved observations data:")
         print(f"   - formData fields: {len(saved_data['formData'])}")
         print(f"   - testRows: {len(saved_data['testRows'])}")
         print(f"{'='*50}\n")
@@ -1053,10 +1090,10 @@ def get_test_observations(test_request_id):
 def save_test_observations(test_request_id):
     """Save test observations including cube results"""
     try:
-        from models import TestRequest, ConcreteTest
+        from models import TestRequest, ConcreteTest, TestPhoto
         
         data = request.get_json()
-        print(f"🔍 FULL REQUEST DATA: {data}")
+        print(f"DEBUG: FULL REQUEST DATA: {data}")
         print(f"Saving observations for test request {test_request_id}")
         
         # Get test request
@@ -1064,146 +1101,242 @@ def save_test_observations(test_request_id):
         if not test_request:
             return jsonify({'error': 'Test request not found'}), 404
         
-        # Get form data from observations
-        form_data = data.get('formData', {})
-        test_rows = data.get('testRows', [])
+        # Get data like Python system (rows array + individual fields)
+        rows_data = data.get('rows', [])
         
-        print(f"🔍 DEBUG: form_data keys: {list(form_data.keys())}")
-        print(f"🔍 DEBUG: test_rows length: {len(test_rows)}")
-        print(f"🔍 DEBUG: test_rows content: {test_rows}")
+        # Get individual form fields (like Python system)
+        sample_description = data.get('sample_description', 'Concrete Cube Specimen')
+        cube_condition = data.get('cube_condition', 'Good')
+        curing_condition = data.get('curing_condition', '')
+        machine_used = data.get('machine_used', 'Universal Testing Machine')
+        test_method = data.get('test_method', 'IS 516 (Part1/Sec1):2021')
+        average_strength = data.get('average_strength')
+        print(f"DEBUG: Received average_strength: {average_strength} (type: {type(average_strength)})")
+        tested_by = data.get('tested_by', '')
+        checked_by = data.get('checked_by', '')
+        verified_by = data.get('verified_by', 'Mr. P A Sanghave')
+        test_remarks = data.get('test_remarks', '')
         
-        # Check if testRows is inside formData
-        if not test_rows and 'testRows' in form_data:
-            test_rows = form_data['testRows']
-            print(f"🔍 DEBUG: Found testRows in formData: {len(test_rows)} rows")
+        print(f"DEBUG: rows_data length: {len(rows_data)}")
+        print(f"DEBUG: rows_data content: {rows_data}")
+        print(f"DEBUG: Form fields - tested_by: {tested_by}, checked_by: {checked_by}")
         
-        print(f"🔍 DEBUG: Final test_rows: {test_rows}")
-        for i, row in enumerate(test_rows):
+        # Validate we have rows data (like Python system)
+        if not rows_data:
+            print(f"ERROR: No rows data found in request")
+            return jsonify({'error': 'No test data provided'}), 400
+        
+        print(f"DEBUG: Processing {len(rows_data)} cube rows")
+        for i, row in enumerate(rows_data):
             print(f"   Row {i+1}: {row}")
         
-        # Clear existing concrete tests for this test request
-        ConcreteTest.query.filter_by(test_request_id=test_request_id).delete()
+        # Get existing concrete tests to preserve original data
+        existing_concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
         
-        # Create cube measurements array (like previous project)
-        cube_measurements = []
-        for index, row in enumerate(test_rows):
-            print(f"🔍 Processing row {index+1}: {row}")
-            
-            # Calculate area and density
-            area = None
-            density = None
-            if row.get('length') and row.get('breadth'):
-                area = float(row['length']) * float(row['breadth'])
-                print(f"   Calculated area: {area}")
-            if row.get('weight') and row.get('length') and row.get('breadth') and row.get('height'):
-                volume = float(row['length']) * float(row['breadth']) * float(row['height']) / 1000000  # Convert to m³
-                density = float(row['weight']) / volume if volume > 0 else None
-                print(f"   Calculated density: {density}")
-            
-            cube_measurement = {
-                'cube_id': row.get('cubeId', f'C{index + 1}'),
-                'dimension_length': float(row['length']) if row.get('length') else None,
-                'dimension_width': float(row['breadth']) if row.get('breadth') else None,
-                'dimension_height': float(row['height']) if row.get('height') else None,
-                'area': area,
-                'weight': float(row['weight']) if row.get('weight') else None,
-                'density': density,
-                'crushing_load': float(row['crushingLoad']) if row.get('crushingLoad') else None,
-                'compressive_strength': float(row['compressiveStrength']) if row.get('compressiveStrength') else None,
-                'failure_type': row.get('failureType')
-            }
-            cube_measurements.append(cube_measurement)
-            print(f"   Created cube_measurement: {cube_measurement}")
+        # Process each cube's data (like Python system)
+        processed_rows = []
+        for i, row in enumerate(rows_data):
+            try:
+                print(f"DEBUG: Processing cube {i+1}/{len(rows_data)}: {row.get('cube_id', 'Unknown')}")
+                print(f"   Raw row data: {row}")
+                
+                # Convert numeric values (like Python system)
+                processed_row = {}
+                for key in ['dimension_length', 'dimension_width', 'dimension_height', 
+                           'weight', 'crushing_load', 'compressive_strength']:
+                    if key in row and row[key] is not None:
+                        try:
+                            processed_row[key] = float(row[key])
+                            print(f"   Converted {key}: {row[key]} -> {processed_row[key]}")
+                        except (ValueError, TypeError) as e:
+                            print(f"   ERROR converting {key}: {row[key]} - {e}")
+                            processed_row[key] = None
+                    else:
+                        processed_row[key] = None
+                        print(f"   {key}: None (missing or null)")
+                
+                # Copy other fields
+                processed_row['cube_id'] = row.get('cube_id', 'C1')
+                processed_row['failure_type'] = row.get('failure_type')
+                print(f"   Cube ID: {processed_row['cube_id']}, Failure Type: {processed_row['failure_type']}")
+                
+                # Calculate area for each cube (like Python system)
+                if (processed_row.get('dimension_length') and processed_row.get('dimension_width')):
+                    processed_row['area'] = processed_row['dimension_length'] * processed_row['dimension_width']
+                    print(f"   Calculated area: {processed_row['area']}")
+                else:
+                    print(f"   Skipped area calculation - missing dimensions")
+                
+                # Calculate density for each cube (like Python system)
+                if (processed_row.get('dimension_length') and processed_row.get('dimension_width') and 
+                    processed_row.get('dimension_height') and processed_row.get('weight')):
+                    volume_m3 = (processed_row['dimension_length'] * processed_row['dimension_width'] * 
+                               processed_row['dimension_height']) / 1000000000  # mm³ to m³
+                    processed_row['density'] = processed_row['weight'] / volume_m3 if volume_m3 > 0 else None
+                    print(f"   Calculated density: {processed_row['density']}")
+                else:
+                    print(f"   Skipped density calculation - missing required values")
+                
+                processed_rows.append(processed_row)
+                print(f"   SUCCESS: Created processed row for {processed_row['cube_id']}: {processed_row}")
+                
+            except Exception as e:
+                print(f"   ERROR processing cube {i+1}: {e}")
+                import traceback
+                traceback.print_exc()
+                # Continue with next cube instead of stopping
+                continue
         
-        print(f"🔍 Final cube_measurements array: {cube_measurements}")
+        print(f"DEBUG: Final processed_rows array ({len(processed_rows)} cubes): {processed_rows}")
         
-        # Create test_results_json (like previous project)
+        # Validate we have processed rows
+        if not processed_rows:
+            print(f"ERROR: No rows were processed successfully")
+            return jsonify({'error': 'Failed to process any cube data'}), 400
+        
+        print(f"SUCCESS: Successfully processed {len(processed_rows)} out of {len(rows_data)} cubes")
+        
+        # Create test_results_json (like Python system - store rows array directly)
         import json
-        test_results_json = json.dumps({
-            'cube_measurements': cube_measurements,
-            'strength_data': {
-                'required_7': None,
-                'required_14': None,
-                'required_28': None,
-                'actual_7': None,
-                'actual_14': None,
-                'actual_28': None,
-                'has_data': False
-            }
-        })
-        print(f"🔍 Created test_results_json: {test_results_json}")
+        test_results_json = json.dumps(processed_rows)  # Store array directly like Python
+        print(f"DEBUG: Created test_results_json (Python-style): {test_results_json}")
         
-        # Create observations_json
+        # Create observations_json with form data
         observations_json = json.dumps({
-            'formData': form_data,
-            'testRows': test_rows
+            'sample_description': sample_description,
+            'cube_condition': cube_condition,
+            'curing_condition': curing_condition,
+            'machine_used': machine_used,
+            'test_method': test_method,
+            'average_strength': average_strength,
+            'tested_by': tested_by,
+            'checked_by': checked_by,
+            'verified_by': verified_by,
+            'test_remarks': test_remarks
         })
         
-        # Create a SINGLE concrete test record (like previous project)
-        print(f"🔍 DEBUG: Creating 1 concrete test record with {len(test_rows)} cube measurements")
-        concrete_test = ConcreteTest(
-            test_request_id=test_request_id,
-            sr_no=1,
-            id_mark=test_rows[0].get('cubeId', 'C1') if test_rows else '',
-            sample_description=form_data.get('sampleDescription', 'Concrete Cube Specimen'),
-            cube_condition=form_data.get('cubeCondition', 'Good'),
-            curing_condition=form_data.get('curingCondition', ''),
-            machine_used=form_data.get('machineUsed', 'Universal Testing Machine'),
-            test_method=form_data.get('testMethod', 'IS 516 (Part1/Sec1):2021'),
-            test_remarks=form_data.get('testRemarks', ''),
-            tested_by=form_data.get('testedBy', ''),
-            checked_by=form_data.get('checkedBy', ''),
-            verified_by=form_data.get('verifiedBy', 'Mr. P A Sanghave'),
+        # Update existing concrete test OR create new one if none exists
+        if existing_concrete_tests:
+            # Update the first existing concrete test to preserve original data
+            concrete_test = existing_concrete_tests[0]
+            print(f"DEBUG: Updating existing concrete test ID {concrete_test.id} to preserve original data")
+            
+            # Preserve original data and only update observation-specific fields
+            concrete_test.sample_description = sample_description
+            concrete_test.cube_condition = cube_condition
+            concrete_test.curing_condition = curing_condition
+            concrete_test.machine_used = machine_used
+            concrete_test.test_method = test_method
+            concrete_test.test_remarks = test_remarks
+            concrete_test.tested_by = tested_by
+            concrete_test.checked_by = checked_by
+            concrete_test.verified_by = verified_by
+            
+            # Ensure ULR number and job number are preserved from test request
+            concrete_test.ulr_number = test_request.ulr_number
+            concrete_test.job_number = test_request.job_number
+            
+            # CRITICAL: Save the observations JSON data (this was missing!)
+            concrete_test.observations_json = observations_json
+            concrete_test.test_results_json = test_results_json
+            concrete_test.has_results = True
+            concrete_test.num_of_cubes = len(processed_rows)
+            
+            # Set individual data from first cube (for backward compatibility)
+            if processed_rows:
+                first_row = processed_rows[0]
+                if first_row.get('weight'):
+                    concrete_test.weight = float(first_row['weight'])
+                if first_row.get('dimension_length'):
+                    concrete_test.dimension_length = float(first_row['dimension_length'])
+                if first_row.get('dimension_width'):
+                    concrete_test.dimension_width = float(first_row['dimension_width'])
+                if first_row.get('dimension_height'):
+                    concrete_test.dimension_height = float(first_row['dimension_height'])
+                if first_row.get('crushing_load'):
+                    concrete_test.crushing_load = float(first_row['crushing_load'])
+                if first_row.get('compressive_strength'):
+                    concrete_test.compressive_strength = float(first_row['compressive_strength'])
+                if first_row.get('failure_type'):
+                    concrete_test.failure_type = first_row['failure_type']
+            
+            # Always save average strength (even if 0 or None)
+            if average_strength is not None:
+                concrete_test.average_strength = float(average_strength)
+                print(f"   SUCCESS: Saved average_strength = {concrete_test.average_strength}")
+            else:
+                concrete_test.average_strength = 0.0
+                print(f"   WARNING: average_strength was None, set to 0.0")
+        else:
+            # Create a NEW concrete test record (like Python system)
+            print(f"DEBUG: Creating new concrete test record with {len(processed_rows)} cube measurements")
+            concrete_test = ConcreteTest(
+                test_request_id=test_request_id,
+                sr_no=1,
+                id_mark=processed_rows[0].get('cube_id', 'C1') if processed_rows else '',
+                sample_description=sample_description,
+                cube_condition=cube_condition,
+                curing_condition=curing_condition,
+                machine_used=machine_used,
+                test_method=test_method,
+                test_remarks=test_remarks,
+                tested_by=tested_by,
+                checked_by=checked_by,
+                verified_by=verified_by,
             has_results=True,
             # Copy ULR number and job number from test request
             ulr_number=test_request.ulr_number,
             job_number=test_request.job_number,
-            # Store JSON data
+            # Store JSON data (like Python system)
             test_results_json=test_results_json,
             observations_json=observations_json,
             # Set num_of_cubes
-            num_of_cubes=len(test_rows)
+            num_of_cubes=len(processed_rows)
         )
         
         # Set individual data from first cube (for backward compatibility)
-        if test_rows:
-            first_row = test_rows[0]
+        if processed_rows:
+            first_row = processed_rows[0]
             if first_row.get('weight'):
                 concrete_test.weight = float(first_row['weight'])
-            if first_row.get('length'):
-                concrete_test.dimension_length = float(first_row['length'])
-            if first_row.get('breadth'):
-                concrete_test.dimension_width = float(first_row['breadth'])
-            if first_row.get('height'):
-                concrete_test.dimension_height = float(first_row['height'])
-            if first_row.get('crushingLoad'):
-                concrete_test.crushing_load = float(first_row['crushingLoad'])
-            if first_row.get('compressiveStrength'):
-                concrete_test.compressive_strength = float(first_row['compressiveStrength'])
-            if first_row.get('failureType'):
-                concrete_test.failure_type = first_row['failureType']
+            if first_row.get('dimension_length'):
+                concrete_test.dimension_length = float(first_row['dimension_length'])
+            if first_row.get('dimension_width'):
+                concrete_test.dimension_width = float(first_row['dimension_width'])
+            if first_row.get('dimension_height'):
+                concrete_test.dimension_height = float(first_row['dimension_height'])
+            if first_row.get('crushing_load'):
+                concrete_test.crushing_load = float(first_row['crushing_load'])
+            if first_row.get('compressive_strength'):
+                concrete_test.compressive_strength = float(first_row['compressive_strength'])
+            if first_row.get('failure_type'):
+                concrete_test.failure_type = first_row['failure_type']
         
-        # Calculate average strength if provided
-        if form_data.get('averageStrength'):
-            concrete_test.average_strength = float(form_data['averageStrength'])
+        # Always save average strength (even if 0 or None)
+        if average_strength is not None:
+            concrete_test.average_strength = float(average_strength)
+            print(f"   SUCCESS: Saved average_strength = {concrete_test.average_strength}")
+        else:
+            concrete_test.average_strength = 0.0
+            print(f"   WARNING: average_strength was None, set to 0.0")
         
         db.session.add(concrete_test)
-        print(f"   ✅ Added single concrete test record with {len(test_rows)} cube measurements")
+        print(f"   SUCCESS: Added single concrete test record with {len(processed_rows)} cube measurements")
         
-        print(f"🔍 DEBUG: About to commit 1 record to database")
+        print(f"DEBUG: About to commit 1 record to database")
         
         # Save captured images to database (attach to first concrete test)
         captured_images = data.get('capturedImages', {})
-        if captured_images and test_rows:
-            # Get the first concrete test ID after it's added
-            first_concrete_test = ConcreteTest.query.filter_by(
+        if captured_images and processed_rows:
+            # Get the concrete test ID after it's added
+            concrete_test = ConcreteTest.query.filter_by(
                 test_request_id=test_request_id, 
                 sr_no=1
             ).first()
             
-            if first_concrete_test:
+            if concrete_test:
                 # Clear existing photos for this test
-                TestPhoto.query.filter_by(concrete_test_id=first_concrete_test.id).delete()
+                TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).delete()
                 
                 # Save new photos
                 for image_key, image_data in captured_images.items():
@@ -1220,22 +1353,32 @@ def save_test_observations(test_request_id):
                                 image_data = image_data.split('base64,')[1]
                             
                             photo = TestPhoto(
-                                concrete_test_id=first_concrete_test.id,
+                                concrete_test_id=concrete_test.id,
                                 photo_type=photo_type,
                                 cube_number=cube_number,
                                 photo_data=image_data,
                                 filename=f"{photo_type}_{cube_number}.jpg"
                             )
                             db.session.add(photo)
+                            print(f"   SUCCESS: Added photo: {photo_type} for cube {cube_number}")
         
         # Update test request status
         test_request.status = 'observations_completed'
         
+        # Commit all changes
         db.session.commit()
+        
+        print(f"SUCCESS: All data committed to database")
+        print(f"   - Concrete test record created")
+        print(f"   - {len(captured_images)} images saved")
+        print(f"   - Test request status updated to 'observations_completed'")
         
         return jsonify({
             'message': 'Test observations saved successfully',
-            'test_request_id': test_request_id
+            'test_request_id': test_request_id,
+            'concrete_test_id': concrete_test.id if concrete_test else None,
+            'images_saved': len(captured_images),
+            'test_rows_saved': len(processed_rows)
         }), 200
         
     except Exception as e:
@@ -1265,27 +1408,27 @@ def save_strength_graph(test_request_id):
         # Get JSON data
         data = request.get_json()
         if not data:
-            print("❌ ERROR: No JSON data received")
+            print("ERROR: No JSON data received")
             return jsonify({'error': 'No data provided'}), 400
             
-        print(f"📥 Received data: {data}")
+        print(f"Received data: {data}")
         
         # Get test request
         test_request = db.session.get(TestRequest, test_request_id)
         if not test_request:
-            print(f"❌ ERROR: Test request {test_request_id} not found")
+            print(f"ERROR: Test request {test_request_id} not found")
             return jsonify({'error': 'Test request not found'}), 404
         
-        print(f"✅ Found test request: {test_request.job_number}")
+        print(f"SUCCESS: Found test request: {test_request.job_number}")
         
         # Get concrete tests
         concrete_tests = ConcreteTest.query.filter_by(test_request_id=test_request_id).all()
         if not concrete_tests:
-            print(f"❌ ERROR: No concrete tests found for request {test_request_id}")
-            print(f"❌ Strength graph data cannot be saved without concrete test records")
+            print(f"ERROR: No concrete tests found for request {test_request_id}")
+            print(f"ERROR: Strength graph data cannot be saved without concrete test records")
             return jsonify({'error': 'No concrete test records found. Please save test observations first.'}), 400
         else:
-            print(f"✅ Found {len(concrete_tests)} concrete test(s)")
+            print(f"SUCCESS: Found {len(concrete_tests)} concrete test(s)")
             # We'll save to the first concrete test
             concrete_test = concrete_tests[0]
         
@@ -1308,8 +1451,17 @@ def save_strength_graph(test_request_id):
             "has_data": True
         }
         
-        # Extract observations
+        # Extract observations and merge with strength data
         observations_data = {
+            # Strength graph data
+            "required_7": strength_data.get("required_7"),
+            "actual_7": strength_data.get("actual_7"),
+            "required_14": strength_data.get("required_14"),
+            "actual_14": strength_data.get("actual_14"),
+            "required_28": strength_data.get("required_28"),
+            "actual_28": strength_data.get("actual_28"),
+            "has_data": strength_data.get("has_data"),
+            # Observations data
             "obs_strength_duration": str(data.get('obs_strength_duration', '')),
             "obs_test_results": str(data.get('obs_test_results', '')),
             "obs_weight": str(data.get('obs_weight', '')),
@@ -1318,28 +1470,81 @@ def save_strength_graph(test_request_id):
             "obs_strength_criteria": str(data.get('obs_strength_criteria', ''))
         }
         
-        print(f"📊 Strength data: {strength_data}")
-        print(f"📝 Observations: {observations_data}")
+        print(f"Strength data: {strength_data}")
+        print(f"Observations: {observations_data}")
         
-        # Save as JSON strings - preserve existing cube_measurements
-        existing_test_results = {}
+        # Save as JSON strings - preserve existing cube data
+        existing_test_results = None
         if concrete_test.test_results_json:
             try:
                 existing_test_results = json.loads(concrete_test.test_results_json)
             except json.JSONDecodeError:
-                print("⚠️ Failed to parse existing test_results_json")
+                print("WARNING: Failed to parse existing test_results_json")
+                existing_test_results = None
         
-        # Merge strength_data with existing cube_measurements
-        merged_test_results = {
-            'cube_measurements': existing_test_results.get('cube_measurements', []),
-            'strength_data': strength_data
-        }
+        # CRITICAL: Preserve the original data format to avoid corruption
+        if existing_test_results is None:
+            print("DEBUG: No existing test_results_json found")
+            final_test_results_json = concrete_test.test_results_json  # Keep original (probably None)
+        elif isinstance(existing_test_results, list):
+            # New Python-style format: data is stored directly as array - KEEP THIS FORMAT!
+            print("DEBUG: Detected new Python-style data format (array) - PRESERVING FORMAT")
+            # Store strength data separately in observations_json, don't touch test_results_json
+            print("DEBUG: Keeping test_results_json as original array format")
+            # Don't modify test_results_json - it should remain as the original array
+            final_test_results_json = concrete_test.test_results_json  # Keep original
+        else:
+            # Old format: data is stored as object with cube_measurements
+            print("DEBUG: Detected old data format (object with cube_measurements)")
+            cube_measurements = existing_test_results.get('cube_measurements', [])
+            
+            # If cube_measurements is empty, try to reconstruct from individual fields
+            if not cube_measurements and concrete_test.num_of_cubes and concrete_test.num_of_cubes > 0:
+                print("DEBUG: cube_measurements is empty, reconstructing from individual fields")
+                # Reconstruct cube data from individual fields (first cube only)
+                if concrete_test.id_mark and concrete_test.crushing_load and concrete_test.compressive_strength:
+                    reconstructed_cube = {
+                        'cube_id': concrete_test.id_mark,
+                        'dimension_length': concrete_test.dimension_length,
+                        'dimension_width': concrete_test.dimension_width,
+                        'dimension_height': concrete_test.dimension_height,
+                        'weight': concrete_test.weight,
+                        'crushing_load': concrete_test.crushing_load,
+                        'compressive_strength': concrete_test.compressive_strength,
+                        'failure_type': concrete_test.failure_type
+                    }
+                    # Calculate area and density if dimensions are available
+                    if reconstructed_cube['dimension_length'] and reconstructed_cube['dimension_width']:
+                        reconstructed_cube['area'] = reconstructed_cube['dimension_length'] * reconstructed_cube['dimension_width']
+                    if (reconstructed_cube['dimension_length'] and reconstructed_cube['dimension_width'] and 
+                        reconstructed_cube['dimension_height'] and reconstructed_cube['weight']):
+                        volume_m3 = (reconstructed_cube['dimension_length'] * reconstructed_cube['dimension_width'] * 
+                                   reconstructed_cube['dimension_height']) / 1000000000  # mm³ to m³
+                        reconstructed_cube['density'] = reconstructed_cube['weight'] / volume_m3 if volume_m3 > 0 else None
+                    
+                    cube_measurements = [reconstructed_cube]
+                    print(f"DEBUG: Reconstructed cube data: {reconstructed_cube}")
+            
+            merged_test_results = {
+                'cube_measurements': cube_measurements,
+                'strength_data': strength_data
+            }
+            final_test_results_json = json.dumps(merged_test_results)
         
-        concrete_test.test_results_json = json.dumps(merged_test_results)
+        concrete_test.test_results_json = final_test_results_json
         concrete_test.observations_json = json.dumps(observations_data)
         
-        print(f"🔍 Preserved cube_measurements: {len(merged_test_results['cube_measurements'])} cubes")
-        print(f"🔍 Updated strength_data: {strength_data}")
+        # Log preserved data count based on format
+        if existing_test_results is None:
+            print(f"DEBUG: No existing data to preserve")
+        elif isinstance(existing_test_results, list):
+            print(f"DEBUG: Preserved original array format with {len(existing_test_results)} cubes")
+        else:
+            if 'cube_measurements' in merged_test_results:
+                print(f"DEBUG: Preserved cube_measurements: {len(merged_test_results['cube_measurements'])} cubes")
+            else:
+                print(f"DEBUG: No cube data preserved")
+        print(f"DEBUG: Updated strength_data: {strength_data}")
         
         # Update test request status
         test_request.status = 'graph_generated'
@@ -1347,7 +1552,7 @@ def save_strength_graph(test_request_id):
         # Commit to database
         db.session.commit()
         
-        print(f"✅ Successfully saved strength graph data for test request {test_request_id}")
+        print(f"SUCCESS: Successfully saved strength graph data for test request {test_request_id}")
         print(f"{'='*50}\n")
         
         return jsonify({
@@ -1363,7 +1568,7 @@ def save_strength_graph(test_request_id):
         import traceback
         error_trace = traceback.format_exc()
         app.logger.error(f"Error saving strength graph: {error_trace}")
-        print(f"\n❌ STRENGTH GRAPH ERROR:")
+        print(f"\nERROR: STRENGTH GRAPH ERROR:")
         print(error_trace)
         print(f"{'='*50}\n")
         return jsonify({'error': f'Failed to save strength graph: {str(e)}'}), 500

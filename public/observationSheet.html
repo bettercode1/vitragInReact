@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Vitrag Associates LLP - Observation Sheet</title>
+
+    <style>
+        :root {
+            --paper-width: 210mm;
+            --paper-height: 297mm;
+            --page-margin: 15mm;
+            --title-color: #b30000;
+            --subtitle-color: #063a6c;
+            --highlight-color: #ffff00;
+            --border-color: #000000;
+            --text-color: #000000;
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
+            color: var(--text-color);
+            line-height: 1.2;
+            background: #ffffff;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+
+        .page {
+            width: var(--paper-width);
+            min-height: var(--paper-height);
+            background: #fff;
+            padding: var(--page-margin);
+            box-sizing: border-box;
+            position: relative;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+        }
+
+        /* Header Table for Page 1 */
+        .header-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+        .header-table td{ border:1px solid #111; vertical-align:middle; padding:12px 16px; }
+        .logo-cell{ width:3.9cm; text-align:center; }
+        .logo-cell img{ width:3.26cm; height:auto; object-fit:contain; }
+        .title-cell{ text-align:center; font-weight:700; }
+        .title-cell h1{ margin:0; font-size:33px; font-weight:700; color:var(--title-color); text-transform:uppercase; line-height:1.0; }
+        .title-cell .subtitle{ display:block; margin-top:8px; font-size:19px; font-weight:700; color:var(--subtitle-color); line-height:1.0; white-space:nowrap; }
+
+        /* Metadata table */
+        .meta-wrap{ margin-top:10px; }
+        table.meta{ width:100%; border-collapse:collapse; table-layout:fixed; }
+        table.meta td{ border:1px solid #111; padding:4px 6px; height:0cm; vertical-align:middle; font-size:14.67px; overflow:hidden; white-space:normal; word-wrap:break-word; width:25% !important; }
+        table.meta tr{ height:0cm; }
+        
+        /* Auto-sizing classes for different text lengths */
+        table.meta td.auto-fit{ font-size:clamp(8px, 2.5vw, 14.67px); }
+        table.meta td.auto-resize{ font-size:14.67px; white-space:normal; overflow:hidden; text-overflow:unset; }
+        table.meta td.auto-resize.long-text{ font-size:12px; }
+        table.meta td.auto-resize.very-long-text{ font-size:10px; }
+        table.meta td.auto-resize.extra-long-text{ font-size:8px; }
+        
+        /* Remarks section styling */
+        #remarks-content {
+            font-size: 16px;
+            line-height: 1.4;
+            min-height: 30mm;
+            max-height: 30mm;
+            height: 30mm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Remarks section auto-sizing */
+        #remarks-content.auto-resize{ font-size:16px; white-space:normal; overflow:hidden; text-overflow:unset; }
+        #remarks-content.auto-resize.long-text{ font-size:14px; }
+        #remarks-content.auto-resize.very-long-text{ font-size:12px; }
+        #remarks-content.auto-resize.extra-long-text{ font-size:10px; }
+        
+        /* Make all columns same width - this rule should be last */
+        table.meta td{ width:25% !important; }
+
+        /* Test result */
+        .test-result{ margin-top:12px; padding:0; }
+        .test-result h3{ margin:0; text-align:center; font-size:16px; font-weight:700; text-transform:uppercase; text-decoration:underline; text-underline-offset: 4px; border:none; }
+
+        table.results{ width:100%; border-collapse:collapse; margin-top:4px; font-size:16px; table-layout:auto; }
+        table.results th, table.results td{ border:1px solid #111; text-align:center; vertical-align:middle; }
+        table.results thead th{ background:#f7f2f2; font-weight:700; font-size:16px; padding:2px; height:0.6cm; }
+        table.results tbody tr{ height:0.8cm; }
+        table.results th:first-child, table.results td:first-child{ width:1%; }
+        table.results th:nth-child(2), table.results td:nth-child(2){ width:12%; }
+        table.results th:nth-child(3), table.results td:nth-child(3){ width:55%; }
+        table.results th:nth-child(4), table.results td:nth-child(4){ width:8%; }
+        table.results th:nth-child(5), table.results td:nth-child(5){ width:12%; }
+        table.results th:nth-child(6), table.results td:nth-child(6){ width:22%; }
+        /* Base styles for table.results tfoot - only for Average row */
+        table.results tfoot tr:first-child td{ border:1px solid #111; height:1cm; font-weight:700; text-align:right; padding-right:6px; }
+        table.results tfoot tr:first-child td:last-child{ text-align:center; }
+        /* Remarks row */
+        table.results tfoot tr:nth-child(2) td{ border:1px solid #111; height:25mm; vertical-align:top; text-align:left; padding:6px; font-weight:normal; }
+        
+        /* ========================================
+           SIGNATURE TABLE - Page 1 (Dedicated CSS - SEPARATE TABLE)
+           ======================================== */
+        
+        /* Signature table base styles */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            table-layout: fixed;
+        }
+        
+        /* Signature table rows - Base styles with LEFT alignment */
+        .signature-table td {
+            height: 0.7cm;
+            border: 1px solid #111;
+            text-align: left !important;
+            padding-left: 8px !important;
+            font-weight: 700 !important;
+            font-size: 16px !important;
+        }
+        
+        /* Column widths for signature table */
+        .signature-table td:first-child {
+            width: 35% !important;
+        }
+        
+        .signature-table td:nth-child(2) {
+            width: 30% !important;
+        }
+        
+        .signature-table td:last-child {
+            width: 35% !important;
+        }
+        
+        /* Signature title cells */
+        .signature-cell-title {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+        
+        /* Signature name spans */
+        .signature-name {
+            font-weight: 700;
+        }
+        
+        /* Signature date cells */
+        .signature-cell-date {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+        
+        /* Signature sign cells */
+        .signature-cell-sign {
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+        }
+
+        /* Download Button */
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        @media print {
+            .download-btn {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .page {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 15mm;
+                width: 210mm;
+                min-height: 297mm;
+                max-height: 297mm;
+                overflow: hidden;
+            }
+
+            .page * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // IMMEDIATE EXECUTION - Update data BEFORE anything else
+        (function() {
+            console.log('🚨 OBSERVATION SHEET - IMMEDIATE SCRIPT RUNNING!');
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Wait for DOM then update ALL fields
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🔥 OBSERVATION SHEET - DOM READY - FORCE UPDATING ALL FIELDS NOW!');
+                
+                // Update all date fields
+                const dateReport = document.getElementById('date-of-report');
+                if (dateReport) dateReport.textContent = urlParams.get('date_of_report') || new Date().toLocaleDateString('en-GB');
+                
+                const ulrEl = document.getElementById('ulr-number');
+                if (ulrEl) ulrEl.textContent = urlParams.get('ulr_number') || '';
+                
+                const refEl = document.getElementById('reference-number');
+                if (refEl) refEl.textContent = urlParams.get('reference_number') || '';
+                
+                const jobEl = document.getElementById('job-code-number');
+                if (jobEl) jobEl.textContent = urlParams.get('job_code_number') || '';
+                
+                const gradeEl = document.getElementById('grade-of-specimen');
+                if (gradeEl) gradeEl.innerHTML = `<span class="highlight-text">${urlParams.get('grade_of_specimen') || 'M25'}</span>`;
+                
+                const ageEl = document.getElementById('age-of-specimen');
+                if (ageEl) ageEl.innerHTML = `<div class="age-cell-content"><span class="highlight-text">${urlParams.get('age_of_specimen') || '28'}</span><div class="age-divider"></div><span>Days</span></div>`;
+                
+                const locationEl = document.getElementById('location-structure');
+                if (locationEl) locationEl.textContent = urlParams.get('location_structure') || '';
+                
+                const machineEl = document.getElementById('machine-used');
+                if (machineEl) {
+                    machineEl.textContent = 'Fully automatic Digital Compression Testing Machine';
+                    console.log('✅✅✅ OBSERVATION SHEET: Machine set to Fully automatic Digital Compression Testing Machine');
+                }
+                
+                // Update BOTH test sample table AND result table
+                console.log('🔄 OBSERVATION SHEET: Updating BOTH tables for 3 cubes...');
+                for (let i = 1; i <= 3; i++) {
+                    // Sample table (dimensions, weight, load)
+                    const idEl = document.getElementById(`sample-${i}-id`);
+                    const blockId = urlParams.get(`block_id_${i}`) || '------';
+                    if (idEl) {
+                        idEl.textContent = blockId;
+                        console.log(`✅ OBSERVATION SHEET: sample-${i}-id:`, blockId);
+                    }
+                    
+                    const lengthEl = document.getElementById(`sample-${i}-length`);
+                    if (lengthEl) lengthEl.textContent = urlParams.get(`length_${i}`) || '';
+                    
+                    const breadthEl = document.getElementById(`sample-${i}-breadth`);
+                    if (breadthEl) breadthEl.textContent = urlParams.get(`breadth_${i}`) || '';
+                    
+                    const heightEl = document.getElementById(`sample-${i}-height`);
+                    if (heightEl) heightEl.textContent = urlParams.get(`height_${i}`) || '';
+                    
+                    const areaEl = document.getElementById(`sample-${i}-area`);
+                    if (areaEl) areaEl.textContent = urlParams.get(`area_${i}`) || '';
+                    
+                    const weightEl = document.getElementById(`sample-${i}-weight`);
+                    if (weightEl) weightEl.textContent = urlParams.get(`weight_${i}`) || '';
+                    
+                    const loadEl = document.getElementById(`sample-${i}-load`);
+                    if (loadEl) loadEl.textContent = urlParams.get(`load_max_${i}`) || '';
+                    
+                    // Result table (density, compressive strength)
+                    const resultIdEl = document.getElementById(`result-${i}-id`);
+                    if (resultIdEl) {
+                        resultIdEl.textContent = blockId;
+                        console.log(`✅ OBSERVATION SHEET: result-${i}-id:`, blockId);
+                    }
+                    
+                    const densityEl = document.getElementById(`result-${i}-density`);
+                    const densityVal = urlParams.get(`density_${i}`) || '';
+                    if (densityEl) {
+                        densityEl.textContent = densityVal;
+                        console.log(`✅ OBSERVATION SHEET: result-${i}-density:`, densityVal);
+                    }
+                    
+                    const strengthEl = document.getElementById(`result-${i}-strength`);
+                    const strengthVal = urlParams.get(`compressive_strength_${i}`) || '';
+                    if (strengthEl) {
+                        strengthEl.textContent = strengthVal;
+                        console.log(`✅ OBSERVATION SHEET: result-${i}-strength:`, strengthVal);
+                    }
+                }
+                
+                // Use SAVED average strength from database (NOT calculated!)
+                const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || '0.00';
+                const avgEl = document.getElementById('average-strength');
+                if (avgEl) {
+                    avgEl.innerHTML = `<span class="highlight-text">${avgStrengthFromDB}</span>`;
+                    console.log('✅ OBSERVATION SHEET: Average strength FROM DATABASE:', avgStrengthFromDB);
+                }
+                
+                // Also update observation sheet average
+                const obsAvgEl = document.getElementById('avg-compressive-strength');
+                if (obsAvgEl) {
+                    obsAvgEl.textContent = avgStrengthFromDB;
+                    console.log('✅ OBSERVATION SHEET: Observation sheet average updated:', avgStrengthFromDB);
+                }
+                
+                // ===== UPDATE OBSERVATION SHEET (PAGE 1) - NEW CODE =====
+                console.log('📋 OBSERVATION SHEET: Populating observation sheet...');
+                
+                // Auto-detect quantity from number of block_id parameters if not explicitly provided
+                let quantity = parseInt(urlParams.get('quantity_of_blocks'));
+                if (!quantity || isNaN(quantity)) {
+                    // Count how many block_id_* parameters are present
+                    quantity = 0;
+                    for (let i = 1; i <= 6; i++) {
+                        if (urlParams.get(`block_id_${i}`)) {
+                            quantity++;
+                        }
+                    }
+                    console.log('📊 OBSERVATION SHEET: Auto-detected quantity from block_id parameters:', quantity);
+                }
+                if (!quantity) quantity = 3; // Default fallback
+                console.log('📊 OBSERVATION SHEET: Number of cubes for observation sheet:', quantity);
+                
+                // Define row mapping based on quantity:
+                // 1 cube: row 1
+                // 2 cubes: rows 1, 3
+                // 3 cubes: rows 1, 3, 5
+                // 4 cubes: rows 1, 2, 3, 4
+                // 5 cubes: rows 1, 2, 3, 4, 5
+                // 6 cubes: rows 1, 2, 3, 4, 5, 6
+                
+                // Map data index to row index
+                let rowMapping;
+                if (quantity === 1) {
+                    rowMapping = [1];
+                } else if (quantity === 2) {
+                    rowMapping = [1, 3];
+                } else if (quantity === 3) {
+                    rowMapping = [1, 3, 5];
+                } else if (quantity === 4) {
+                    rowMapping = [1, 2, 3, 4];
+                } else if (quantity === 5) {
+                    rowMapping = [1, 2, 3, 4, 5];
+                } else {
+                    rowMapping = [1, 2, 3, 4, 5, 6];
+                }
+                
+                // Populate data for each cube
+                for (let dataIndex = 0; dataIndex < quantity; dataIndex++) {
+                    const rowIndex = rowMapping[dataIndex];
+                    const i = dataIndex + 1; // URL params are 1-indexed
+                    
+                    // Get data from URL params
+                    const blockId = urlParams.get(`block_id_${i}`) || '';
+                    const length = urlParams.get(`length_${i}`) || '';
+                    const breadth = urlParams.get(`breadth_${i}`) || '';
+                    const height = urlParams.get(`height_${i}`) || '';
+                    const area = urlParams.get(`area_${i}`) || '';
+                    const weight = urlParams.get(`weight_${i}`) || '';
+                    const loadMax = urlParams.get(`load_max_${i}`) || '';
+                    const compStrength = urlParams.get(`compressive_strength_${i}`) || '';
+                    const failureType = urlParams.get(`failure_type_${i}`) || '';
+                    
+                    // Calculate size (format: length x breadth x height)
+                    let size = '';
+                    if (length && breadth && height) {
+                        size = `${length}x${breadth}x${height}`;
+                    }
+                    
+                    // Calculate density (kg/m³)
+                    // Formula: density = (weight * 1000) / (length * breadth * height)
+                    let density = '';
+                    if (weight && length && breadth && height) {
+                        const weightKg = parseFloat(weight);
+                        const lengthMm = parseFloat(length);
+                        const breadthMm = parseFloat(breadth);
+                        const heightMm = parseFloat(height);
+                        
+                        // Volume in cubic meters = (L * B * H) / 1000000000
+                        const volumeM3 = (lengthMm * breadthMm * heightMm) / 1000000000;
+                        const densityValue = weightKg / volumeM3;
+                        density = densityValue.toFixed(0); // Round to nearest integer
+                        console.log(`📊 OBSERVATION SHEET: Density calculation for cube ${i}:`, {weightKg, volumeM3, densityValue, density});
+                    }
+                    
+                    // Populate serial number
+                    const srNoEl = document.getElementById(`sr-no-${rowIndex}`);
+                    if (srNoEl && blockId) {
+                        srNoEl.textContent = dataIndex + 1;
+                        console.log(`✅ OBSERVATION SHEET: sr-no-${rowIndex}:`, dataIndex + 1);
+                    }
+                    
+                    // Populate observation sheet fields (Page 1)
+                    const blockIdEl = document.getElementById(`block-id-${rowIndex}`);
+                    if (blockIdEl) {
+                        blockIdEl.textContent = blockId;
+                        console.log(`✅ OBSERVATION SHEET: block-id-${rowIndex}:`, blockId);
+                    }
+                    
+                    const sizeEl = document.getElementById(`size-${rowIndex}`);
+                    if (sizeEl) {
+                        sizeEl.textContent = size;
+                        console.log(`✅ OBSERVATION SHEET: size-${rowIndex}:`, size);
+                    }
+                    
+                    const areaEl = document.getElementById(`area-${rowIndex}`);
+                    if (areaEl) {
+                        areaEl.textContent = area;
+                        console.log(`✅ OBSERVATION SHEET: area-${rowIndex}:`, area);
+                    }
+                    
+                    const weightEl = document.getElementById(`weight-${rowIndex}`);
+                    if (weightEl) {
+                        weightEl.textContent = weight;
+                        console.log(`✅ OBSERVATION SHEET: weight-${rowIndex}:`, weight);
+                    }
+                    
+                    const loadMaxEl = document.getElementById(`load-max-${rowIndex}`);
+                    if (loadMaxEl) {
+                        loadMaxEl.textContent = loadMax;
+                        console.log(`✅ OBSERVATION SHEET: load-max-${rowIndex}:`, loadMax);
+                    }
+                    
+                    const densityEl = document.getElementById(`density-${rowIndex}`);
+                    if (densityEl) {
+                        densityEl.textContent = density;
+                        console.log(`✅ OBSERVATION SHEET: density-${rowIndex}:`, density);
+                    }
+                    
+                    const compStrengthEl = document.getElementById(`compressive-strength-${rowIndex}`);
+                    if (compStrengthEl) {
+                        compStrengthEl.textContent = compStrength;
+                        console.log(`✅ OBSERVATION SHEET: compressive-strength-${rowIndex}:`, compStrength);
+                    }
+                    
+                    const failureTypeEl = document.getElementById(`failure-type-${rowIndex}`);
+                    if (failureTypeEl) {
+                        failureTypeEl.textContent = failureType;
+                        console.log(`✅ OBSERVATION SHEET: failure-type-${rowIndex}:`, failureType);
+                    }
+                }
+                console.log('✅ OBSERVATION SHEET: Observation sheet populated with row mapping:', rowMapping);
+                // ===== END OBSERVATION SHEET POPULATION =====
+                
+                // ===== HIDE EMPTY ROWS BASED ON QUANTITY =====
+                console.log('📊 OBSERVATION SHEET: Number of cubes:', quantity);
+                
+                // Update rowspan on average cell
+                const avgCell = document.getElementById('average-strength');
+                if (avgCell) {
+                    avgCell.setAttribute('rowspan', quantity);
+                }
+                
+                console.log(`✅ OBSERVATION SHEET: Hiding rows for quantity=${quantity}`);
+                
+                // Update grade header
+                const gradeHeader = document.getElementById('grade-header');
+                if (gradeHeader) {
+                    const grade = urlParams.get('grade_of_specimen') || 'M-25';
+                    gradeHeader.textContent = `GRADE OF CONCRETE: ${grade}`;
+                }
+                
+                // ===== UPDATE IMAGES FROM SESSIONSTORAGE =====
+                const testRequestId = urlParams.get('test_request_id') || '248';
+                console.log('📸 OBSERVATION SHEET: Loading images from sessionStorage for test:', testRequestId);
+                
+                const imagesJson = sessionStorage.getItem('testImages_' + testRequestId);
+                
+                if (imagesJson) {
+                    try {
+                        const images = JSON.parse(imagesJson);
+                        console.log('📸 OBSERVATION SHEET: Loaded images from sessionStorage:', Object.keys(images));
+                        
+                        // Update cube images only for quantity
+                        for (let i = 1; i <= quantity; i++) {
+                            const frontImg = images[`front_failure_${i}`];
+                            const screenImg = images[`digital_reading_${i}`];
+                            const backImg = images[`back_failure_${i}`];
+                            
+                            console.log(`📸 OBSERVATION SHEET: Cube ${i} images from sessionStorage:`, {
+                                front: frontImg ? 'Found' : 'Missing',
+                                screen: screenImg ? 'Found' : 'Missing', 
+                                back: backImg ? 'Found' : 'Missing'
+                            });
+                            
+                            // Update any image elements if they exist in observation sheet
+                            const frontEl = document.getElementById(`cube${i}-front-img`);
+                            if (frontEl && frontImg) {
+                                // Validate base64 data URL format
+                                if (frontImg.startsWith('data:image')) {
+                                    frontEl.src = frontImg;
+                                    frontEl.onerror = function() {
+                                        console.warn(`⚠️ OBSERVATION SHEET: Failed to load front image for cube ${i} - Invalid base64 data`);
+                                        console.warn(`⚠️ OBSERVATION SHEET: Image data preview: ${frontImg.substring(0, 100)}...`);
+                                    };
+                                    frontEl.onload = function() {
+                                        console.log(`✅ OBSERVATION SHEET: Successfully loaded front image for cube ${i} (${frontImg.length} chars)`);
+                                    };
+                                    console.log(`✅ OBSERVATION SHEET: Updated cube${i} front image from sessionStorage (base64)`);
+                                } else {
+                                    console.warn(`⚠️ OBSERVATION SHEET: Invalid image format for cube ${i} front: ${frontImg.substring(0, 50)}...`);
+                                }
+                            }
+                            
+                            const screenEl = document.getElementById(`cube${i}-screen-img`);
+                            if (screenEl && screenImg) {
+                                // Validate base64 data URL format
+                                if (screenImg.startsWith('data:image')) {
+                                    screenEl.src = screenImg;
+                                    screenEl.onerror = function() {
+                                        console.warn(`⚠️ OBSERVATION SHEET: Failed to load screen image for cube ${i} - Invalid base64 data`);
+                                        console.warn(`⚠️ OBSERVATION SHEET: Image data preview: ${screenImg.substring(0, 100)}...`);
+                                    };
+                                    screenEl.onload = function() {
+                                        console.log(`✅ OBSERVATION SHEET: Successfully loaded screen image for cube ${i} (${screenImg.length} chars)`);
+                                    };
+                                    console.log(`✅ OBSERVATION SHEET: Updated cube${i} screen image from sessionStorage (base64)`);
+                                } else {
+                                    console.warn(`⚠️ OBSERVATION SHEET: Invalid image format for cube ${i} screen: ${screenImg.substring(0, 50)}...`);
+                                }
+                            }
+                            
+                            const backEl = document.getElementById(`cube${i}-back-img`);
+                            if (backEl && backImg) {
+                                // Validate base64 data URL format
+                                if (backImg.startsWith('data:image')) {
+                                    backEl.src = backImg;
+                                    backEl.onerror = function() {
+                                        console.warn(`⚠️ OBSERVATION SHEET: Failed to load back image for cube ${i} - Invalid base64 data`);
+                                        console.warn(`⚠️ OBSERVATION SHEET: Image data preview: ${backImg.substring(0, 100)}...`);
+                                    };
+                                    backEl.onload = function() {
+                                        console.log(`✅ OBSERVATION SHEET: Successfully loaded back image for cube ${i} (${backImg.length} chars)`);
+                                    };
+                                    console.log(`✅ OBSERVATION SHEET: Updated cube${i} back image from sessionStorage (base64)`);
+                                } else {
+                                    console.warn(`⚠️ OBSERVATION SHEET: Invalid image format for cube ${i} back: ${backImg.substring(0, 50)}...`);
+                                }
+                            }
+                        }
+                        
+                        console.log('✅ OBSERVATION SHEET: Images updated from sessionStorage!');
+                    } catch (e) {
+                        console.error('❌ OBSERVATION SHEET: Error loading images from sessionStorage:', e);
+                    }
+                } else {
+                    console.warn('⚠️ OBSERVATION SHEET: No images found in sessionStorage for test:', testRequestId);
+                    console.log('🔍 OBSERVATION SHEET: Available sessionStorage keys:', Object.keys(sessionStorage));
+                    
+                    // Try URL parameters as fallback
+                    console.log('📸 OBSERVATION SHEET: Trying URL parameters as fallback...');
+                    for (let i = 1; i <= quantity; i++) {
+                        const frontImg = urlParams.get(`front_failure_${i}`) || urlParams.get(`front_image_${i}`);
+                        const screenImg = urlParams.get(`digital_reading_${i}`) || urlParams.get(`screen_image_${i}`);
+                        const backImg = urlParams.get(`back_failure_${i}`) || urlParams.get(`back_image_${i}`);
+                        
+                        const frontEl = document.getElementById(`cube${i}-front-img`);
+                        if (frontEl && frontImg) {
+                            frontEl.src = frontImg;
+                            console.log(`✅ OBSERVATION SHEET: Updated cube${i} front image from URL parameters`);
+                        }
+                        
+                        const screenEl = document.getElementById(`cube${i}-screen-img`);
+                        if (screenEl && screenImg) {
+                            screenEl.src = screenImg;
+                            console.log(`✅ OBSERVATION SHEET: Updated cube${i} screen image from URL parameters`);
+                        }
+                        
+                        const backEl = document.getElementById(`cube${i}-back-img`);
+                        if (backEl && backImg) {
+                            backEl.src = backImg;
+                            console.log(`✅ OBSERVATION SHEET: Updated cube${i} back image from URL parameters`);
+                        }
+                    }
+                }
+                
+                console.log('✅✅✅ OBSERVATION SHEET: ALL DATA UPDATED - TABLES, GRAPH, OBSERVATIONS, IMAGES!');
+            });
+        })();
+    </script>
+    
+    <!-- PAGE 1: OBSERVATION REPORT -->
+    <div class="page" id="page1">
+        <table class="header-table">
+            <tr>
+                <td class="logo-cell"><img src="/logo.png" alt="Vitrag Associates logo"></td>
+                <td class="title-cell">
+                    <h1>VITRAG ASSOCIATES LLP</h1>
+                    <div class="subtitle">(CONSTRUCTION MATERIAL TESTING LABORATORY)</div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="meta-wrap">
+            <table class="meta">
+                <tr>
+                    <td colspan="4" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21.33px; height:1cm;">COMPRESSIVE STRENGTH OF CONCRETE CUBE</td>
+                </tr>
+                <tr>
+                    <td><strong>Sample Test Code Number</strong></td>
+                    <td id="sample-test-code"></td>
+                    <td><strong>Sample Description</strong></td>
+                    <td id="sample-description"></td>
+                </tr>
+                <tr>
+                    <td><strong>Quantity of Cubes</strong></td>
+                    <td id="quantity-of-blocks"></td>
+                    <td><strong>Date of Receipt</strong></td>
+                    <td id="date-of-receipt"></td>
+                </tr>
+                <tr>
+                    <td><strong>Date of Casting</strong></td>
+                    <td id="date-of-casting"></td>
+                    <td><strong>Date of Testing</strong></td>
+                    <td id="date-of-testing"></td>
+                </tr>
+                <tr>
+                    <td><strong>Grade of Cube</strong></td>
+                    <td id="grade-of-blocks"></td>
+                    <td><strong>Cube Condition</strong></td>
+                    <td id="blocks-condition"></td>
+                </tr>
+                <tr>
+                    <td><strong>Age of Cube</strong></td>
+                    <td id="manufacture-of-blocks"></td>
+                    <td><strong>Curing Condition</strong></td>
+                    <td id="curing-condition"></td>
+                </tr>
+                <tr>
+                    <td><strong>Machine used for Testing</strong></td>
+                    <td id="machine-used-for-testing"></td>
+                    <td><strong>Test Method</strong></td>
+                    <td id="test-method"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="test-result">
+            <table class="results">
+                <thead>
+                    <tr>
+                        <td colspan="9" style="text-align:center; font-weight:bold; text-decoration:underline; font-size:21px; height:0.6cm;">TEST RESULT</td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">Sr. No.</th>
+                        <th rowspan="2">Cube ID</th>
+                        <th>Size</th>
+                        <th>Area</th>
+                        <th>Cube Weight</th>
+                        <th>Maximum Load</th>
+                        <th>Density</th>
+                        <th>Compressive Strength</th>
+                        <th>Type of Failure</th>
+                    </tr>
+                    <tr>
+                        <th>mm</th>
+                        <th>mm²</th>
+                        <th>Kg</th>
+                        <th>KN</th>
+                        <th>kg/m³</th>
+                        <th>Mpa</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="sr-no-1"></td>
+                        <td id="block-id-1"></td>
+                        <td id="size-1"></td>
+                        <td id="area-1"></td>
+                        <td id="weight-1"></td>
+                        <td id="load-max-1"></td>
+                        <td id="density-1"></td>
+                        <td id="compressive-strength-1"></td>
+                        <td id="failure-type-1"></td>
+                    </tr>
+                    <tr>
+                        <td id="sr-no-2"></td>
+                        <td id="block-id-2"></td>
+                        <td id="size-2"></td>
+                        <td id="area-2"></td>
+                        <td id="weight-2"></td>
+                        <td id="load-max-2"></td>
+                        <td id="density-2"></td>
+                        <td id="compressive-strength-2"></td>
+                        <td id="failure-type-2"></td>
+                    </tr>
+                    <tr>
+                        <td id="sr-no-3"></td>
+                        <td id="block-id-3"></td>
+                        <td id="size-3"></td>
+                        <td id="area-3"></td>
+                        <td id="weight-3"></td>
+                        <td id="load-max-3"></td>
+                        <td id="density-3"></td>
+                        <td id="compressive-strength-3"></td>
+                        <td id="failure-type-3"></td>
+                    </tr>
+                    <tr>
+                        <td id="sr-no-4"></td>
+                        <td id="block-id-4"></td>
+                        <td id="size-4"></td>
+                        <td id="area-4"></td>
+                        <td id="weight-4"></td>
+                        <td id="load-max-4"></td>
+                        <td id="density-4"></td>
+                        <td id="compressive-strength-4"></td>
+                        <td id="failure-type-4"></td>
+                    </tr>
+                    <tr>
+                        <td id="sr-no-5"></td>
+                        <td id="block-id-5"></td>
+                        <td id="size-5"></td>
+                        <td id="area-5"></td>
+                        <td id="weight-5"></td>
+                        <td id="load-max-5"></td>
+                        <td id="density-5"></td>
+                        <td id="compressive-strength-5"></td>
+                        <td id="failure-type-5"></td>
+                    </tr>
+                    <tr>
+                        <td id="sr-no-6"></td>
+                        <td id="block-id-6"></td>
+                        <td id="size-6"></td>
+                        <td id="area-6"></td>
+                        <td id="weight-6"></td>
+                        <td id="load-max-6"></td>
+                        <td id="density-6"></td>
+                        <td id="compressive-strength-6"></td>
+                        <td id="failure-type-6"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7">Average</td>
+                        <td id="avg-compressive-strength" style="font-weight: bold; text-align: center;"></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="9" style="text-align:left; padding:12px; height:40mm; vertical-align:top; font-size:16px;">
+                            <div style="font-weight:bold; margin-bottom:8px; font-size:18px;">Remarks:</div>
+                            <div id="remarks-content" style="font-size:16px; min-height: 30mm; max-height: 30mm; overflow: hidden;"></div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- SEPARATE SIGNATURE TABLE -->
+            <table class="signature-table">
+                <tbody>
+                    <!-- Signature Table - Title Row -->
+                    <tr class="signature-row-title">
+                        <td class="signature-cell-title">Tested By: <span id="tested-by-name" class="signature-name"></span></td>
+                        <td class="signature-cell-title">Checked By: <span id="checked-by-name" class="signature-name"></span></td>
+                        <td class="signature-cell-title">Verified By: <span id="verified-by-name" class="signature-name"></span></td>
+                    </tr>
+                    <!-- Signature Table - Date Row -->
+                    <tr class="signature-row-date">
+                        <td class="signature-cell-date">Date: <span id="tested-by-date"></span></td>
+                        <td class="signature-cell-date">Date: <span id="checked-by-date"></span></td>
+                        <td class="signature-cell-date">Date: <span id="verified-by-date"></span></td>
+                    </tr>
+                    <!-- Signature Table - Sign Row -->
+                    <tr class="signature-row-sign">
+                        <td class="signature-cell-sign">Sign:</td>
+                        <td class="signature-cell-sign">Sign:</td>
+                        <td class="signature-cell-sign">Sign:</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Download PDF Button -->
+    <button class="download-btn" onclick="downloadPDF()">📄 Download Observation Sheet</button>
+
+    <script>
+        // Function to populate form data from URL parameters
+        function populateFormData() {
+            console.log('========================================');
+            console.log('🚀 OBSERVATION SHEET - POPULATE FORM DATA STARTED!');
+            console.log('========================================');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            console.log('📋 OBSERVATION SHEET - ALL URL PARAMS:');
+            for (let [key, value] of urlParams.entries()) {
+                console.log(`   ${key}:`, value);
+            }
+
+            // General Information (Observation Report - Page 1)
+            document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'Concrete Cube Specimen';
+            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '';
+            document.getElementById('sample-test-code').textContent = urlParams.get('job_code_number') || '';
+            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '';
+            
+            // Auto-detect quantity from block_id parameters
+            let quantityValue = urlParams.get('quantity_of_blocks');
+            if (!quantityValue) {
+                let count = 0;
+                for (let i = 1; i <= 6; i++) {
+                    if (urlParams.get(`block_id_${i}`)) count++;
+                }
+                quantityValue = count > 0 ? count : '';
+            }
+            document.getElementById('quantity-of-blocks').textContent = quantityValue;
+            
+            document.getElementById('date-of-casting').textContent = urlParams.get('date_of_casting') || '';
+            
+            const gradeValue = urlParams.get('grade_of_blocks') || 'M25';
+            document.getElementById('grade-of-blocks').textContent = gradeValue;
+            console.log('✅ OBSERVATION SHEET: Grade of Blocks:', gradeValue);
+            
+            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || 'Acceptable';
+            
+            // Calculate age if both dates are provided
+            const castingDate = urlParams.get('date_of_casting');
+            const testingDate = urlParams.get('date_of_testing');
+            let ageValue = urlParams.get('manufacture_of_blocks') || urlParams.get('age_of_cube') || '';
+            if (!ageValue && castingDate && testingDate) {
+                const casting = new Date(castingDate);
+                const testing = new Date(testingDate);
+                const diffTime = Math.abs(testing - casting);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                ageValue = diffDays + ' Days';
+            }
+            document.getElementById('manufacture-of-blocks').textContent = ageValue;
+            
+            document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '';
+            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || 'CTM (2000KN)';
+            document.getElementById('test-method').textContent = urlParams.get('test_method') || 'IS 516 (Part1/Sec1):2021';
+            document.getElementById('environmental-conditions').textContent = urlParams.get('environmental_conditions') || '';
+            
+            // Test Results (Observation Report - Page 1)
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`block-id-${i}`).textContent = urlParams.get(`block_id_${i}`) || '';
+                // Combine length x breadth x height for size
+                const length = urlParams.get(`length_${i}`) || '';
+                const breadth = urlParams.get(`breadth_${i}`) || '';
+                const height = urlParams.get(`height_${i}`) || '';
+                const size = length && breadth && height ? `${length} x ${breadth} x ${height}` : '';
+                document.getElementById(`size-${i}`).textContent = size;
+                document.getElementById(`area-${i}`).textContent = urlParams.get(`area_${i}`) || '';
+                document.getElementById(`weight-${i}`).textContent = urlParams.get(`weight_${i}`) || '';
+                document.getElementById(`load-max-${i}`).textContent = urlParams.get(`load_max_${i}`) || '';
+                document.getElementById(`density-${i}`).textContent = urlParams.get(`density_${i}`) || '';
+                document.getElementById(`compressive-strength-${i}`).textContent = urlParams.get(`compressive_strength_${i}`) || '';
+                document.getElementById(`failure-type-${i}`).textContent = urlParams.get(`failure_type_${i}`) || '';
+            }
+            
+            // Calculate and display averages
+            let compressiveSum = 0;
+            let densitySum = 0;
+            let loadSum = 0;
+            let count = 0;
+            
+            for (let i = 1; i <= 6; i++) {
+                const compressiveValue = parseFloat(urlParams.get(`compressive_strength_${i}`)) || 0;
+                const densityValue = parseFloat(urlParams.get(`density_${i}`)) || 0;
+                const loadValue = parseFloat(urlParams.get(`load_max_${i}`)) || 0;
+                
+                if (compressiveValue > 0) {
+                    compressiveSum += compressiveValue;
+                    densitySum += densityValue;
+                    loadSum += loadValue;
+                    count++;
+                }
+            }
+            
+            // Use SAVED average strength from database (NOT calculated!)
+            const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || (count > 0 ? (compressiveSum / count).toFixed(2) : '0.00');
+            const densityAverage = count > 0 ? (densitySum / count).toFixed(2) : '0.00';
+            const loadAverage = count > 0 ? (loadSum / count).toFixed(2) : '0.00';
+            
+            document.getElementById('avg-compressive-strength').textContent = avgStrengthFromDB;
+            
+            console.log('OBSERVATION SHEET: Calculated averages - Compressive:', avgStrengthFromDB, 'Density:', densityAverage, 'Load:', loadAverage, 'from', count, 'values');
+            
+            // Verification (Observation Report - Page 1)
+            // Only show user input data, leave empty if not provided
+            const testedByName = urlParams.get('tested_by_name');
+            const checkedByName = urlParams.get('checked_by_name');
+            const verifiedByName = urlParams.get('verified_by_name');
+            const testedByDate = urlParams.get('tested_by_date');
+            const checkedByDate = urlParams.get('checked_by_date');
+            const verifiedByDate = urlParams.get('verified_by_date');
+            
+            console.log('👤 OBSERVATION SHEET - Signature Data:', {
+                testedBy: testedByName,
+                checkedBy: checkedByName,
+                verifiedBy: verifiedByName,
+                dates: { testedByDate, checkedByDate, verifiedByDate }
+            });
+            
+            // Update tested by (only if user provided data)
+            if (testedByName && testedByName.trim() !== '') {
+                document.getElementById('tested-by-name').textContent = testedByName;
+            } else {
+                document.getElementById('tested-by-name').textContent = ''; // Empty if not provided
+            }
+            if (testedByDate && testedByDate.trim() !== '') {
+                document.getElementById('tested-by-date').textContent = testedByDate;
+            } else {
+                document.getElementById('tested-by-date').textContent = '';
+            }
+            
+            // Update checked by (only if user provided data)
+            if (checkedByName && checkedByName.trim() !== '') {
+                document.getElementById('checked-by-name').textContent = checkedByName;
+            } else {
+                document.getElementById('checked-by-name').textContent = ''; // Empty if not provided
+            }
+            if (checkedByDate && checkedByDate.trim() !== '') {
+                document.getElementById('checked-by-date').textContent = checkedByDate;
+            } else {
+                document.getElementById('checked-by-date').textContent = '';
+            }
+            
+            // Update verified by (only if user provided data)
+            if (verifiedByName && verifiedByName.trim() !== '') {
+                document.getElementById('verified-by-name').textContent = verifiedByName;
+            } else {
+                document.getElementById('verified-by-name').textContent = ''; // Empty if not provided
+            }
+            if (verifiedByDate && verifiedByDate.trim() !== '') {
+                document.getElementById('verified-by-date').textContent = verifiedByDate;
+            } else {
+                document.getElementById('verified-by-date').textContent = '';
+            }
+            
+            // Remarks (Observation Report - Page 1)
+            document.getElementById('remarks-content').textContent = urlParams.get('remarks') || '';
+            
+            // Current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB');
+        }
+
+        // Download PDF function
+        function downloadPDF() {
+            console.log('OBSERVATION SHEET: Download PDF clicked');
+
+            // Get data for filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerName = urlParams.get('customer_site_name') || 'Customer';
+            const dateOfTesting = urlParams.get('date_of_testing') || new Date().toISOString().split('T')[0];
+
+            // Create default filename
+            const defaultFilename = `Observation_Sheet_${customerName.replace(/\s+/g, '_')}_${dateOfTesting}.pdf`;
+
+            // Set document title
+            document.title = defaultFilename;
+
+            // Show instructions
+            alert('Print dialog will open. Please select "Save as PDF" and use the suggested filename: ' + defaultFilename);
+
+            // Open print dialog
+            window.print();
+        }
+
+        // Populate form data when page loads
+        window.onload = function () {
+            console.log('==========================================================');
+            console.log('✅ OBSERVATION SHEET - PDF PAGE LOADED - STARTING DATA POPULATION');
+            console.log('==========================================================');
+            populateFormData();
+            console.log('✅ OBSERVATION SHEET - populateFormData() completed!');
+        };
+    </script>
+</body>
+
+</html>

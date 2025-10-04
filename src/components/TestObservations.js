@@ -34,7 +34,14 @@ const TestObservations = () => {
     checkedBy: '',
     verifiedBy: 'Mr. P A Sanghave',
     testRemarks: '',
-    rows: []
+    rows: [],
+    // Observations data for PDF display
+    obsStrengthDuration: '',
+    obsTestResults: 'Satisfactory',
+    obsWeight: '',
+    obsFailurePattern: '',
+    obsBonding: 'Satisfactory',
+    obsStrengthCriteria: ''
   });
 
   const [testRows, setTestRows] = useState([]);
@@ -50,6 +57,7 @@ const TestObservations = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [lastSavedRowsData, setLastSavedRowsData] = useState([]);
   
   // Fetch test request data if URL has testRequestId
   useEffect(() => {
@@ -158,7 +166,7 @@ const TestObservations = () => {
     loadSavedData();
   }, [editMode, testRequestId]);
 
-  // Initialize test rows based on number of cubes (only if NOT in edit mode)
+  // Initialize test rows based on number of cubes (like previous Python system)
   useEffect(() => {
     // Skip initialization if in edit mode - data will be loaded from backend
     if (editMode) {
@@ -166,14 +174,17 @@ const TestObservations = () => {
       return;
     }
     
+    // Get number of cubes from test data (like Python: {{ test.num_of_cubes|int }})
     const numCubes = testData?.quantity || apiConcreteTests?.[0]?.quantity || apiConcreteTests?.length || 3;
-    const actualCubes = Math.min(Math.max(numCubes, 1), 3);
+    const actualCubes = Math.min(Math.max(numCubes, 1), 3); // Max 3 cubes like Python
+    
+    console.log(`🔧 Initializing ${actualCubes} cube rows (like Python generateRowsBasedOnCubes())`);
     
     const initialRows = [];
     for (let i = 1; i <= actualCubes; i++) {
       initialRows.push({
         id: i,
-        cubeId: '',
+        cubeId: `C${i}`, // Default cube ID like Python
         length: '',
         breadth: '',
         height: '',
@@ -423,22 +434,87 @@ const TestObservations = () => {
       }, 200);
       setProgressInterval(interval);
 
-      // Prepare data for saving
+      // Prepare data for saving (like Python collectFormData())
       setSaveProgress(10);
-      const observationsData = {
-        formData: {
-          ...formData,
-          testRows: testRows
-        },
-        testRows: testRows,
-        capturedImages: capturedImages, // Send images to backend
-        testRequestId: testRequestId,
-        timestamp: new Date().toISOString()
-      };
+      
+      // Build rowsData array like Python system
+      const rowsData = [];
+      console.log(`🔍 Frontend: Processing ${testRows.length} test rows`);
+      
+      testRows.forEach((row, index) => {
+        const rowIndex = index + 1;
+        console.log(`🔍 Frontend: Processing row ${rowIndex}:`, row);
+        
+        // Check if row has essential data
+        const hasCrushingLoad = row.crushingLoad && row.crushingLoad.trim() !== '';
+        const hasCompressiveStrength = row.compressiveStrength && row.compressiveStrength.trim() !== '';
+        
+        console.log(`   - crushingLoad: "${row.crushingLoad}" (has: ${hasCrushingLoad})`);
+        console.log(`   - compressiveStrength: "${row.compressiveStrength}" (has: ${hasCompressiveStrength})`);
+        
+        // Only include rows that have essential data (like Python validation)
+        if (!hasCrushingLoad || !hasCompressiveStrength) {
+          console.log(`❌ Frontend: Skipping row ${rowIndex} - missing crushing load or compressive strength`);
+          return; // Skip incomplete rows
+        }
+        
+        // Create row data object (like Python collectFormData())
+        const rowData = {
+          cube_id: row.cubeId,
+          dimension_length: row.length ? parseFloat(row.length) : null,
+          dimension_width: row.breadth ? parseFloat(row.breadth) : null,
+          dimension_height: row.height ? parseFloat(row.height) : null,
+          weight: row.weight ? parseFloat(row.weight) : null,
+          crushing_load: parseFloat(row.crushingLoad),
+          compressive_strength: parseFloat(row.compressiveStrength),
+          failure_type: row.failureType ? parseFloat(row.failureType) : null
+        };
+        
+        console.log(`✅ Frontend: Created rowData for ${row.cubeId}:`, rowData);
+        rowsData.push(rowData);
+      });
+      
+      console.log(`🔍 Frontend: Final rowsData array (${rowsData.length} valid rows):`, rowsData);
+      
+      // Save rowsData to state for use in success modal
+      setLastSavedRowsData(rowsData);
+      
+        // Build observations data like Python system
+        const observationsData = {
+          rows: rowsData, // Main data array like Python
+          sample_description: formData.sampleDescription,
+          cube_condition: formData.cubeCondition,
+          curing_condition: formData.curingCondition,
+          machine_used: formData.machineUsed,
+          test_method: formData.testMethod,
+          average_strength: formData.averageStrength ? parseFloat(formData.averageStrength) : null,
+          tested_by: formData.testedBy,
+          checked_by: formData.checkedBy,
+          verified_by: formData.verifiedBy,
+          test_remarks: formData.testRemarks,
+          capturedImages: capturedImages,
+          testRequestId: testRequestId,
+          timestamp: new Date().toISOString(),
+          // Add missing fields that should be saved to database
+          grade: testData?.grade || testRequest?.grade || 'M25',
+          casting_date: testData?.castingDate || testRequest?.castingDate || null,
+          testing_date: testData?.testingDate || testRequest?.testingDate || null,
+          age_in_days: testData?.ageInDays || testRequest?.ageInDays || null,
+          sample_code_number: testData?.sampleCodeNumber || testRequest?.sampleCodeNumber || testData?.referenceNumber || testRequest?.referenceNumber || null,
+          location_nature: testData?.locationNature || testRequest?.locationNature || null,
+          id_mark: testData?.idMark || testRequest?.idMark || `C${rowsData.length > 0 ? rowsData[0].cube_id : '1'}`,
+          // Add observations data that will be displayed in PDF
+          obs_strength_duration: formData.obsStrengthDuration || '--',
+          obs_test_results: formData.obsTestResults || 'Satisfactory',
+          obs_weight: formData.obsWeight || '--',
+          obs_failure_pattern: formData.obsFailurePattern || '--',
+          obs_bonding: formData.obsBonding || 'Satisfactory',
+          obs_strength_criteria: formData.obsStrengthCriteria || '--'
+        };
 
-      console.log('🔍 FRONTEND DEBUG: About to send data:');
-      console.log('  testRows length:', testRows.length);
-      console.log('  testRows content:', testRows);
+      console.log('🔍 FRONTEND DEBUG: About to send data (Python-style):');
+      console.log('  rowsData length:', rowsData.length);
+      console.log('  rowsData content:', rowsData);
       console.log('  observationsData:', observationsData);
 
       setSaveProgress(30);
@@ -457,25 +533,31 @@ const TestObservations = () => {
       try {
         // Try to save to database first
         setSaveProgress(50);
-        await axios.post(`${API_BASE_URL}/test-observations/${testRequestId}`, observationsData);
+        console.log('🔍 Sending data to backend:', observationsData);
+        
+        const response = await axios.post(`${API_BASE_URL}/test-observations/${testRequestId}`, observationsData);
         setSaveProgress(80);
-        setSubmitMessage({ type: 'success', text: 'Test observations saved successfully!' });
+        
+        console.log('✅ Backend response:', response.data);
+        
+        if (response.data && response.data.message) {
+          setSubmitMessage({ type: 'success', text: `Test observations saved successfully! ${response.data.images_saved || 0} images saved.` });
+        } else {
+          setSubmitMessage({ type: 'success', text: 'Test observations saved successfully!' });
+        }
         setShowSuccessModal(true);
       } catch (dbError) {
-        console.warn('Database save failed, using localStorage fallback:', dbError);
+        console.error('❌ Database save failed:', dbError);
+        console.error('Error details:', dbError.response?.data);
         
-        // Fallback to localStorage (without images to avoid quota issues)
-        setSaveProgress(60);
-        const storageKey = `test_observations_${testRequestId || 'temp'}`;
-        const dataWithoutImages = {
-          ...observationsData,
-          capturedImages: {} // Don't save images to localStorage
-        };
-        localStorage.setItem(storageKey, JSON.stringify(dataWithoutImages));
-        setSaveProgress(80);
+        setErrorMessage(`Failed to save to database: ${dbError.response?.data?.error || dbError.message}. Please try again.`);
+        setShowErrorModal(true);
+        setTimeout(() => setShowErrorModal(false), 5000);
         
-        setSubmitMessage({ type: 'success', text: 'Test observations saved locally!' });
-        setShowSuccessModal(true);
+        // Don't use localStorage fallback for now - force user to retry
+        setIsSubmitting(false);
+        setSaveProgress(0);
+        return;
       }
       
       setSaveProgress(100);
@@ -1545,12 +1627,18 @@ const TestObservations = () => {
                   testIndex: testIndex,
                   testRequestId: testRequestId,
                   observationsData: {
-                    formData: {
-                      ...formData,
-                      testRows: testRows
-                    },
-                    testRows: testRows,
-                    capturedImages: capturedImages, // Send images to backend
+                    rows: lastSavedRowsData, // Main data array like Python
+                    sample_description: formData.sampleDescription,
+                    cube_condition: formData.cubeCondition,
+                    curing_condition: formData.curingCondition,
+                    machine_used: formData.machineUsed,
+                    test_method: formData.testMethod,
+                    average_strength: formData.averageStrength ? parseFloat(formData.averageStrength) : null,
+                    tested_by: formData.testedBy,
+                    checked_by: formData.checkedBy,
+                    verified_by: formData.verifiedBy,
+                    test_remarks: formData.testRemarks,
+                    capturedImages: capturedImages,
                     testRequestId: testRequestId,
                     timestamp: new Date().toISOString()
                   }

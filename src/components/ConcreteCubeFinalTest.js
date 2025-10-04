@@ -374,9 +374,75 @@ const styles = StyleSheet.create({
 //     textAlign: 'center',
 //     marginTop: 50,
 //   },
+  
+  // Section Title
+  sectionTitle: {
+    fontSize: 14,
+    fontFamily: 'Times-Bold',
+    color: '#000000',
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 15,
+  },
+  
+  // Table Header Cell
+  tableHeaderCell: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 0.5,
+    borderColor: '#000000',
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Table Header Text
+  tableHeaderText: {
+    fontSize: 8,
+    fontFamily: 'Times-Bold',
+    color: '#000000',
+    textAlign: 'center',
+  },
+  
+  // Table Data Cell
+  tableDataCell: {
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: '#000000',
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Table Data Text
+  tableDataText: {
+    fontSize: 8,
+    fontFamily: 'Times-Roman',
+    color: '#000000',
+    textAlign: 'center',
+  },
+  
+  // Average Strength Row
+  averageStrengthRow: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  
+  // Average Strength Text
+  averageStrengthText: {
+    fontSize: 10,
+    fontFamily: 'Times-Bold',
+    color: '#000000',
+    textAlign: 'center',
+  },
 });
 
 const ConcreteCubeFinalTest = ({ testData }) => {
+  console.log('📄 ConcreteCubeFinalTest: Rendering PDF with data:', testData);
+  console.log('📄 ConcreteCubeFinalTest: main_test:', testData?.main_test);
+  console.log('📄 ConcreteCubeFinalTest: cube_results:', testData?.main_test?.cube_results);
+  console.log('📄 ConcreteCubeFinalTest: cube_results length:', testData?.main_test?.cube_results?.length);
+  
   return (
     <Document>
       {/* PAGE 1 - BLANK */}
@@ -411,13 +477,13 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.customerText}>Customer/Site Name &{'\n'}Address</Text>
             </View>
             <View style={styles.customerValueCell}>
-              <Text style={styles.customerText}>Lords Developers Shivyogi Residency, shelgi solapur</Text>
+              <Text style={styles.customerText}>{testData?.customer?.name || 'N/A'}{testData?.customer?.address ? `\n${testData.customer.address}` : ''}</Text>
             </View>
             <View style={styles.rightSideLabelCell}>
               <Text style={styles.tableLabelText}>Date of Report</Text>
             </View>
             <View style={styles.rightSideValueCell}>
-              <Text style={styles.tableValueText}>09/09/2025</Text>
+              <Text style={styles.tableValueText}>{testData?.test_request?.completion_date ? new Date(testData.test_request.completion_date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}</Text>
             </View>
           </View>
           
@@ -428,7 +494,7 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>ULR Number</Text>
             </View>
             <View style={styles.rightSideValueCell}>
-              <Text style={styles.tableValueText}>TC-1575625000001840F</Text>
+              <Text style={styles.tableValueText}>{testData?.test_request?.ulr_number || 'N/A'}</Text>
             </View>
           </View>
           
@@ -438,13 +504,13 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Reference Number</Text>
             </View>
             <View style={styles.valueCell}>
-              <Text style={styles.tableValueText}>VA/CC/2025/AUG-74</Text>
+              <Text style={styles.tableValueText}>{testData?.test_request?.job_number || 'N/A'}</Text>
             </View>
             <View style={styles.rightSideLabelCellStandard}>
               <Text style={styles.tableLabelText}>Job Code Number</Text>
             </View>
             <View style={styles.rightSideValueCellStandard}>
-              <Text style={styles.tableValueText}>T-2501690</Text>
+              <Text style={styles.tableValueText}>{testData?.test_request?.job_number || 'N/A'}</Text>
             </View>
           </View>
           
@@ -454,7 +520,7 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Location/Structure Type</Text>
             </View>
             <View style={styles.fullWidthValueCell}>
-              <Text style={styles.tableValueText}>column</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.location_nature || 'N/A'}</Text>
             </View>
           </View>
           
@@ -464,13 +530,13 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Date of Receipt</Text>
             </View>
             <View style={styles.valueCell}>
-              <Text style={styles.tableValueText}>25/08/2025</Text>
+              <Text style={styles.tableValueText}>{testData?.test_request?.receipt_date ? new Date(testData.test_request.receipt_date).toLocaleDateString('en-GB') : 'N/A'}</Text>
             </View>
             <View style={styles.rightSideLabelCellStandard}>
               <Text style={styles.tableLabelText}>Age of Specimen</Text>
             </View>
             <View style={styles.rightSideValueCellStandard}>
-              <Text style={styles.tableValueText}>28 Days</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.age_in_days ? `${testData.main_test.age_in_days} Days` : 'N/A'}</Text>
             </View>
           </View>
           
@@ -480,13 +546,13 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Date of Casting</Text>
             </View>
             <View style={styles.valueCell}>
-              <Text style={styles.tableValueText}>11/08/2025</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.casting_date ? new Date(testData.main_test.casting_date).toLocaleDateString('en-GB') : 'N/A'}</Text>
             </View>
             <View style={styles.rightSideLabelCellStandard}>
               <Text style={styles.tableLabelText}>Date of Testing</Text>
             </View>
             <View style={styles.rightSideValueCellStandard}>
-              <Text style={styles.tableValueText}>08/09/2025</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.testing_date ? new Date(testData.main_test.testing_date).toLocaleDateString('en-GB') : 'N/A'}</Text>
             </View>
           </View>
           
@@ -502,7 +568,7 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Grade of Specimen</Text>
             </View>
             <View style={styles.rightSideValueCellStandard}>
-              <Text style={styles.tableValueText}>M-25</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.grade || 'N/A'}</Text>
             </View>
           </View>
           
@@ -512,13 +578,13 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Condition of Specimen</Text>
             </View>
             <View style={styles.valueCell}>
-              <Text style={styles.tableValueText}>Acceptable</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.cube_condition || 'N/A'}</Text>
             </View>
             <View style={styles.rightSideLabelCellStandard}>
               <Text style={styles.tableLabelText}>Curing Condition</Text>
             </View>
             <View style={styles.rightSideValueCellStandard}>
-              <Text style={styles.tableValueText}>28.0</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.curing_condition || 'N/A'}</Text>
             </View>
           </View>
           
@@ -528,7 +594,7 @@ const ConcreteCubeFinalTest = ({ testData }) => {
               <Text style={styles.tableLabelText}>Machine used for Testing</Text>
             </View>
             <View style={styles.fullWidthValueCell}>
-              <Text style={styles.tableValueText}>Fully automatic Digital Compression Testing Machine</Text>
+              <Text style={styles.tableValueText}>{testData?.main_test?.machine_used || 'N/A'}</Text>
             </View>
           </View>
           
@@ -587,7 +653,94 @@ const ConcreteCubeFinalTest = ({ testData }) => {
         <View style={styles.headerSeparatorFull} />
         
         <View style={styles.contentArea}>
-          {/* Page 2 content will go here */}
+          {/* Test Results Table */}
+          <Text style={styles.sectionTitle}>TEST RESULTS</Text>
+          
+          {/* Table Header */}
+          <View style={styles.tableRow}>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Sr. No.</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>ID Mark</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Length (mm)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Width (mm)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Height (mm)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Area (mm²)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Weight (kg)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Crushing Load (kN)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Compressive Strength (N/mm²)</Text>
+            </View>
+            <View style={styles.tableHeaderCell}>
+              <Text style={styles.tableHeaderText}>Density (kg/m³)</Text>
+            </View>
+          </View>
+          
+          {/* Table Data Rows */}
+          {testData?.main_test?.cube_results?.map((cube, index) => {
+            console.log(`📄 ConcreteCubeFinalTest: Rendering cube ${index + 1}:`, cube);
+            return (
+              <View key={index} style={styles.tableRow}>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{index + 1}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.cube_id || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.dimension_length || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.dimension_width || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.dimension_height || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.area ? cube.area.toFixed(2) : 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.weight || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.crushing_load || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.compressive_strength || 'N/A'}</Text>
+                </View>
+                <View style={styles.tableDataCell}>
+                  <Text style={styles.tableDataText}>{cube.density ? cube.density.toFixed(0) : 'N/A'}</Text>
+                </View>
+              </View>
+            );
+          }) || (
+            <View style={styles.tableRow}>
+              <View style={styles.tableDataCell}>
+                <Text style={styles.tableDataText}>No data available</Text>
+              </View>
+            </View>
+          )}
+          
+          {/* Average Strength */}
+          <View style={styles.averageStrengthRow}>
+            <Text style={styles.averageStrengthText}>
+              Average Compressive Strength: {testData?.main_test?.average_strength || 'N/A'} N/mm²
+            </Text>
+          </View>
         </View>
       </Page>
 

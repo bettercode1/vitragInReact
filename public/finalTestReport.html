@@ -1173,7 +1173,7 @@
                 }
                 
                 // Use SAVED average strength from database (NOT calculated!)
-                const avgStrengthFromDB = urlParams.get('average_strength') || '0.00';
+                const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || '0.00';
                 const avgEl = document.getElementById('average-strength');
                 if (avgEl) {
                     avgEl.innerHTML = `<span class="highlight-text">${avgStrengthFromDB}</span>`;
@@ -1459,49 +1459,168 @@
                         gradeHeader.textContent = `GRADE OF CONCRETE: ${grade}`;
                     }
                     
-                    // ===== UPDATE IMAGES (PAGE 3) FROM sessionStorage =====
-                    const testRequestId = urlParams.get('test_request_id') || '248';
-                    const imagesJson = sessionStorage.getItem('testImages_' + testRequestId);
+                    // ===== LOAD IMAGES (PAGE 3) - DIRECT FROM URL PARAMETERS =====
+                    console.log('🔍 LOADING IMAGES DIRECTLY FROM URL PARAMETERS');
+                    console.log('🔍 Full URL:', window.location.href);
+                    console.log('🔍 URL search params:', window.location.search);
                     
-                    if (imagesJson) {
+                    // DEBUG: Check what's in URL parameters
+                    console.log('🔍 ALL URL PARAMETERS:');
+                    for (let [key, value] of urlParams.entries()) {
+                        if (key.includes('front') || key.includes('screen') || key.includes('back')) {
+                            console.log(`🔍 ${key}:`, value ? 'EXISTS (' + value.length + ' chars)' : 'MISSING');
+                        }
+                    }
+                    
+                    // Load images from testData passed from React component
+                    console.log('🔍 LOADING IMAGES FROM TESTDATA');
+                    
+                    // First try to get testData from sessionStorage
+                    const testDataJson = sessionStorage.getItem(`testData_${testRequestId}`);
+                    let testData = null;
+                    if (testDataJson) {
                         try {
-                            const images = JSON.parse(imagesJson);
-                            console.log('📸 Loaded images from sessionStorage:', Object.keys(images));
+                            testData = JSON.parse(testDataJson);
+                            console.log('✅ LOADED TESTDATA FROM SESSIONSTORAGE:', testData);
+                            console.log('🔍 testData.capturedImages:', testData.capturedImages);
+                            console.log('🔍 testData.photos:', testData.photos);
+                        } catch (e) {
+                            console.error('❌ Error parsing testData:', e);
+                        }
+                    }
+                    
+                    // Load images from testData.capturedImages or testData.photos (priority 1)
+                    const capturedImages = testData.capturedImages || testData.photos || {};
+                    if (testData && capturedImages && Object.keys(capturedImages).length > 0) {
+                        console.log('📸 LOADING IMAGES FROM TESTDATA:', Object.keys(capturedImages));
+                        
+                        for (let i = 1; i <= quantity; i++) {
+                            const frontImg = capturedImages[`front_failure_${i}`];
+                            const screenImg = capturedImages[`digital_reading_${i}`];
+                            const backImg = capturedImages[`back_failure_${i}`];
                             
-                            // Update cube images only for quantity
-                            for (let i = 1; i <= quantity; i++) {
-                                const frontImg = images[`front_failure_${i}`];
-                                const screenImg = images[`digital_reading_${i}`];
-                                const backImg = images[`back_failure_${i}`];
-                                
+                            console.log(`🔍 Cube ${i} images from testData:`, {
+                                front: frontImg ? 'EXISTS' : 'MISSING',
+                                screen: screenImg ? 'EXISTS' : 'MISSING', 
+                                back: backImg ? 'EXISTS' : 'MISSING'
+                            });
+                            
+                            // Set front image
+                            if (frontImg) {
                                 const frontEl = document.getElementById(`cube${i}-front-img`);
-                                if (frontEl && frontImg) {
+                                if (frontEl) {
                                     frontEl.src = frontImg;
-                                    console.log(`✅ Updated cube${i} front image`);
-                                }
-                                
-                                const screenEl = document.getElementById(`cube${i}-screen-img`);
-                                if (screenEl && screenImg) {
-                                    screenEl.src = screenImg;
-                                    console.log(`✅ Updated cube${i} screen image`);
-                                }
-                                
-                                const backEl = document.getElementById(`cube${i}-back-img`);
-                                if (backEl && backImg) {
-                                    backEl.src = backImg;
-                                    console.log(`✅ Updated cube${i} back image`);
+                                    console.log(`✅ Set cube${i} front image from testData`);
                                 }
                             }
                             
-                            console.log('✅ Images updated from sessionStorage!');
-                        } catch (e) {
-                            console.error('❌ Error loading images:', e);
+                            // Set screen image
+                            if (screenImg) {
+                                const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                if (screenEl) {
+                                    screenEl.src = screenImg;
+                                    console.log(`✅ Set cube${i} screen image from testData`);
+                                }
+                            }
+                            
+                            // Set back image
+                            if (backImg) {
+                                const backEl = document.getElementById(`cube${i}-back-img`);
+                                if (backEl) {
+                                    backEl.src = backImg;
+                                    console.log(`✅ Set cube${i} back image from testData`);
+                                }
+                            }
                         }
                     } else {
-                        console.warn('⚠️ No images found in sessionStorage for test:', testRequestId);
+                        // Fallback: Load images directly from URL parameters
+                        console.log('📸 FALLBACK: Loading images from URL parameters');
+                        for (let i = 1; i <= quantity; i++) {
+                            const frontImg = urlParams.get(`front_failure_${i}`);
+                            const screenImg = urlParams.get(`digital_reading_${i}`);
+                            const backImg = urlParams.get(`back_failure_${i}`);
+                            
+                            console.log(`🔍 Cube ${i} images from URL:`, {
+                                front: frontImg ? 'EXISTS' : 'MISSING',
+                                screen: screenImg ? 'EXISTS' : 'MISSING', 
+                                back: backImg ? 'EXISTS' : 'MISSING'
+                            });
+                            
+                            // Set front image
+                            if (frontImg) {
+                                const frontEl = document.getElementById(`cube${i}-front-img`);
+                                if (frontEl) {
+                                    frontEl.src = frontImg;
+                                    console.log(`✅ Set cube${i} front image from URL`);
+                                }
+                            }
+                            
+                            // Set screen image
+                            if (screenImg) {
+                                const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                if (screenEl) {
+                                    screenEl.src = screenImg;
+                                    console.log(`✅ Set cube${i} screen image from URL`);
+                                }
+                            }
+                            
+                            // Set back image
+                            if (backImg) {
+                                const backEl = document.getElementById(`cube${i}-back-img`);
+                                if (backEl) {
+                                    backEl.src = backImg;
+                                    console.log(`✅ Set cube${i} back image from URL`);
+                                }
+                            }
+                        }
                     }
                     
                     console.log('✅✅✅ ALL DATA UPDATED - TABLES, GRAPH, OBSERVATIONS, IMAGES!');
+                    
+                    // Retry image loading after 1 second in case sessionStorage wasn't ready
+                    setTimeout(() => {
+                        console.log('🔄 RETRY: Checking sessionStorage again after 1 second...');
+                        const retryImagesJson = sessionStorage.getItem('testImages_' + testRequestId);
+                        if (retryImagesJson && !imagesLoaded) {
+                            console.log('✅ RETRY: Found images in sessionStorage on retry!');
+                            try {
+                                const retryImages = JSON.parse(retryImagesJson);
+                                console.log('📸 RETRY: Loaded images from sessionStorage:', Object.keys(retryImages));
+                                
+                                for (let i = 1; i <= quantity; i++) {
+                                    const frontImg = retryImages[`front_failure_${i}`];
+                                    const screenImg = retryImages[`digital_reading_${i}`];
+                                    const backImg = retryImages[`back_failure_${i}`];
+                                    
+                                    if (frontImg && frontImg.startsWith('data:image')) {
+                                        const frontEl = document.getElementById(`cube${i}-front-img`);
+                                        if (frontEl) {
+                                            frontEl.src = frontImg;
+                                            console.log(`✅ RETRY: Updated cube${i} front image (base64)`);
+                                        }
+                                    }
+                                    
+                                    if (screenImg && screenImg.startsWith('data:image')) {
+                                        const screenEl = document.getElementById(`cube${i}-screen-img`);
+                                        if (screenEl) {
+                                            screenEl.src = screenImg;
+                                            console.log(`✅ RETRY: Updated cube${i} screen image (base64)`);
+                                        }
+                                    }
+                                    
+                                    if (backImg && backImg.startsWith('data:image')) {
+                                        const backEl = document.getElementById(`cube${i}-back-img`);
+                                        if (backEl) {
+                                            backEl.src = backImg;
+                                            console.log(`✅ RETRY: Updated cube${i} back image (base64)`);
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('❌ RETRY: Error loading images:', e);
+                            }
+                        }
+                    }, 1000);
                 }, 500); // Wait 500ms for pages to be visible
                 
                 // SECOND ATTEMPT - Force update graph again after 1 second
@@ -2345,6 +2464,7 @@
 
     <!-- Download PDF Button -->
     <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
+    
 
     <script>
         // ✅ CONTROL WHICH PAGES TO SHOW BASED ON page_type PARAMETER
@@ -2826,11 +2946,11 @@
                 }
             }
             
-            // Update average strength
-            const avgStrength = count > 0 ? (strengthSum / count).toFixed(2) : '0.00';
+            // Use SAVED average strength from database (NOT calculated!)
+            const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || (count > 0 ? (strengthSum / count).toFixed(2) : '0.00');
             const avgEl = document.getElementById('average-strength');
             if (avgEl) {
-                avgEl.innerHTML = `<span class="highlight-text">${avgStrength}</span>`;
+                avgEl.innerHTML = `<span class="highlight-text">${avgStrengthFromDB}</span>`;
             }
             
             console.log('✅ Page 2 ALL data populated!');
@@ -2962,6 +3082,7 @@
             // Open print dialog
             window.print();
         }
+        
 
         // Function to auto-resize text for overflowing content
         function autoResizeText() {
