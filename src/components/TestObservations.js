@@ -278,7 +278,7 @@ const TestObservations = () => {
             const breadth = field === 'breadth' ? parseFloat(value) : parseFloat(row.breadth);
             
             if (length && breadth && length > 0 && breadth > 0) {
-              updatedRow.area = (length * breadth).toFixed(1);
+              updatedRow.area = (length * breadth).toFixed(3);
             }
           }
           
@@ -296,7 +296,7 @@ const TestObservations = () => {
               const heightInMeters = height / 1000;
               const volumeInCubicMeters = lengthInMeters * breadthInMeters * heightInMeters;
               const density = weight / volumeInCubicMeters;
-              updatedRow.density = density.toFixed(1);
+              updatedRow.density = density.toFixed(3);
             }
           }
           

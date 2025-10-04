@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Observation Sheet</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    
+    <!-- Test the exact same elements -->
+    <p>Curing Condition: <span id="curing-condition">EMPTY</span></p>
+    <p>Tested By: <span id="tested-by-name">EMPTY</span></p>
+    <p>Checked By: <span id="checked-by-name">EMPTY</span></p>
+    <p>Verified By: <span id="verified-by-name">EMPTY</span></p>
+    <p>Tested Date: <span id="tested-by-date">EMPTY</span></p>
+    <p>Checked Date: <span id="checked-by-date">EMPTY</span></p>
+    <p>Verified Date: <span id="verified-by-date">EMPTY</span></p>
+    <p>Remarks: <span id="remarks-content">EMPTY</span></p>
+
+    <script>
+        console.log('🔍 DEBUG PAGE LOADED');
+        
+        // Get URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('📋 ALL URL PARAMS:');
+        for (let [key, value] of urlParams.entries()) {
+            console.log(`   ${key}:`, value);
+        }
+        
+        // Test element setting
+        const todayDate = new Date().toLocaleDateString('en-GB');
+        
+        // Force set values
+        document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || 'NO CURING CONDITION PARAM';
+        document.getElementById('tested-by-name').textContent = urlParams.get('tested_by') || 'NO TESTED BY PARAM';
+        document.getElementById('checked-by-name').textContent = urlParams.get('checked_by') || 'NO CHECKED BY PARAM';
+        document.getElementById('verified-by-name').textContent = urlParams.get('verified_by') || 'NO VERIFIED BY PARAM';
+        document.getElementById('tested-by-date').textContent = todayDate;
+        document.getElementById('checked-by-date').textContent = todayDate;
+        document.getElementById('verified-by-date').textContent = todayDate;
+        document.getElementById('remarks-content').textContent = urlParams.get('test_remarks') || 'NO REMARKS PARAM';
+        
+        console.log('✅ Values set on debug page');
+    </script>
+</body>
+</html>

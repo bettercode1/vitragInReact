@@ -1263,7 +1263,7 @@
                         // Volume in cubic meters = (L * B * H) / 1000000000
                         const volumeM3 = (lengthMm * breadthMm * heightMm) / 1000000000;
                         const densityValue = weightKg / volumeM3;
-                        density = densityValue.toFixed(0); // Round to nearest integer
+                        density = densityValue.toFixed(3); // Format to 3 decimal places
                         console.log(`📊 Density calculation for cube ${i}:`, {weightKg, volumeM3, densityValue, density});
                     }
                     
@@ -2827,7 +2827,7 @@
             }
             
             // Update average strength
-            const avgStrength = count > 0 ? (strengthSum / count).toFixed(2) : '0.00';
+            const avgStrength = count > 0 ? (strengthSum / count).toFixed(3) : '0.000';
             const avgEl = document.getElementById('average-strength');
             if (avgEl) {
                 avgEl.innerHTML = `<span class="highlight-text">${avgStrength}</span>`;

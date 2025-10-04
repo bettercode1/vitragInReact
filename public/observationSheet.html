@@ -413,7 +413,7 @@
                         // Volume in cubic meters = (L * B * H) / 1000000000
                         const volumeM3 = (lengthMm * breadthMm * heightMm) / 1000000000;
                         const densityValue = weightKg / volumeM3;
-                        density = densityValue.toFixed(0); // Round to nearest integer
+                        density = densityValue.toFixed(3); // Format to 3 decimal places
                         console.log(`📊 OBSERVATION SHEET: Density calculation for cube ${i}:`, {weightKg, volumeM3, densityValue, density});
                     }
                     
@@ -821,48 +821,126 @@
             for (let [key, value] of urlParams.entries()) {
                 console.log(`   ${key}:`, value);
             }
+            
+            // DYNAMIC FIX: Get values from URL parameters (data from main_test)
+            console.log('🔄 DYNAMIC DATA RETRIEVAL FROM MAIN_TEST:');
+            
+            // Get values dynamically from URL parameters (these come from the main_test object)
+            const curingValue = urlParams.get('curing_condition') || '';
+            const testedValue = urlParams.get('tested_by') || '';
+            const checkedValue = urlParams.get('checked_by') || '';
+            const verifiedValue = 'Mr. P A Sanghave';  // CEO always - not from URL
+            const remarksValue = urlParams.get('test_remarks') || '';
+            
+            console.log('  curing_condition from URL:', curingValue);
+            console.log('  tested_by from URL:', testedValue);
+            console.log('  checked_by from URL:', checkedValue);
+            console.log('  verified_by (CEO always):', verifiedValue);
+            console.log('  test_remarks from URL:', remarksValue);
+            
+            // Set values dynamically if they exist
+            if (curingValue) {
+                const curingEl = document.getElementById('curing-condition');
+                if (curingEl) {
+                    curingEl.textContent = curingValue;
+                    console.log('✅ Set curing condition:', curingValue);
+                }
+            }
+            
+            if (testedValue) {
+                const testedEl = document.getElementById('tested-by-name');
+                if (testedEl) {
+                    testedEl.textContent = testedValue;
+                    console.log('✅ Set tested by:', testedValue);
+                }
+            }
+            
+            if (checkedValue) {
+                const checkedEl = document.getElementById('checked-by-name');
+                if (checkedEl) {
+                    checkedEl.textContent = checkedValue;
+                    console.log('✅ Set checked by:', checkedValue);
+                }
+            }
+            
+            if (verifiedValue) {
+                const verifiedEl = document.getElementById('verified-by-name');
+                if (verifiedEl) {
+                    verifiedEl.textContent = verifiedValue;
+                    console.log('✅ Set verified by:', verifiedValue);
+                }
+            }
+            
+            if (remarksValue) {
+                const remarksEl = document.getElementById('remarks-content');
+                if (remarksEl) {
+                    remarksEl.textContent = remarksValue;
+                    console.log('✅ Set remarks:', remarksValue);
+                }
+            }
+            
+            // Set today's date for all date fields dynamically
+            const todayFormattedDate = new Date().toLocaleDateString('en-GB');
+            const dateElements = ['tested-by-date', 'checked-by-date', 'verified-by-date'];
+            dateElements.forEach(dateId => {
+                const dateEl = document.getElementById(dateId);
+                if (dateEl) {
+                    dateEl.textContent = todayFormattedDate;
+                    console.log(`✅ Set ${dateId}:`, todayFormattedDate);
+                }
+            });
 
             // General Information (Observation Report - Page 1)
             document.getElementById('sample-description').textContent = urlParams.get('sample_description') || 'Concrete Cube Specimen';
-            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || '';
-            document.getElementById('sample-test-code').textContent = urlParams.get('job_code_number') || '';
-            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || '';
+            
+            // Set today's date for date of receipt (as requested by user)
+            const todayDate = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY format
+            document.getElementById('date-of-receipt').textContent = urlParams.get('date_of_receipt') || todayDate;
+            
+            document.getElementById('sample-test-code').textContent = urlParams.get('job_code_number') || urlParams.get('job_number') || '';
+            document.getElementById('date-of-testing').textContent = urlParams.get('date_of_testing') || urlParams.get('testing_date') || '';
             
             // Auto-detect quantity from block_id parameters
-            let quantityValue = urlParams.get('quantity_of_blocks');
+            let quantityValue = urlParams.get('quantity_of_blocks') || urlParams.get('quantity');
             if (!quantityValue) {
                 let count = 0;
                 for (let i = 1; i <= 6; i++) {
-                    if (urlParams.get(`block_id_${i}`)) count++;
+                    if (urlParams.get(`block_id_${i}`) || urlParams.get(`cube_id_${i}`)) count++;
                 }
                 quantityValue = count > 0 ? count : '';
             }
             document.getElementById('quantity-of-blocks').textContent = quantityValue;
             
-            document.getElementById('date-of-casting').textContent = urlParams.get('date_of_casting') || '';
+            document.getElementById('date-of-casting').textContent = urlParams.get('date_of_casting') || urlParams.get('casting_date') || '';
             
-            const gradeValue = urlParams.get('grade_of_blocks') || 'M25';
+            const gradeValue = urlParams.get('grade_of_blocks') || urlParams.get('grade') || urlParams.get('grade_of_specimen') || 'M25';
             document.getElementById('grade-of-blocks').textContent = gradeValue;
             console.log('✅ OBSERVATION SHEET: Grade of Blocks:', gradeValue);
             
-            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || 'Acceptable';
+            document.getElementById('blocks-condition').textContent = urlParams.get('blocks_condition') || urlParams.get('cube_condition') || 'Acceptable';
             
             // Calculate age if both dates are provided
-            const castingDate = urlParams.get('date_of_casting');
-            const testingDate = urlParams.get('date_of_testing');
-            let ageValue = urlParams.get('manufacture_of_blocks') || urlParams.get('age_of_cube') || '';
+            const castingDate = urlParams.get('date_of_casting') || urlParams.get('casting_date');
+            const testingDate = urlParams.get('date_of_testing') || urlParams.get('testing_date');
+            let ageValue = urlParams.get('manufacture_of_blocks') || urlParams.get('age_of_cube') || urlParams.get('age_in_days') || '';
             if (!ageValue && castingDate && testingDate) {
                 const casting = new Date(castingDate);
                 const testing = new Date(testingDate);
                 const diffTime = Math.abs(testing - casting);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 ageValue = diffDays + ' Days';
+            } else if (ageValue && !ageValue.includes('Days')) {
+                ageValue = ageValue + ' Days';
             }
             document.getElementById('manufacture-of-blocks').textContent = ageValue;
             
-            document.getElementById('curing-condition').textContent = urlParams.get('curing_condition') || '';
-            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || 'CTM (2000KN)';
-            document.getElementById('test-method').textContent = urlParams.get('test_method') || 'IS 516 (Part1/Sec1):2021';
+            // Get curing condition from multiple possible sources and store in variable for later use
+            let curingConditionValue = urlParams.get('curing_condition') || urlParams.get('curingCondition') || '';
+            document.getElementById('curing-condition').textContent = curingConditionValue;
+            console.log('✅ OBSERVATION SHEET: Curing Condition:', curingConditionValue);
+            
+            document.getElementById('machine-used-for-testing').textContent = urlParams.get('machine_used_for_testing') || urlParams.get('machine_used') || urlParams.get('machineUsed') || 'CTM (2000KN)';
+            document.getElementById('test-method').textContent = urlParams.get('test_method') || urlParams.get('testMethod') || 'IS 516 (Part1/Sec1):2021';
             document.getElementById('environmental-conditions').textContent = urlParams.get('environmental_conditions') || '';
             
             // Test Results (Observation Report - Page 1)
@@ -902,7 +980,7 @@
             }
             
             // Use SAVED average strength from database (NOT calculated!)
-            const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || (count > 0 ? (compressiveSum / count).toFixed(2) : '0.00');
+            const avgStrengthFromDB = urlParams.get('average_compressive_strength') || urlParams.get('average_strength') || (count > 0 ? (compressiveSum / count).toFixed(3) : '0.000');
             const densityAverage = count > 0 ? (densitySum / count).toFixed(2) : '0.00';
             const loadAverage = count > 0 ? (loadSum / count).toFixed(2) : '0.00';
             
@@ -911,59 +989,101 @@
             console.log('OBSERVATION SHEET: Calculated averages - Compressive:', avgStrengthFromDB, 'Density:', densityAverage, 'Load:', loadAverage, 'from', count, 'values');
             
             // Verification (Observation Report - Page 1)
-            // Only show user input data, leave empty if not provided
-            const testedByName = urlParams.get('tested_by_name');
-            const checkedByName = urlParams.get('checked_by_name');
-            const verifiedByName = urlParams.get('verified_by_name');
-            const testedByDate = urlParams.get('tested_by_date');
-            const checkedByDate = urlParams.get('checked_by_date');
-            const verifiedByDate = urlParams.get('verified_by_date');
+            // Get data from sessionStorage testData first, then fall back to URL params
+            const testRequestId = urlParams.get('test_request_id') || urlParams.get('testRequestId');
             
-            console.log('👤 OBSERVATION SHEET - Signature Data:', {
+            // Initialize variables with multiple fallback sources to match database field names
+            let testedByName = urlParams.get('tested_by') || urlParams.get('tested_by_name') || urlParams.get('testedBy');
+            let checkedByName = urlParams.get('checked_by') || urlParams.get('checked_by_name') || urlParams.get('checkedBy');
+            let verifiedByName = urlParams.get('verified_by') || urlParams.get('verified_by_name') || urlParams.get('verifiedBy');
+            let remarksText = urlParams.get('test_remarks') || urlParams.get('remarks') || urlParams.get('testRemarks');
+            // Use the curing condition variable we already declared earlier
+            let curingCondition = curingConditionValue;
+            
+            console.log('🔍 OBSERVATION SHEET: Initial URL params data:', {
                 testedBy: testedByName,
                 checkedBy: checkedByName,
                 verifiedBy: verifiedByName,
-                dates: { testedByDate, checkedByDate, verifiedByDate }
+                remarks: remarksText,
+                curingCondition: curingCondition,
+                testRequestId: testRequestId
             });
             
-            // Update tested by (only if user provided data)
-            if (testedByName && testedByName.trim() !== '') {
-                document.getElementById('tested-by-name').textContent = testedByName;
+            // Try to get data from sessionStorage testData if available (this should have the database values)
+            if (testRequestId) {
+                try {
+                    const testDataJson = sessionStorage.getItem(`testData_${testRequestId}`);
+                    if (testDataJson) {
+                        const testData = JSON.parse(testDataJson);
+                        console.log('🔍 OBSERVATION SHEET: Loading signature data from sessionStorage:', testData);
+                        
+                        // Override with sessionStorage data if available (database field names)
+                        testedByName = testData.testedBy || testData.tested_by || testedByName || '';
+                        checkedByName = testData.checkedBy || testData.checked_by || checkedByName || '';
+                        verifiedByName = testData.verifiedBy || testData.verified_by || verifiedByName || 'Mr. P A Sanghave';
+                        remarksText = testData.testRemarks || testData.test_remarks || testData.remarks || remarksText || '';
+                        curingCondition = testData.curingCondition || testData.curing_condition || curingCondition || '';
+                        
+                        console.log('✅ OBSERVATION SHEET: Got signature data from sessionStorage:', {
+                            testedBy: testedByName,
+                            checkedBy: checkedByName,
+                            verifiedBy: verifiedByName,
+                            remarks: remarksText,
+                            curingCondition: curingCondition
+                        });
+                    } else {
+                        console.warn('⚠️ OBSERVATION SHEET: No testData found in sessionStorage for key:', `testData_${testRequestId}`);
+                        console.log('🔍 Available sessionStorage keys:', Object.keys(sessionStorage));
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error loading testData from sessionStorage:', e);
+                }
             } else {
-                document.getElementById('tested-by-name').textContent = ''; // Empty if not provided
-            }
-            if (testedByDate && testedByDate.trim() !== '') {
-                document.getElementById('tested-by-date').textContent = testedByDate;
-            } else {
-                document.getElementById('tested-by-date').textContent = '';
+                console.warn('⚠️ OBSERVATION SHEET: No testRequestId found');
             }
             
-            // Update checked by (only if user provided data)
-            if (checkedByName && checkedByName.trim() !== '') {
-                document.getElementById('checked-by-name').textContent = checkedByName;
-            } else {
-                document.getElementById('checked-by-name').textContent = ''; // Empty if not provided
-            }
-            if (checkedByDate && checkedByDate.trim() !== '') {
-                document.getElementById('checked-by-date').textContent = checkedByDate;
-            } else {
-                document.getElementById('checked-by-date').textContent = '';
+            // Update the curing condition field that was missed earlier
+            const curingConditionEl = document.getElementById('curing-condition');
+            if (curingConditionEl) {
+                curingConditionEl.textContent = curingCondition || '';
+                console.log('✅ OBSERVATION SHEET: Updated curing condition:', curingCondition);
             }
             
-            // Update verified by (only if user provided data)
-            if (verifiedByName && verifiedByName.trim() !== '') {
-                document.getElementById('verified-by-name').textContent = verifiedByName;
-            } else {
-                document.getElementById('verified-by-name').textContent = ''; // Empty if not provided
-            }
-            if (verifiedByDate && verifiedByDate.trim() !== '') {
-                document.getElementById('verified-by-date').textContent = verifiedByDate;
-            } else {
-                document.getElementById('verified-by-date').textContent = '';
-            }
+            // Set today's date for all signature dates (as requested by user)
+            const todayDateFormatted = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY format
+            
+            console.log('👤 OBSERVATION SHEET - Final Signature Data:', {
+                testedBy: testedByName,
+                checkedBy: checkedByName,
+                verifiedBy: verifiedByName,
+                todayDate: todayDateFormatted,
+                remarks: remarksText
+            });
+            
+            // Update tested by
+            const testedByNameEl = document.getElementById('tested-by-name');
+            const testedByDateEl = document.getElementById('tested-by-date');
+            if (testedByNameEl) testedByNameEl.textContent = testedByName || '';
+            if (testedByDateEl) testedByDateEl.textContent = todayDateFormatted;
+            
+            // Update checked by
+            const checkedByNameEl = document.getElementById('checked-by-name');
+            const checkedByDateEl = document.getElementById('checked-by-date');
+            if (checkedByNameEl) checkedByNameEl.textContent = checkedByName || '';
+            if (checkedByDateEl) checkedByDateEl.textContent = todayDateFormatted;
+            
+            // Update verified by
+            const verifiedByNameEl = document.getElementById('verified-by-name');
+            const verifiedByDateEl = document.getElementById('verified-by-date');
+            if (verifiedByNameEl) verifiedByNameEl.textContent = verifiedByName || '';
+            if (verifiedByDateEl) verifiedByDateEl.textContent = todayDateFormatted;
             
             // Remarks (Observation Report - Page 1)
-            document.getElementById('remarks-content').textContent = urlParams.get('remarks') || '';
+            const remarksContentEl = document.getElementById('remarks-content');
+            if (remarksContentEl) {
+                remarksContentEl.textContent = remarksText || '';
+                console.log('✅ OBSERVATION SHEET: Updated remarks:', remarksText);
+            }
             
             // Current date
             document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB');

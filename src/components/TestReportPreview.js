@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Badge, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import API_BASE_URL from '../config/api';
 import {
   faArrowLeft,
@@ -44,97 +45,12 @@ const TestReportPreview = () => {
   // Fetch data from backend
   useEffect(() => {
     const fetchTestData = async () => {
-      // FIRST: Check if we already have data in location.state
-      if (location.state?.testData) {
-        console.log('🔍 USING EXISTING DATA FROM LOCATION STATE');
-        console.log('🔍 location.state.testData:', location.state.testData);
-        
-        // Transform the existing data to match expected format
-        const existingData = location.state.testData;
-        
-        // Check if it's already in the right format (must have allTestResults, not just rows)
-        if (existingData.allTestResults) {
-          console.log('🔍 Data already in correct format with allTestResults, using directly');
-          setTestData(existingData);
-          setLoading(false);
-          return;
-        }
-        
-        // Transform if needed
-        console.log('🔍 RAW ROWS DATA:', existingData.rows);
-        console.log('🔍 NUMBER OF CUBES:', existingData.rows?.length || 0);
-        
-        const transformedData = {
-          id: existingData.id || testRequestId,
-          jobNumber: existingData.jobNumber || 'N/A',
-          customerName: existingData.customerName || 'N/A',
-          siteName: existingData.siteName || 'N/A',
-          siteAddress: existingData.siteAddress || 'N/A',
-          receiptDate: existingData.receiptDate || 'N/A',
-          status: existingData.status || 'pending',
-          ulrNumber: existingData.ulrNumber || 'N/A',
-          referenceNumber: existingData.referenceNumber || existingData.sample_code_number || 'N/A',
-          cubeTests: existingData.cubeTests || [{
-            id: existingData.id || 1,
-            idMark: existingData.idMark || 'N/A',
-            locationNature: existingData.locationNature || 'N/A',
-            grade: existingData.grade || 'M25',
-            castingDate: existingData.castingDate || '2025-10-01',
-            testingDate: existingData.testingDate || '2025-10-03',
-            ageInDays: existingData.ageInDays || 28,
-            quantity: existingData.quantity || 3,
-            testMethod: existingData.testMethod || 'IS 516 (Part1/Sec1):2021',
-            sampleCodeNumber: existingData.sample_code_number || 'N/A',
-            ulrNumber: existingData.ulrNumber || 'N/A',
-            machineUsed: existingData.machine_used || 'CTM (2000KN)',
-            cubeCondition: existingData.cube_condition || 'Acceptable',
-            curingCondition: existingData.curing_condition || 'Water Curing',
-            sampleDescription: existingData.sample_description || 'Concrete Cube Specimen',
-            testedBy: existingData.tested_by || 'N/A',
-            checkedBy: existingData.checked_by || 'N/A',
-            verifiedBy: existingData.verified_by || 'Mr. P A Sanghave',
-            averageStrength: existingData.average_strength || 'N/A'
-          }],
-          allTestResults: (existingData.rows || []).map((row, index) => {
-            console.log(`🔍 PROCESSING CUBE ${index + 1}:`, row);
-            
-            // Calculate area if not present
-            const area = row.area || (row.dimension_length * row.dimension_width / 10000); // Convert mm² to cm²
-            const density = row.density || (row.weight * 1000 / (row.dimension_length * row.dimension_width * row.dimension_height / 1000000)); // kg/m³
-            
-            return {
-              srNo: index + 1,
-              idMark: row.cube_id || `C${index + 1}`,
-              dimensionLength: row.dimension_length || '',
-              dimensionWidth: row.dimension_width || '',
-              dimensionHeight: row.dimension_height || '',
-              area: area ? area.toFixed(2) : '',
-              weight: row.weight || '',
-              crushingLoad: row.crushing_load || '',
-              density: density ? density.toFixed(0) : '',
-              compressiveStrength: row.compressive_strength || '',
-              failureType: row.failure_type || ''
-            };
-          }),
-          strengthData: existingData.strengthData || {},
-          observationsData: existingData.strengthData || {},
-          photos: existingData.capturedImages || {},
-          averageStrength: existingData.average_strength || 'N/A'
-        };
-        
-        console.log('🔍 TRANSFORMED EXISTING DATA:', transformedData);
-        console.log('🔍 allTestResults length:', transformedData.allTestResults.length);
-        console.log('🔍 allTestResults data:', transformedData.allTestResults);
-        setTestData(transformedData);
-        setLoading(false);
-        return;
-      }
+      // PRIORITY: Always fetch fresh data from database
+      console.log('🔍 FETCHING FRESH DATA FROM DATABASE');
+      console.log('🔍 Test Request ID:', testRequestId);
       
       if (!testRequestId) {
         console.error('❌ NO TEST REQUEST ID!');
-        console.error('   location.state:', location.state);
-        console.error('   location.state?.testData:', location.state?.testData);
-        console.error('   location.state?.id:', location.state?.id);
         setError('No test request ID provided. Please navigate from a test sample.');
         setLoading(false);
         return;
@@ -144,10 +60,29 @@ const TestReportPreview = () => {
         console.log('🔍 Fetching COMPLETE PDF data for ID:', testRequestId);
         
         // Use the new PDF data endpoint that fetches from ALL required tables
+        console.log('<------------Start DATA from DB----------->');
         const data = await databaseService.getTestRequestPDFData(testRequestId);
         console.log('✅ Fetched COMPLETE PDF data:', data);
+        console.log('<------------End DATA from DB----------->');
+        
+        // Also fetch observations data from database
+        let observationsData = null;
+        try {
+          console.log('<------------Start OBSERVATIONS DATA from DB----------->');
+          const observationsResponse = await axios.get(`${API_BASE_URL}/test-observations/${testRequestId}`);
+          if (!observationsResponse.data.isEmpty) {
+            observationsData = observationsResponse.data;
+            console.log('✅ Fetched observations data from database:', observationsData);
+          } else {
+            console.log('ℹ️ No observations data found in database');
+          }
+          console.log('<------------End OBSERVATIONS DATA from DB----------->');
+        } catch (error) {
+          console.warn('⚠️ Could not fetch observations data:', error);
+        }
         
         // PRINT THE COMPLETE FETCHED DATA TO SEE EXACTLY WHAT WE GET
+        console.log('<------------Start PROCESSING DATA----------->');
         console.log('🔍 ===== COMPLETE FETCHED DATA =====');
         console.log('🔍 RAW DATA FROM BACKEND:');
         console.log(JSON.stringify(data, null, 2));
@@ -158,7 +93,7 @@ const TestReportPreview = () => {
         
         // Parse strength data from observations_json (where it's saved)
         let strengthData = {};
-        let observationsData = {};
+        let parsedObservationsData = {};
         
         if (mainTest.observations_json) {
           try {
@@ -166,7 +101,7 @@ const TestReportPreview = () => {
             // Check if strength data is in observations_json
             if (observationsParsed && typeof observationsParsed === 'object') {
               strengthData = observationsParsed; // The strength data is in observations_json
-              observationsData = observationsParsed; // Also use for observations
+              parsedObservationsData = observationsParsed; // Also use for observations
             }
           } catch (e) {
             console.warn('Failed to parse observations_json:', e);
@@ -178,12 +113,46 @@ const TestReportPreview = () => {
           strengthData = mainTest.test_results_json || {};
         }
         
+        // Parse test results from test_results_json
+        let testResults = [];
+        if (mainTest.test_results_json) {
+          try {
+            const parsedData = JSON.parse(mainTest.test_results_json);
+            // Check if it has cube_data array
+            if (parsedData.cube_data && Array.isArray(parsedData.cube_data)) {
+              testResults = parsedData.cube_data;
+            } else if (Array.isArray(parsedData)) {
+              testResults = parsedData;
+            }
+            console.log('✅ Parsed test results from JSON:', testResults);
+            console.log('✅ Number of cubes in test results:', testResults.length);
+            testResults.forEach((cube, index) => {
+              console.log(`✅ Cube ${index + 1}:`, {
+                cube_id: cube.cube_id,
+                dimension_length: cube.dimension_length,
+                dimension_width: cube.dimension_width,
+                dimension_height: cube.dimension_height,
+                weight: cube.weight,
+                crushing_load: cube.crushing_load,
+                compressive_strength: cube.compressive_strength,
+                area: cube.area,
+                density: cube.density
+              });
+            });
+          } catch (e) {
+            console.warn('Failed to parse test_results_json:', e);
+          }
+        } else {
+          console.log('⚠️ No test_results_json found in mainTest');
+        }
+        
         console.log('🔍 Data Structure:');
         console.log('  test_request:', data.test_request);
         console.log('  customer:', data.customer);
         console.log('  main_test:', mainTest);
         console.log('  strengthData:', strengthData);
-        console.log('  observationsData:', observationsData);
+        console.log('  parsedObservationsData:', parsedObservationsData);
+        console.log('  observationsData from DB:', observationsData);
         console.log('  photos:', data.photos);
         
         // Debug specific fields that are showing as N/A
@@ -191,6 +160,7 @@ const TestReportPreview = () => {
         console.log('  mainTest.grade:', mainTest.grade);
         console.log('  mainTest.grade_of_specimen:', mainTest.grade_of_specimen);
         console.log('  mainTest.sample_code_number:', mainTest.sample_code_number);
+        console.log('  mainTest.id_mark:', mainTest.id_mark);
         console.log('  mainTest.reference_number:', mainTest.reference_number);
         console.log('  mainTest.testing_date:', mainTest.testing_date);
         console.log('  mainTest.casting_date:', mainTest.casting_date);
@@ -198,10 +168,13 @@ const TestReportPreview = () => {
         console.log('  mainTest.average_strength type:', typeof mainTest.average_strength);
         console.log('  mainTest.age_in_days:', mainTest.age_in_days);
         console.log('  data.test_request.sample_code_number:', data.test_request.sample_code_number);
+        console.log('  data.test_request.job_number:', data.test_request.job_number);
         console.log('🔍 ALL mainTest keys:', Object.keys(mainTest));
         console.log('🔍 ALL test_request keys:', Object.keys(data.test_request));
         console.log('🔍 COMPLETE mainTest object:', JSON.stringify(mainTest, null, 2));
         console.log('🔍 COMPLETE test_request object:', JSON.stringify(data.test_request, null, 2));
+        console.log('🔍 testResults array:', testResults);
+        console.log('🔍 testResults length:', testResults.length);
         
         // Calculate age in days
         const calculateAge = (castingDate, testingDate) => {
@@ -218,24 +191,24 @@ const TestReportPreview = () => {
           id: data.test_request.id,
           jobNumber: data.test_request.job_number || 'N/A',
           customerName: data.customer.name || 'N/A',
-          siteName: data.test_request.site_name || 'N/A',
+          siteName: data.test_request.site_name || data.customer.site_name || 'N/A',
           siteAddress: data.customer.address || 'N/A',
           receiptDate: data.test_request.receipt_date || 'N/A',
           status: data.test_request.status || 'pending',
           ulrNumber: data.test_request.ulr_number || 'N/A',
-          referenceNumber: mainTest.sample_code_number || mainTest.reference_number || data.test_request.sample_code_number || mainTest.id_mark || 'N/A',
+          referenceNumber: mainTest.sample_code_number || data.test_request.job_number || 'N/A',
           cubeTests: [{
             id: mainTest.id || 1,
             idMark: mainTest.id_mark || 'N/A',
             locationNature: mainTest.location_nature || 'N/A',
-            grade: mainTest.grade || mainTest.grade_of_specimen || 'M25', // Default to M25 if not specified
-            castingDate: mainTest.casting_date || '2025-10-01', // Default to receipt date if not specified
-            testingDate: mainTest.testing_date || '2025-10-03', // Default to completion date if not specified  
-            ageInDays: mainTest.age_in_days || 28, // Default to 28 days if not specified
-            quantity: mainTest.num_of_cubes || 3,
+            grade: mainTest.grade || 'M25',
+            castingDate: mainTest.casting_date || data.test_request.receipt_date || '2025-10-01',
+            testingDate: mainTest.testing_date || '2025-10-03',
+            ageInDays: mainTest.age_in_days || 28,
+            quantity: mainTest.cube_results ? mainTest.cube_results.length : testResults.length || 3,
             testMethod: mainTest.test_method || 'IS 516 (Part1/Sec1):2021',
-            sampleCodeNumber: mainTest.sample_code_number || mainTest.reference_number || 'N/A',
-            ulrNumber: mainTest.ulr_number || 'N/A',
+            sampleCodeNumber: mainTest.sample_code_number || data.test_request.job_number || 'N/A',
+            ulrNumber: data.test_request.ulr_number || 'N/A',
             machineUsed: mainTest.machine_used || 'CTM (2000KN)',
             cubeCondition: mainTest.cube_condition || 'Acceptable',
             curingCondition: mainTest.curing_condition || 'Water Curing',
@@ -243,35 +216,7 @@ const TestReportPreview = () => {
             testedBy: mainTest.tested_by || 'N/A',
             checkedBy: mainTest.checked_by || 'N/A',
             verifiedBy: mainTest.verified_by || 'Mr. P A Sanghave',
-            averageStrength: (() => {
-              console.log('🔍 DEBUGGING AVERAGE STRENGTH:');
-              console.log('  mainTest.average_strength:', mainTest.average_strength);
-              console.log('  mainTest.cube_results:', mainTest.cube_results);
-              console.log('  mainTest.test_results_json:', mainTest.test_results_json);
-              
-              // Try saved value first
-              if (mainTest.average_strength && mainTest.average_strength !== 0 && mainTest.average_strength !== '0') {
-                console.log('  Using saved average_strength:', mainTest.average_strength);
-                return mainTest.average_strength.toString();
-              }
-              
-              // Calculate from cube results if not saved in database
-              const cubeResults = mainTest.cube_results || (mainTest.test_results_json && Array.isArray(mainTest.test_results_json) ? mainTest.test_results_json : []);
-              console.log('  cubeResults for calculation:', cubeResults);
-              
-              if (cubeResults.length > 0) {
-                const strengths = cubeResults.map(cube => parseFloat(cube.compressive_strength)).filter(s => !isNaN(s));
-                console.log('  extracted strengths:', strengths);
-                
-                if (strengths.length > 0) {
-                  const calculated = (strengths.reduce((sum, s) => sum + s, 0) / strengths.length).toFixed(2);
-                  console.log('🔍 CALCULATED average from cube results:', strengths, '=', calculated);
-                  return calculated;
-                }
-              }
-              console.log('🔍 No cube results for calculation, returning N/A');
-              return 'N/A';
-            })(),
+            averageStrength: mainTest.average_strength ? mainTest.average_strength.toString() : 'N/A',
             weight: mainTest.weight || 'N/A',
             dimensionLength: mainTest.dimension_length || 'N/A',
             dimensionWidth: mainTest.dimension_width || 'N/A',
@@ -281,61 +226,67 @@ const TestReportPreview = () => {
             failureType: mainTest.failure_type || 'N/A',
             testRemarks: mainTest.test_remarks || 'N/A'
           }],
-          // Use cube_results from the PDF data endpoint, with fallback to test_results_json
-          allTestResults: (() => {
-            const cubeData = mainTest.cube_results || (mainTest.test_results_json ? 
-              (Array.isArray(mainTest.test_results_json) ? mainTest.test_results_json : []) : []);
-            
-            // Transform the cube data to match the expected frontend format
-            return cubeData.map((cube, index) => ({
+          // Use cube_results from main_test (this is the correct data from your JSON)
+          allTestResults: mainTest.cube_results ? mainTest.cube_results.map((cube, index) => {
+            console.log(`🔍 Processing cube ${index + 1} for display:`, cube);
+            return {
               srNo: index + 1,
-              idMark: cube.cube_id || cube.id_mark || `C${index + 1}`,
-              dimensionLength: cube.dimension_length || cube.length || '',
-              dimensionWidth: cube.dimension_width || cube.breadth || cube.width || '',
-              dimensionHeight: cube.dimension_height || cube.height || '',
-              area: cube.area ? cube.area.toFixed(2) : '',
-              weight: cube.weight || '',
-              crushingLoad: cube.crushing_load || cube.load_max || '',
-              density: cube.density ? cube.density.toFixed(0) : '',
-              compressiveStrength: cube.compressive_strength || '',
-              failureType: cube.failure_type || ''
-            }));
+              idMark: cube.cube_id || `C${index + 1}`,
+              dimensionLength: cube.dimension_length || '',
+              dimensionWidth: cube.dimension_width || '',
+              dimensionHeight: cube.dimension_height || '',
+              area: cube.area ? parseFloat(cube.area).toFixed(3) : '',
+              weight: cube.weight ? parseFloat(cube.weight).toFixed(3) : '',
+              crushingLoad: cube.crushing_load ? parseFloat(cube.crushing_load).toFixed(3) : '',
+              density: cube.density ? parseFloat(cube.density).toFixed(3) : '',
+              compressiveStrength: cube.compressive_strength ? parseFloat(cube.compressive_strength).toFixed(3) : '',
+              failureType: cube.failure_type || '-'
+            };
+          }) : [],
+          strengthData: mainTest.observations_json || {},
+          observationsData: mainTest.observations_json || {},
+          photos: data.photos || [],
+          // Handle captured images - try multiple sources
+          capturedImages: (() => {
+            console.log('📸 PROCESSING CAPTURED IMAGES:');
+            console.log('📸 data.photos:', data.photos);
+            console.log('📸 observationsData?.capturedImages:', observationsData?.capturedImages);
+            
+            // Priority 1: Use observationsData.capturedImages if available
+            if (observationsData?.capturedImages && Object.keys(observationsData.capturedImages).length > 0) {
+              console.log('📸 Using capturedImages from observationsData');
+              return observationsData.capturedImages;
+            }
+            
+            // Priority 2: Convert photos array to capturedImages format
+            if (data.photos && Array.isArray(data.photos) && data.photos.length > 0) {
+              console.log('📸 Converting photos array to capturedImages format');
+              const convertedImages = {};
+              data.photos.forEach((photo) => {
+                const { photo_type, cube_number, photo_data } = photo;
+                if (photo_data && typeof photo_data === 'string') {
+                  // Add data:image prefix if not present
+                  const imageData = photo_data.startsWith('data:image') ? photo_data : `data:image/jpeg;base64,${photo_data}`;
+                  // Create the key format expected by finalTestReport.html
+                  const key = `${photo_type}_${cube_number}`;
+                  convertedImages[key] = imageData;
+                  console.log(`📸 Converted photo: ${key}`);
+                }
+              });
+              return convertedImages;
+            }
+            
+            console.log('⚠️ No images found in any source');
+            return {};
           })(),
-          strengthData: strengthData,
-          observationsData: observationsData,
-          photos: data.photos, // Add photos for display in PDF
-          averageStrength: (() => {
-            console.log('🔍 DEBUGGING MAIN AVERAGE STRENGTH:');
-            console.log('  mainTest.average_strength (main):', mainTest.average_strength);
-            
-            // Try saved value first
-            if (mainTest.average_strength && mainTest.average_strength !== 0 && mainTest.average_strength !== '0') {
-              console.log('  Using saved average_strength (main):', mainTest.average_strength);
-              return mainTest.average_strength.toString();
-            }
-            
-            // Calculate from cube results if not saved in database
-            const cubeResults = mainTest.cube_results || (mainTest.test_results_json && Array.isArray(mainTest.test_results_json) ? mainTest.test_results_json : []);
-            console.log('  cubeResults for calculation (main):', cubeResults);
-            
-            if (cubeResults.length > 0) {
-              const strengths = cubeResults.map(cube => parseFloat(cube.compressive_strength)).filter(s => !isNaN(s));
-              console.log('  extracted strengths (main):', strengths);
-              
-              if (strengths.length > 0) {
-                const calculated = (strengths.reduce((sum, s) => sum + s, 0) / strengths.length).toFixed(2);
-                console.log('🔍 CALCULATED average from cube results (main):', strengths, '=', calculated);
-                return calculated;
-              }
-            }
-            console.log('🔍 No cube results for calculation (main), returning N/A');
-            return 'N/A';
-          })()
+          averageStrength: mainTest.average_strength ? mainTest.average_strength.toString() : 'N/A'
         };
         
         console.log('✅ Transformed data:', transformedData);
         console.log('✅ allTestResults length:', transformedData.allTestResults.length);
         console.log('✅ allTestResults content:', transformedData.allTestResults);
+        console.log('✅ Reference number:', transformedData.referenceNumber);
+        console.log('✅ Sample code number:', transformedData.cubeTests[0]?.sampleCodeNumber);
         console.log('✅ mainTest.cube_results:', mainTest.cube_results);
         console.log('✅ mainTest structure:', Object.keys(mainTest));
         console.log('✅ Full mainTest object:', mainTest);
@@ -346,9 +297,11 @@ const TestReportPreview = () => {
         console.log('🔍 About to set testData:', transformedData);
         console.log('🔍 transformedData keys:', Object.keys(transformedData));
         console.log('🔍 transformedData.allTestResults:', transformedData.allTestResults);
+        console.log('🔍 transformedData.referenceNumber:', transformedData.referenceNumber);
         setTestData(transformedData);
         setLoading(false);
         console.log('🔍 testData state set, loading set to false');
+        console.log('<------------End PROCESSING DATA----------->');
         
       } catch (err) {
         console.error('❌ Error fetching test data:', err);
@@ -485,6 +438,161 @@ const TestReportPreview = () => {
     params.append('checked_by_name', testData.checkedBy || '');
     params.append('verified_by_name', testData.verifiedBy || reviewerInfo.name);
     
+    // DYNAMIC FIX: Access the main_test data correctly from your structure
+    // From your log: main_test: { curing_condition: "Water curing at 27°C ± 2°C", tested_by: "Shashwat", etc. }
+    console.log('🔍 DYNAMIC DEBUG - Raw testData structure:', testData);
+    
+    // FALLBACK: Check if data is nested in main_test or other structure
+    const mainTestData = testData.main_test || testData;
+    console.log('🐛 CHECKING MAIN_TEST DATA:');
+    console.log('  mainTestData.curing_condition:', mainTestData.curing_condition);
+    console.log('  mainTestData.tested_by:', mainTestData.tested_by);
+    console.log('  mainTestData.checked_by:', mainTestData.checked_by);
+    console.log('  mainTestData.test_remarks:', mainTestData.test_remarks);
+    
+    // Use the correct data source - try direct access first, then fallback
+    const curingCondition = testData.curing_condition || mainTestData.curing_condition || '';
+    const testedBy = testData.tested_by || mainTestData.tested_by || '';
+    const checkedBy = testData.checked_by || mainTestData.checked_by || '';
+    const testRemarks = testData.test_remarks || mainTestData.test_remarks || '';
+    // CEO is always the verified_by
+    const verifiedBy = 'Mr. P A Sanghave';
+    
+    // FINAL FIX: Try multiple sources for the data
+    const finalCuringCondition = 
+      testData.curing_condition || 
+      testData.curingCondition ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].curing_condition) ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].curingCondition) ||
+      mainTestData.curing_condition || 
+      '';
+      
+    const finalTestedBy = 
+      testData.tested_by || 
+      testData.testedBy ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].tested_by) ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].testedBy) ||
+      mainTestData.tested_by || 
+      '';
+      
+    const finalCheckedBy = 
+      testData.checked_by || 
+      testData.checkedBy ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].checked_by) ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].checkedBy) ||
+      mainTestData.checked_by || 
+      '';
+      
+    const finalTestRemarks = 
+      testData.test_remarks || 
+      testData.testRemarks ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].test_remarks) ||
+      (testData.cubeTests && testData.cubeTests[0] && testData.cubeTests[0].testRemarks) ||
+      mainTestData.test_remarks || 
+      '';
+    
+    // ADD MORE REQUIRED FIELDS FOR OBSERVATION SHEET
+    params.append('test_request_id', testData.id || testRequestId || '');
+    
+    // Get data from the correct database fields (based on the actual database schema)
+    // These field names match the main_tests table structure exactly
+    params.append('curing_condition', finalCuringCondition);
+    params.append('tested_by', finalTestedBy);
+    params.append('checked_by', finalCheckedBy);
+    params.append('verified_by', verifiedBy);
+    params.append('test_remarks', finalTestRemarks);
+    params.append('machine_used', testData.machineUsed || 'CTM (2000KN)');
+    params.append('test_method', testData.testMethod || 'IS 516 (Part1/Sec1):2021');
+    
+    console.log('🚀 FINAL URL PARAMETERS BEING SET:');
+    console.log('  curing_condition:', finalCuringCondition);
+    console.log('  tested_by:', finalTestedBy);
+    console.log('  checked_by:', finalCheckedBy);
+    console.log('  verified_by:', verifiedBy);
+    console.log('  test_remarks:', finalTestRemarks);
+    
+    // CRITICAL: Log what we're extracting
+    console.log('🐛 EXTRACTING FROM TESTDATA:');
+    console.log('  testData.curing_condition:', testData.curing_condition);
+    console.log('  testData.tested_by:', testData.tested_by);
+    console.log('  testData.checked_by:', testData.checked_by);
+    console.log('  testData.test_remarks:', testData.test_remarks);
+    console.log('  Full testData keys:', Object.keys(testData));
+    console.log('  Complete testData object:', testData);
+    
+    console.log('✅ DYNAMIC VALUES FROM MAIN_TEST:');
+    console.log('  curing_condition:', curingCondition);
+    console.log('  tested_by:', testedBy);
+    console.log('  checked_by:', checkedBy);
+    console.log('  verified_by:', verifiedBy, '(CEO - always)');
+    console.log('  test_remarks:', testRemarks);
+    
+    // CRITICAL: Debug what data exists in testData
+    console.log('🐛 CRITICAL DEBUG - testData structure:');
+    console.log('  typeof testData:', typeof testData);
+    console.log('  testData keys:', Object.keys(testData));
+    console.log('  testData.cubeTests:', testData.cubeTests);
+    if (testData.cubeTests && testData.cubeTests[0]) {
+      console.log('  cubeTests[0] keys:', Object.keys(testData.cubeTests[0]));
+      console.log('  cubeTests[0].curing_condition:', testData.cubeTests[0].curing_condition);
+      console.log('  cubeTests[0].curingCondition:', testData.cubeTests[0].curingCondition);
+      console.log('  cubeTests[0].tested_by:', testData.cubeTests[0].tested_by);
+      console.log('  cubeTests[0].testedBy:', testData.cubeTests[0].testedBy);
+    }
+    
+    console.log('🎯 FINAL VALUES AFTER ALL FALLBACKS:');
+    console.log('  finalCuringCondition:', finalCuringCondition);
+    console.log('  finalTestedBy:', finalTestedBy);
+    console.log('  finalCheckedBy:', finalCheckedBy);
+    console.log('  finalTestRemarks:', finalTestRemarks);
+    
+    // Also add alternative parameter names for compatibility
+    params.append('tested_by_name', finalTestedBy);
+    params.append('checked_by_name', finalCheckedBy);
+    params.append('verified_by_name', verifiedBy);  // CEO always
+    params.append('testedBy', finalTestedBy);
+    params.append('checkedBy', finalCheckedBy);
+    params.append('verifiedBy', verifiedBy);  // CEO always
+    params.append('curingCondition', finalCuringCondition);
+    params.append('machineUsed', testData.machineUsed || 'CTM (2000KN)');
+    params.append('testMethod', testData.testMethod || 'IS 516 (Part1/Sec1):2021');
+    params.append('testRemarks', finalTestRemarks);
+    params.append('remarks', finalTestRemarks);
+    params.append('grade', cubeTest.grade || testData.grade || 'M25');
+    params.append('grade_of_specimen', cubeTest.grade || testData.grade || 'M25');
+    params.append('quantity', testResults.length || '');
+    
+    // Add console logging to debug what data we're sending
+    console.log('🔍 OBSERVATION SHEET DEBUG - Data being sent:');
+    console.log('  📷 testData.curingCondition:', testData.curingCondition);
+    console.log('  📷 testData.testedBy:', testData.testedBy);
+    console.log('  📷 testData.checkedBy:', testData.checkedBy);
+    console.log('  📷 testData.verifiedBy:', testData.verifiedBy);
+    console.log('  📷 testData.testRemarks:', testData.testRemarks);
+    console.log('  📷 Complete testData object:', testData);
+    
+    // CRITICAL: Log the actual values being used
+    console.log('🐛 ACTUAL VALUES BEING SET:');
+    console.log('  finalCuringCondition variable:', finalCuringCondition);
+    console.log('  finalTestedBy variable:', finalTestedBy);
+    console.log('  finalCheckedBy variable:', finalCheckedBy);
+    console.log('  verifiedBy variable:', verifiedBy);
+    console.log('  finalTestRemarks variable:', finalTestRemarks);
+    
+    // Store complete testData in sessionStorage for the observation sheet
+    if (testData.id || testRequestId) {
+      const sessionKey = `testData_${testData.id || testRequestId}`;
+      
+      // DYNAMIC FIX: Store the actual testData (which is the main_test object)
+      sessionStorage.setItem(sessionKey, JSON.stringify(testData));
+      console.log('✅ DYNAMIC: Stored actual testData in sessionStorage:', sessionKey);
+      console.log('  📷 testData.curing_condition:', testData.curing_condition);
+      console.log('  📷 testData.tested_by:', testData.tested_by);
+      console.log('  📷 testData.checked_by:', testData.checked_by);
+      console.log('  📷 testData.verified_by:', testData.verified_by);
+      console.log('  📷 capturedImages available:', testData.capturedImages ? 'YES' : 'NO');
+    }
+    
     // Add average compressive strength - dynamic calculation
     const averageStrengthObs = testData.averageStrength || cubeTest.averageStrength || '';
     if (averageStrengthObs && averageStrengthObs !== '0' && averageStrengthObs !== 'N/A' && averageStrengthObs !== '') {
@@ -508,6 +616,28 @@ const TestReportPreview = () => {
     }
     
     window.open(`/observationSheet.html?${params.toString()}`, '_blank');
+    
+    // DEBUG: Log what's actually in the URL
+    console.log('🚀 FINAL URL PARAMETERS BEING SENT:');
+    console.log('  curing_condition:', params.get('curing_condition'));
+    console.log('  tested_by:', params.get('tested_by'));
+    console.log('  checked_by:', params.get('checked_by'));
+    console.log('  verified_by:', params.get('verified_by'));
+    console.log('  test_remarks:', params.get('test_remarks'));
+    console.log('🚀 COMPLETE URL:', `/observationSheet.html?${params.toString()}`);
+    
+    // DEBUG: Also log the final URL for manual testing
+    const finalObsUrl = `/observationSheet.html?${params.toString()}`;
+    console.log('🚀 FINAL OBSERVATION SHEET URL:', finalObsUrl);
+    console.log('🚀 Manual test URL:', window.location.origin + finalObsUrl);
+    
+    // CRITICAL: Show a preview of the URL parameters to verify data
+    console.log('🔍 URL PREVIEW - PARAMETERS:');
+    console.log('  URL length:', finalObsUrl.length);
+    console.log('  curing_condition param:', params.get('curing_condition') ? 'HAS VALUE' : 'EMPTY');
+    console.log('  tested_by param:', params.get('tested_by') ? 'HAS VALUE' : 'EMPTY');
+    console.log('  checked_by param:', params.get('checked_by') ? 'HAS VALUE' : 'EMPTY');
+    console.log('  test_remarks param:', params.get('test_remarks') ? 'HAS VALUE' : 'EMPTY');
   };
   
   // Function to view FULL REPORT (Pages 2-4)
@@ -719,14 +849,28 @@ const TestReportPreview = () => {
     console.log('🔍 testData.capturedImages:', testData.capturedImages);
     console.log('🔍 testData keys:', Object.keys(testData));
     
+    // CRITICAL DEBUG: Check if we have capturedImages from Node.js backend
+    if (testData.capturedImages && Object.keys(testData.capturedImages).length > 0) {
+      console.log('✅ FOUND capturedImages from Node.js backend!');
+      console.log('📸 capturedImages keys:', Object.keys(testData.capturedImages));
+      console.log('📸 Sample image data:', Object.keys(testData.capturedImages)[0], ':', testData.capturedImages[Object.keys(testData.capturedImages)[0]]?.substring(0, 50) + '...');
+    } else {
+      console.log('❌ NO capturedImages found in testData!');
+      console.log('🔍 Available testData properties:', Object.keys(testData));
+    }
+    
     // Store complete testData in sessionStorage for HTML page to access
     sessionStorage.setItem(`testData_${testData.id}`, JSON.stringify(testData));
     console.log('✅ COMPLETE TESTDATA STORED IN SESSIONSTORAGE');
+    console.log('📸 Stored testData.capturedImages:', testData.capturedImages ? Object.keys(testData.capturedImages) : 'null');
+    console.log('📸 Stored testData.photos:', testData.photos ? testData.photos.length : 'null');
     
-    // PRIORITY 1: Use capturedImages from observation page (most reliable)
+    // PRIORITY 1: Use capturedImages from database (most reliable)
     let capturedImages = testData.capturedImages || {};
     
-    // If no capturedImages, try to convert photos array to capturedImages format
+    console.log('📸 Database capturedImages:', Object.keys(capturedImages));
+    
+    // If no capturedImages from database, try to convert photos array to capturedImages format
     if (!capturedImages || Object.keys(capturedImages).length === 0) {
       if (testData.photos && Array.isArray(testData.photos)) {
         console.log('📸 Converting photos array to capturedImages format');
@@ -1347,9 +1491,12 @@ const TestReportPreview = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {console.log('🔍 FIRST TABLE RENDER - testData.allTestResults:', testData.allTestResults)}
-                    {console.log('🔍 FIRST TABLE RENDER - length:', testData.allTestResults?.length)}
-                    {testData.allTestResults && testData.allTestResults.length > 0 ? testData.allTestResults.map((result, index) => (
+                    {console.log('🔍 FIRST TABLE RENDER - testData.allTestResults:', testData?.allTestResults)}
+                    {console.log('🔍 FIRST TABLE RENDER - length:', testData?.allTestResults?.length)}
+                    {console.log('🔍 FIRST TABLE RENDER - testData exists:', !!testData)}
+                    {console.log('🔍 FIRST TABLE RENDER - testData keys:', testData ? Object.keys(testData) : 'null')}
+                    {console.log('🔍 FIRST TABLE RENDER - condition result:', testData?.allTestResults?.length > 0)}
+                    {testData?.allTestResults?.length > 0 ? testData.allTestResults.map((result, index) => (
                       <tr key={index}>
                         <td style={{
                           color: '#ffffff',
@@ -1425,6 +1572,10 @@ const TestReportPreview = () => {
                           border: '1px solid rgba(255, 255, 255, 0.2)',
                           fontStyle: 'italic'
                         }}>
+                          {console.log('🔍 RENDERING NO DATA - testData:', testData)}
+                          {console.log('🔍 RENDERING NO DATA - allTestResults:', testData?.allTestResults)}
+                          {console.log('🔍 RENDERING NO DATA - length:', testData?.allTestResults?.length)}
+                          {console.log('🔍 RENDERING NO DATA - condition failed:', !(testData?.allTestResults?.length > 0))}
                           No test data available
                         </td>
                       </tr>
@@ -1509,7 +1660,7 @@ const TestReportPreview = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {testData.allTestResults && testData.allTestResults.length > 0 ? testData.allTestResults.map((result, index) => (
+                    {testData?.allTestResults?.length > 0 ? testData.allTestResults.map((result, index) => (
                       <tr key={index}>
                         <td style={{
                           color: '#ffffff',
@@ -1564,6 +1715,10 @@ const TestReportPreview = () => {
                           border: '1px solid rgba(255, 255, 255, 0.2)',
                           fontStyle: 'italic'
                         }}>
+                          {console.log('🔍 SECOND TABLE NO DATA - testData:', testData)}
+                          {console.log('🔍 SECOND TABLE NO DATA - allTestResults:', testData?.allTestResults)}
+                          {console.log('🔍 SECOND TABLE NO DATA - length:', testData?.allTestResults?.length)}
+                          {console.log('🔍 SECOND TABLE NO DATA - condition failed:', !(testData?.allTestResults?.length > 0))}
                           No test data available
                         </td>
                       </tr>

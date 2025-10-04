@@ -43,7 +43,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for
 
 # Database configuration with proper error handling
 database_url = "postgresql://myapp:VitragLLP%402025@213.136.94.206:5432/vitragLLP"
-#database_url = "postgresql://neondb_owner:npg_eHZv0ncD8irC@ep-muddy-pond-a6nccqdf.us-west-2.aws.neon.tech/neondb?sslmode=require"
+
 
 if database_url and database_url.strip():
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url.strip()
@@ -803,9 +803,46 @@ def get_test_request_pdf_data(test_request_id):
         concrete_test = concrete_tests[0]  # Use first test for main data
         print(f"SUCCESS: Found concrete test with results")
         
-        # Get photos for this concrete test
-        photos = TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).all()
-        print(f"SUCCESS: Found {len(photos)} photos")
+        # Get photos for this concrete test using concrete_test_id only
+        # Note: test_request_id column doesn't exist in the actual database
+        # Use a custom query to avoid the missing column
+        from sqlalchemy import text
+        photos_query = text("""
+            SELECT id, concrete_test_id, photo_type, cube_number, photo_data, filename, created_at
+            FROM test_photo 
+            WHERE concrete_test_id = :concrete_test_id
+        """)
+        
+        result = db.session.execute(photos_query, {'concrete_test_id': concrete_test.id})
+        photos_data = result.fetchall()
+        
+        # Convert to a list of dictionaries to match expected format
+        photos = []
+        for row in photos_data:
+            photo_dict = {
+                'id': row[0],
+                'concrete_test_id': row[1],
+                'photo_type': row[2],
+                'cube_number': row[3],
+                'photo_data': row[4],
+                'filename': row[5],
+                'created_at': row[6]
+            }
+            photos.append(photo_dict)
+        
+        print(f"Found {len(photos)} photos using concrete_test_id={concrete_test.id}")
+        
+        print(f"SUCCESS: Total photos found: {len(photos)}")
+        
+        # Debug photo details
+        if photos:
+            for photo in photos:
+                print(f"   - Photo: {photo['photo_type']}_cube_{photo['cube_number']} (ID: {photo['id']}, concrete_test_id: {photo['concrete_test_id']})")
+        else:
+            print(f"⚠️ NO PHOTOS FOUND - This could mean:")
+            print(f"   1. No images were captured during test observations")
+            print(f"   2. Images are stored in a different table or format")
+            print(f"   3. Database schema mismatch between Flask and Node.js backends")
         
         # Parse JSON data and structure for PDF
         test_results_json = {}
@@ -866,6 +903,7 @@ def get_test_request_pdf_data(test_request_id):
             'main_test': {
                 'id': concrete_test.id,
                 'id_mark': concrete_test.id_mark,
+                'sample_code_number': concrete_test.sample_code_number,  # Add the missing sample_code_number field!
                 'location_nature': concrete_test.location_nature,
                 'grade': concrete_test.grade,
                 'casting_date': concrete_test.casting_date.isoformat() if concrete_test.casting_date else None,
@@ -904,18 +942,24 @@ def get_test_request_pdf_data(test_request_id):
         
         # Add photos data
         for photo in photos:
+            # Ensure photo_data has proper data:image prefix for frontend display
+            photo_data_value = photo['photo_data']
+            if photo_data_value and not photo_data_value.startswith('data:image'):
+                photo_data_value = f"data:image/jpeg;base64,{photo_data_value}"
+            
             photo_data = {
-                'id': photo.id,
-                'photo_type': photo.photo_type,
-                'cube_number': photo.cube_number,
-                'photo_data': photo.photo_data,
-                'filename': photo.filename
+                'id': photo['id'],
+                'photo_type': photo['photo_type'],
+                'cube_number': int(photo['cube_number']) if photo['cube_number'] else photo['cube_number'],  # Convert float to int
+                'photo_data': photo_data_value,
+                'filename': photo['filename']
             }
             pdf_data['photos'].append(photo_data)
         
         print(f"SUCCESS: Built complete PDF data structure")
         print(f"   - Test Request: {pdf_data['test_request']['job_number']}")
         print(f"   - Customer: {pdf_data['customer']['name']}")
+        print(f"   - Sample Code Number: {pdf_data['main_test']['sample_code_number']}")
         print(f"   - Test Results: {len(test_results_json)} fields")
         print(f"   - Observations: {len(observations_json)} fields")
         print(f"   - Cube Results: {len(cube_results)} cubes")
@@ -1035,14 +1079,28 @@ def get_test_observations(test_request_id):
         # Load captured images from database
         if concrete_tests:
             concrete_test = concrete_tests[0]
-            photos = TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).all()
-            captured_images = {}
             
-            for photo in photos:
-                image_key = f"{photo.photo_type}_{int(photo.cube_number)}"
-                if photo.photo_data:
+            # Use custom query to avoid missing test_request_id column
+            from sqlalchemy import text
+            photos_query = text("""
+                SELECT id, concrete_test_id, photo_type, cube_number, photo_data, filename, created_at
+                FROM test_photo 
+                WHERE concrete_test_id = :concrete_test_id
+            """)
+            
+            result = db.session.execute(photos_query, {'concrete_test_id': concrete_test.id})
+            photos_data = result.fetchall()
+            
+            captured_images = {}
+            for row in photos_data:
+                photo_type = row[2]
+                cube_number = row[3]
+                photo_data = row[4]
+                
+                image_key = f"{photo_type}_{int(cube_number)}"
+                if photo_data:
                     # Add data URL prefix for display
-                    captured_images[image_key] = f"data:image/jpeg;base64,{photo.photo_data}"
+                    captured_images[image_key] = f"data:image/jpeg;base64,{photo_data}"
             
             saved_data['capturedImages'] = captured_images
             print(f"SUCCESS: Loaded {len(captured_images)} images from database")
@@ -1335,8 +1393,13 @@ def save_test_observations(test_request_id):
             ).first()
             
             if concrete_test:
-                # Clear existing photos for this test
-                TestPhoto.query.filter_by(concrete_test_id=concrete_test.id).delete()
+                # Clear existing photos for this test using custom query
+                from sqlalchemy import text
+                delete_query = text("""
+                    DELETE FROM test_photo 
+                    WHERE concrete_test_id = :concrete_test_id
+                """)
+                db.session.execute(delete_query, {'concrete_test_id': concrete_test.id})
                 
                 # Save new photos
                 for image_key, image_data in captured_images.items():
